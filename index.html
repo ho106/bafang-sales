@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<title>八方来财销售开单版 V2.7</title>
+<title>八方来财销售开单版 V2.8</title>
 <style>
 :root{--blue:#2f6df6;--green:#18a058;--red:#ef4444;--orange:#ff7a1a;--bg:#f3f5f9;--card:#fff;--text:#1f2937;--muted:#8791a3;--line:#e8edf5}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",Arial,sans-serif;color:var(--text)}
@@ -137,7 +137,7 @@ body.hide-bottom-nav .app{padding-bottom:0!important}
 .note-save-btn{min-height:34px;border-radius:10px;padding:0 10px;font-weight:900;background:#edf4ff;color:#2563eb}
 
 
-/* V2.7 报表与商品分析优化 */
+/* V2.8 报表与商品分析优化 */
 .report-head-simple{display:flex;gap:10px;align-items:center;padding:10px 16px;background:#fff;border-bottom:1px solid var(--line)}
 .report-head-simple select{flex:1;height:44px;border:1px solid #d9dfeb;border-radius:14px;background:#fff;padding:0 14px;font-size:17px}
 .report-analysis-entry{border-top:1px solid var(--line);margin-top:14px;padding-top:12px}
@@ -204,7 +204,7 @@ body.hide-bottom-nav .app{padding-bottom:0!important}
 .pa-date-modal .actions .confirm{border:none;background:#ff6243;color:#fff}
 
 
-/* V2.7 退货流程 */
+/* V2.8 退货流程 */
 .sale-modebar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 14px 8px;background:#fff;border-bottom:1px solid var(--line)}
 .sale-mode-select{height:42px;border:1px solid #d4dbe6;border-radius:8px;padding:0 12px;background:#fff;font-size:16px;color:#111827}
 .sale-tools{display:flex;align-items:center;gap:14px;font-size:16px;color:#111827;white-space:nowrap}
@@ -223,19 +223,19 @@ body.hide-bottom-nav .app{padding-bottom:0!important}
 .refund-neg{color:#ef4444 !important}
 
 
-/* V2.7 退货选款：点减号产生负数退货数量 */
+/* V2.8 退货选款：点减号产生负数退货数量 */
 .pick-refund-tip{margin:10px 0 0;color:#ef4444;font-weight:800;font-size:14px}
 .qty-num.refund{color:#ef4444}
 
 
-/* V2.7 不用切换销售/退货：选款页 + 为销售，- 为退货 */
+/* V2.8 不用切换销售/退货：选款页 + 为销售，- 为退货 */
 .pick-mode-tip{margin-top:8px;color:#6b7280;font-size:14px;line-height:1.45}
 .pick-mode-tip b{color:#ef4444}
 .qty-num.refund,.refund-neg{color:#ef4444!important}
 .qty-num.sale{color:#111827}
 
 
-/* V2.7 报表：销售和退货分开统计 */
+/* V2.8 报表：销售和退货分开统计 */
 .metric .refund-value{color:#ef4444}
 .metric .net-value{color:#111827}
 
@@ -243,7 +243,7 @@ body.hide-bottom-nav .app{padding-bottom:0!important}
 </head>
 <body>
 <div class="app">
-  <div class="topbar"><span id="topTitle">八方来财销售开单版 V2.7</span><div class="left" id="topLeft"></div><div class="right" id="topRight"></div></div>
+  <div class="topbar"><span id="topTitle">八方来财销售开单版 V2.8</span><div class="left" id="topLeft"></div><div class="right" id="topRight"></div></div>
   <section id="page-sale" class="page active"><div class="sale-modebar"><div class="sale-tools" style="margin-left:auto"><button class="sale-tool-btn" onclick="focusSaleSearch()">⌕ 搜索选款</button><button class="sale-tool-btn" onclick="alert('扫码功能后期接小程序摄像头接口')">▣ 扫描选款</button><button class="sale-tool-btn" onclick="alert('更多功能后续补充')">⋮</button></div></div><div class="sale-customer-bar"><span>散客</span><span>主仓</span></div><div class="tabs"><button id="tab-hot" class="active" onclick="setSaleTab('hot')">热卖</button><button id="tab-new" onclick="setSaleTab('new')">新款</button><button id="tab-bought" onclick="setSaleTab('bought')">买过</button></div><div class="product-list" id="saleProductList"></div><div class="searchbar"><div class="searchbox"><span style="font-size:24px">⌕</span><input id="saleSearch" placeholder="搜索款号/商品名称或扫码款号" oninput="renderSaleProducts()"><button onclick="alert('扫码功能后期接小程序摄像头接口')">▣</button></div></div></section>
   <section id="page-pick" class="page"><div id="pickBox"></div><div class="bottom-bar"><div class="bottom-inner"><button class="btn btn-light" onclick="addCurrentSelection(false)">继续选款</button><button class="btn btn-blue" onclick="addCurrentSelection(true)">立即结算</button></div></div></section>
   <section id="page-cart" class="page"><div class="card"><div class="row"><div class="title">销售清单</div><button class="btn-small btn-gray" onclick="showPage('sale')">继续选款</button></div><div id="cartList"></div></div><div class="bottom-bar"><div class="bottom-inner"><div class="cart-total">共 <b id="cartQty">0</b> 件<br><span class="cart-detail">合计 <span id="cartAmount">0.00</span></span></div><button class="btn btn-blue" id="cartActionBtn" onclick="handleCartMainAction()">去结算</button></div></div></section>
@@ -439,7 +439,7 @@ function calcSummary(range){const os=ordersInRange(range).filter(o=>!isRefundOrd
 function productStats(range){const stats={};ordersInRange(range).filter(o=>!isRefundOrder(o)).forEach(o=>o.items.forEach(i=>{if(!stats[i.code])stats[i.code]={code:i.code,qty:0,amount:0,cost:0,returns:0,unship:0};stats[i.code].qty+=n(i.qty);stats[i.code].amount+=n(i.qty)*n(i.price);stats[i.code].cost+=n(i.qty)*n(i.cost)}));return Object.values(stats).map(x=>{x.profit=x.amount-x.cost;x.margin=x.amount?x.profit/x.amount*100:0;x.avg=x.qty?x.amount/x.qty:0;x.stock=totalStock(getProduct(x.code)||{});return x}).sort((a,b)=>b.amount-a.amount)}
 
 
-// ===== V2.7 覆盖逻辑：不需要销售/退货下拉，选择商品时 + 是销售，- 是退货 =====
+// ===== V2.8 覆盖逻辑：不需要销售/退货下拉，选择商品时 + 是销售，- 是退货 =====
 function cartOrderType(){
   const line=data.cart.find(x=>n(x.qty)>0);
   if(line && line.lineType) return line.lineType;
@@ -584,7 +584,7 @@ function confirmRefund(){
 }
 
 
-// ===== V2.7 报表统计修复：退货单在报表里单独体现 =====
+// ===== V2.8 报表统计修复：退货单在报表里单独体现 =====
 function orderCostSum(o){
   return (o.items||[]).reduce((s,i)=>s+n(i.qty)*n(i.cost),0);
 }
@@ -751,7 +751,7 @@ function renderAll(){renderSaleProducts();renderCart();renderOrders();renderRepo
 .business-date-actions{display:grid;grid-template-columns:1fr 1.6fr;gap:14px;padding:0 16px}
 </style>
 <script>
-// ===== V2.7 经营分析详情修复：销售/退货/毛利趋势图 + 自定义日期 =====
+// ===== V2.8 经营分析详情修复：销售/退货/毛利趋势图 + 自定义日期 =====
 let businessState={
   mode:'day',
   anchor:today(),
@@ -1017,7 +1017,7 @@ function confirmBusinessCustomPicker(){
 
 
 <script>
-// ===== V2.7 修复：经营分析日期条可左右滑动，切换日期后不丢失最近日期；去掉顶部店铺锁 =====
+// ===== V2.8 修复：经营分析日期条可左右滑动，切换日期后不丢失最近日期；去掉顶部店铺锁 =====
 (function businessDateBarFixV23(){
   function ensureDateBarCssV23(){
     if(document.getElementById('businessDateBarFixCssV23')) return;
@@ -1127,7 +1127,7 @@ function confirmBusinessCustomPicker(){
 
 
 <script>
-// ===== V2.7 修复：日期栏只允许手动滑动，点击日期不自动来回晃动 =====
+// ===== V2.8 修复：日期栏只允许手动滑动，点击日期不自动来回晃动 =====
 (function businessDateBarNoShakeV24(){
   let lastBusinessDateScrollLeft = null;
   let lastBusinessMode = null;
@@ -1276,7 +1276,7 @@ function confirmBusinessCustomPicker(){
 
 
 <style id="pa-v25-style">
-/* ===== V2.7 商品分析对齐参考图 ===== */
+/* ===== V2.8 商品分析对齐参考图 ===== */
 .pa-screen{background:#f5f6fa;min-height:calc(100vh - 56px);padding-bottom:24px}
 .pa-topbar{display:flex;align-items:center;justify-content:center;position:relative;height:56px;background:#fff;border-bottom:1px solid #eceff5;font-size:20px;font-weight:900;color:#1f2937}
 .pa-topbar .right-actions{position:absolute;right:14px;top:50%;transform:translateY(-50%);display:flex;gap:18px;align-items:center}
@@ -1351,7 +1351,7 @@ function confirmBusinessCustomPicker(){
 </style>
 
 <script id="pa-v25-script">
-// ===== V2.7 商品分析：按参考截图重做功能 =====
+// ===== V2.8 商品分析：按参考截图重做功能 =====
 (function patchProductAnalysisV25(){
   const vColumns=[
     {key:'qty',label:'销量'},
@@ -2064,6 +2064,157 @@ function confirmBusinessCustomPicker(){
   window.renderProductAnalysis=function(){
     if(oldRenderProductAnalysis) oldRenderProductAnalysis();
     setTimeout(()=>{ document.querySelectorAll('#productAnalysisRows .pa-detail-arrow').forEach(el=>{ el.textContent='▶'; }); },0);
+  };
+})();
+</script>
+
+
+<style id="pa-v28-fix-style">
+/* V2.8 商品分析修复：今天无数据 + 列挤压 + 顶部重复 */
+#page-product-analysis .pa-topbar{display:none !important}
+#page-product-analysis .pa-screen{min-height:calc(100vh - 56px)}
+#page-product-analysis .pa-toolbar{top:56px}
+#page-product-analysis .pa-grid{overflow-x:auto;-webkit-overflow-scrolling:touch}
+#page-product-analysis .pa-table{table-layout:auto !important;min-width:920px}
+#page-product-analysis .pa-table th,
+#page-product-analysis .pa-table td{min-width:96px;white-space:normal;word-break:break-word;padding:14px 10px}
+#page-product-analysis .pa-table th:first-child,
+#page-product-analysis .pa-table td:first-child{min-width:190px}
+#page-product-analysis .pa-table th:last-child,
+#page-product-analysis .pa-table td:last-child{min-width:44px;width:44px}
+#page-product-analysis .pa-prod-wrap{padding-right:24px}
+#page-product-analysis .pa-prod-code{display:block;line-height:1.25}
+#page-product-analysis .pa-prod-name{display:none}
+#page-product-analysis .pa-arrow-btn{position:absolute;right:0;top:50%;transform:translateY(-50%);border:none;background:none;color:#c2c8d5;font-size:16px;padding:0}
+#paDetailPanel .pa-grid{overflow-x:auto;-webkit-overflow-scrolling:touch}
+#paDetailPanel .pa-grid .pa-table{table-layout:auto !important;min-width:760px}
+#paDetailPanel .pa-grid .pa-table th,
+#paDetailPanel .pa-grid .pa-table td{min-width:90px;white-space:normal;word-break:break-word}
+#paDetailPanel .pa-grid .pa-table th:first-child,
+#paDetailPanel .pa-grid .pa-table td:first-child{min-width:160px}
+</style>
+<script id="pa-v28-fix-script">
+(function(){
+  if(window.__paV28Fix) return; window.__paV28Fix=true;
+  function dateOnly(ts){ return fullDay(ts); }
+  function addDays(dateStr, delta){ var d=new Date((dateStr||today())+'T00:00:00'); d.setDate(d.getDate()+delta); return d.toISOString().slice(0,10); }
+  function localWeekStart(dateStr){ var d=new Date((dateStr||today())+'T00:00:00'); var day=(d.getDay()+6)%7; d.setDate(d.getDate()-day); return d.toISOString().slice(0,10); }
+  function localMonthStart(dateStr){ var d=new Date((dateStr||today())+'T00:00:00'); d.setDate(1); return d.toISOString().slice(0,10); }
+  function formatChip(dateStr){ return String(dateStr||'').slice(5).replace('-', '.'); }
+  function latestOrderDate(){
+    var arr=(data.orders||[]).filter(function(o){ return !o.isVoid && n(o.createdTs); }).map(function(o){ return n(o.createdTs); });
+    if(!arr.length) return today();
+    return dateOnly(Math.max.apply(null, arr));
+  }
+  function closePaMenus(){ if($('paModeMenu')) $('paModeMenu').style.display='none'; if($('paDetailModeMenu')) $('paDetailModeMenu').style.display='none'; }
+  function buildChipsFixed(mode){
+    var base=latestOrderDate(), items=[];
+    if(mode==='day'){
+      for(var i=5;i>=0;i--){ var v=addDays(base,-i); items.push({v:v,label:i===0?'今天':formatChip(v)}); }
+    }else if(mode==='week'){
+      var wb=localWeekStart(base);
+      for(var j=5;j>=0;j--){ var w=addDays(wb,-j*7); items.push({v:w,label:formatChip(w)}); }
+    }else if(mode==='month'){
+      var mb=localMonthStart(base); var bd=new Date(mb+'T00:00:00');
+      for(var k=5;k>=0;k--){ var d=new Date(bd.getFullYear(), bd.getMonth()-k, 1); var s=d.toISOString().slice(0,10); items.push({v:s,label:s.slice(0,7)}); }
+    }else if(mode==='custom'){
+      items.push({v:paState.customEnd||base,label:(paState.customStart||base)+' 至 '+(paState.customEnd||base)});
+    }else if(mode==='7'){
+      items.push({v:base,label:'近 7 天'});
+    }else if(mode==='30'){
+      items.push({v:base,label:'近 30 天'});
+    }
+    return items;
+  }
+  function renderChipsFixed(boxId){
+    var box=$(boxId); if(!box) return; var items=buildChipsFixed(paState.mode); var active=paState.anchor||latestOrderDate();
+    box.innerHTML=items.map(function(x,idx){
+      var on = (paState.mode==='7'||paState.mode==='30'||paState.mode==='custom') ? idx===0 : active===x.v;
+      return '<button class="pa-chip '+(on?'active':'')+'" onclick="selectPaChip(\''+x.v+'\')">'+esc(x.label)+'</button>';
+    }).join('');
+  }
+  function syncDateInputs(){ var base=latestOrderDate(); if($('paStartDate')) $('paStartDate').value=paState.customStart||base; if($('paEndDate')) $('paEndDate').value=paState.customEnd||base; }
+  function normalizePaAnchor(){
+    var base=latestOrderDate();
+    if(!window.paState) window.paState={};
+    paState.mode = paState.mode || 'day';
+    if(paState.mode==='day') paState.anchor = paState.anchor || base;
+    else if(paState.mode==='week') paState.anchor = paState.anchor || localWeekStart(base);
+    else if(paState.mode==='month') paState.anchor = paState.anchor || localMonthStart(base);
+    else paState.anchor = paState.anchor || base;
+    if(paState.mode==='day' && paState.anchor>base) paState.anchor=base;
+    if(paState.mode==='7' || paState.mode==='30') paState.anchor=base;
+    if(paState.mode==='custom'){
+      paState.customStart = paState.customStart || base;
+      paState.customEnd = paState.customEnd || base;
+      paState.anchor = paState.customEnd;
+    }
+    syncDateInputs();
+  }
+  window.paOrders = function(){
+    normalizePaAnchor();
+    var os=(data.orders||[]).filter(function(o){ return !o.isVoid; });
+    var base=latestOrderDate();
+    var anchor=paState.anchor || base;
+    if(paState.mode==='7' || paState.mode==='30'){
+      var days=paState.mode==='7'?7:30;
+      var endTs=new Date(base+'T23:59:59').getTime();
+      var startTs=new Date(addDays(base,-(days-1))+'T00:00:00').getTime();
+      return os.filter(function(o){ var t=n(o.createdTs); return t>=startTs && t<=endTs; });
+    }
+    if(paState.mode==='custom'){
+      var s=new Date((paState.customStart||base)+'T00:00:00').getTime();
+      var e=new Date((paState.customEnd||base)+'T23:59:59').getTime();
+      return os.filter(function(o){ var t=n(o.createdTs); return t>=s && t<=e; });
+    }
+    if(paState.mode==='month'){
+      var ms=localMonthStart(anchor); var d0=new Date(ms+'T00:00:00'); var y=d0.getFullYear(), m=d0.getMonth();
+      return os.filter(function(o){ var d=new Date(n(o.createdTs)); return d.getFullYear()===y && d.getMonth()===m; });
+    }
+    if(paState.mode==='week'){
+      var ws=localWeekStart(anchor); var st=new Date(ws+'T00:00:00').getTime(); var et=new Date(addDays(ws,6)+'T23:59:59').getTime();
+      return os.filter(function(o){ var t=n(o.createdTs); return t>=st && t<=et; });
+    }
+    return os.filter(function(o){ return dateOnly(o.createdTs)===(anchor||base); });
+  };
+  window.renderPaChips = function(){ normalizePaAnchor(); renderChipsFixed('paChips'); };
+  window.renderPaDetailChips = function(){ normalizePaAnchor(); renderChipsFixed('paDetailChips'); };
+  window.selectPaChip = function(v){ paState.anchor=v; renderPaAll(); };
+  window.setPaMode = function(mode){
+    normalizePaAnchor();
+    paState.mode=mode; closePaMenus(); var base=latestOrderDate();
+    if(mode==='custom'){ syncDateInputs(); openPaDateModal(); return; }
+    if(mode==='day') paState.anchor=base;
+    else if(mode==='week') paState.anchor=localWeekStart(base);
+    else if(mode==='month') paState.anchor=localMonthStart(base);
+    else paState.anchor=base;
+    renderPaAll();
+  };
+  window.openProductAnalysis = function(){
+    if(typeof ensurePaTemplate==='function') ensurePaTemplate();
+    normalizePaAnchor();
+    showPage('product-analysis');
+    renderPaAll();
+  };
+  var oldRenderProductAnalysis=window.renderProductAnalysis;
+  window.renderProductAnalysis = function(){
+    normalizePaAnchor();
+    if(oldRenderProductAnalysis) oldRenderProductAnalysis();
+    var table=document.querySelector('#page-product-analysis .pa-table');
+    if(table){
+      var cols=(paState && Array.isArray(paState.columns) ? paState.columns.length : 2);
+      table.style.minWidth=(190 + Math.max(cols,2)*96 + 44)+'px';
+    }
+  };
+  var oldRenderPaDetail=window.renderPaDetail;
+  window.renderPaDetail=function(){
+    normalizePaAnchor();
+    if(oldRenderPaDetail) oldRenderPaDetail();
+    var table=document.querySelector('#paDetailPanel .pa-table');
+    if(table){
+      var cols=(paState && Array.isArray(paState.columns) ? paState.columns.length : 2);
+      table.style.minWidth=(160 + Math.max(cols,2)*90 + 44)+'px';
+    }
   };
 })();
 </script>
