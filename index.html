@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<title>八方来财销售开单版 V2.0</title>
+<title>八方来财销售开单版 V2.1</title>
 <style>
 :root{--blue:#2f6df6;--green:#18a058;--red:#ef4444;--orange:#ff7a1a;--bg:#f3f5f9;--card:#fff;--text:#1f2937;--muted:#8791a3;--line:#e8edf5}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",Arial,sans-serif;color:var(--text)}
@@ -137,7 +137,7 @@ body.hide-bottom-nav .app{padding-bottom:0!important}
 .note-save-btn{min-height:34px;border-radius:10px;padding:0 10px;font-weight:900;background:#edf4ff;color:#2563eb}
 
 
-/* V2.0 报表与商品分析优化 */
+/* V2.1 报表与商品分析优化 */
 .report-head-simple{display:flex;gap:10px;align-items:center;padding:10px 16px;background:#fff;border-bottom:1px solid var(--line)}
 .report-head-simple select{flex:1;height:44px;border:1px solid #d9dfeb;border-radius:14px;background:#fff;padding:0 14px;font-size:17px}
 .report-analysis-entry{border-top:1px solid var(--line);margin-top:14px;padding-top:12px}
@@ -204,7 +204,7 @@ body.hide-bottom-nav .app{padding-bottom:0!important}
 .pa-date-modal .actions .confirm{border:none;background:#ff6243;color:#fff}
 
 
-/* V2.0 退货流程 */
+/* V2.1 退货流程 */
 .sale-modebar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 14px 8px;background:#fff;border-bottom:1px solid var(--line)}
 .sale-mode-select{height:42px;border:1px solid #d4dbe6;border-radius:8px;padding:0 12px;background:#fff;font-size:16px;color:#111827}
 .sale-tools{display:flex;align-items:center;gap:14px;font-size:16px;color:#111827;white-space:nowrap}
@@ -223,22 +223,27 @@ body.hide-bottom-nav .app{padding-bottom:0!important}
 .refund-neg{color:#ef4444 !important}
 
 
-/* V2.0 退货选款：点减号产生负数退货数量 */
+/* V2.1 退货选款：点减号产生负数退货数量 */
 .pick-refund-tip{margin:10px 0 0;color:#ef4444;font-weight:800;font-size:14px}
 .qty-num.refund{color:#ef4444}
 
 
-/* V2.0 不用切换销售/退货：选款页 + 为销售，- 为退货 */
+/* V2.1 不用切换销售/退货：选款页 + 为销售，- 为退货 */
 .pick-mode-tip{margin-top:8px;color:#6b7280;font-size:14px;line-height:1.45}
 .pick-mode-tip b{color:#ef4444}
 .qty-num.refund,.refund-neg{color:#ef4444!important}
 .qty-num.sale{color:#111827}
 
+
+/* V2.1 报表：销售和退货分开统计 */
+.metric .refund-value{color:#ef4444}
+.metric .net-value{color:#111827}
+
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="topbar"><span id="topTitle">八方来财销售开单版 V2.0</span><div class="left" id="topLeft"></div><div class="right" id="topRight"></div></div>
+  <div class="topbar"><span id="topTitle">八方来财销售开单版 V2.1</span><div class="left" id="topLeft"></div><div class="right" id="topRight"></div></div>
   <section id="page-sale" class="page active"><div class="sale-modebar"><div class="sale-tools" style="margin-left:auto"><button class="sale-tool-btn" onclick="focusSaleSearch()">⌕ 搜索选款</button><button class="sale-tool-btn" onclick="alert('扫码功能后期接小程序摄像头接口')">▣ 扫描选款</button><button class="sale-tool-btn" onclick="alert('更多功能后续补充')">⋮</button></div></div><div class="sale-customer-bar"><span>散客</span><span>主仓</span></div><div class="tabs"><button id="tab-hot" class="active" onclick="setSaleTab('hot')">热卖</button><button id="tab-new" onclick="setSaleTab('new')">新款</button><button id="tab-bought" onclick="setSaleTab('bought')">买过</button></div><div class="product-list" id="saleProductList"></div><div class="searchbar"><div class="searchbox"><span style="font-size:24px">⌕</span><input id="saleSearch" placeholder="搜索款号/商品名称或扫码款号" oninput="renderSaleProducts()"><button onclick="alert('扫码功能后期接小程序摄像头接口')">▣</button></div></div></section>
   <section id="page-pick" class="page"><div id="pickBox"></div><div class="bottom-bar"><div class="bottom-inner"><button class="btn btn-light" onclick="addCurrentSelection(false)">继续选款</button><button class="btn btn-blue" onclick="addCurrentSelection(true)">立即结算</button></div></div></section>
   <section id="page-cart" class="page"><div class="card"><div class="row"><div class="title">销售清单</div><button class="btn-small btn-gray" onclick="showPage('sale')">继续选款</button></div><div id="cartList"></div></div><div class="bottom-bar"><div class="bottom-inner"><div class="cart-total">共 <b id="cartQty">0</b> 件<br><span class="cart-detail">合计 <span id="cartAmount">0.00</span></span></div><button class="btn btn-blue" id="cartActionBtn" onclick="handleCartMainAction()">去结算</button></div></div></section>
@@ -434,7 +439,7 @@ function calcSummary(range){const os=ordersInRange(range).filter(o=>!isRefundOrd
 function productStats(range){const stats={};ordersInRange(range).filter(o=>!isRefundOrder(o)).forEach(o=>o.items.forEach(i=>{if(!stats[i.code])stats[i.code]={code:i.code,qty:0,amount:0,cost:0,returns:0,unship:0};stats[i.code].qty+=n(i.qty);stats[i.code].amount+=n(i.qty)*n(i.price);stats[i.code].cost+=n(i.qty)*n(i.cost)}));return Object.values(stats).map(x=>{x.profit=x.amount-x.cost;x.margin=x.amount?x.profit/x.amount*100:0;x.avg=x.qty?x.amount/x.qty:0;x.stock=totalStock(getProduct(x.code)||{});return x}).sort((a,b)=>b.amount-a.amount)}
 
 
-// ===== V2.0 覆盖逻辑：不需要销售/退货下拉，选择商品时 + 是销售，- 是退货 =====
+// ===== V2.1 覆盖逻辑：不需要销售/退货下拉，选择商品时 + 是销售，- 是退货 =====
 function cartOrderType(){
   const line=data.cart.find(x=>n(x.qty)>0);
   if(line && line.lineType) return line.lineType;
@@ -576,6 +581,141 @@ function confirmRefund(){
   const order={id:makeOrderId(),orderType:"refund",customer:"散客",salesman:(data.settings&&data.settings.salesman)||"李飞",items:data.cart.map(x=>{const p=getProduct(x.code)||{};return {...x,lineType:"refund",cost:skuCostOf(p,x.color,x.size)}}),totalQty:cartQty(),amount,roundOff:round,receivable:pending,paid,pay:{wechat:n($("refundWechat").value),alipay:n($("refundAlipay").value),bank:n($("refundBank").value),cash:n($("refundCash").value)},payMethod:n($("refundWechat").value)>0?"微信支付":n($("refundAlipay").value)>0?"支付宝":n($("refundBank").value)>0?"银行卡":"现金支付",paidStatus:"已退款",orderTag:"退货退款",note:$("refundNote")?$("refundNote").value.trim():"",created:nowText(),createdTs:Date.now(),pickupCode:makePickupCode()};
   order.items.forEach(x=>{const p=getProduct(x.code);setStock(p,x.color,x.size,stockOf(p,x.color,x.size)+n(x.qty))});
   data.orders.unshift(order);data.cart=[];orderMode="sale";save();renderSuccess(order);showPage("success");
+}
+
+
+// ===== V2.1 报表统计修复：退货单在报表里单独体现 =====
+function orderCostSum(o){
+  return (o.items||[]).reduce((s,i)=>s+n(i.qty)*n(i.cost),0);
+}
+function summarizeOrders(range){
+  const all=ordersInRange(range).filter(o=>!o.isVoid);
+  const sales=all.filter(o=>!isRefundOrder(o));
+  const refunds=all.filter(o=>isRefundOrder(o));
+
+  const saleQty=sales.reduce((s,o)=>s+n(o.totalQty),0);
+  const refundQty=refunds.reduce((s,o)=>s+n(o.totalQty),0);
+
+  const saleAmount=sales.reduce((s,o)=>s+n(o.receivable),0);
+  const refundAmount=refunds.reduce((s,o)=>s+n(o.receivable),0);
+
+  const saleCost=sales.reduce((s,o)=>s+orderCostSum(o),0);
+  const refundCost=refunds.reduce((s,o)=>s+orderCostSum(o),0);
+
+  const saleProfit=saleAmount-saleCost;
+  const refundProfit=refundAmount-refundCost;
+
+  const netAmount=saleAmount-refundAmount;
+  const netCost=saleCost-refundCost;
+  const netProfit=netAmount-netCost;
+  const netMargin=netAmount?netProfit/netAmount*100:0;
+
+  return {all,sales,refunds,saleQty,refundQty,saleAmount,refundAmount,saleCost,refundCost,saleProfit,refundProfit,netAmount,netCost,netProfit,netMargin};
+}
+function calcSummary(range){
+  const r=summarizeOrders(range);
+  return {
+    os:r.sales,
+    all:r.all,
+    refunds:r.refunds,
+    qty:r.saleQty,
+    amount:r.saleAmount,
+    cost:r.saleCost,
+    profit:r.netProfit,
+    margin:r.netMargin,
+    refundQty:r.refundQty,
+    refundAmount:r.refundAmount,
+    netAmount:r.netAmount
+  };
+}
+function renderReport(){
+  const range=$("reportRange")?$("reportRange").value:"today";
+  const r=summarizeOrders(range);
+
+  $("salesMetrics").innerHTML =
+    metricHtml(`销售 ${r.saleQty}件`, money(r.saleAmount), "销售收入") +
+    metricHtml(`退货 ${r.refundQty}件`, `<span class="refund-value">${money(r.refundAmount)}</span>`, "退款支出") +
+    metricHtml("毛利率", r.netMargin.toFixed(2)+"%", `毛利 ${money(r.netProfit)}`);
+
+  $("financeMetrics").innerHTML =
+    metricHtml(`总收入 ${r.sales.length}笔`, money(r.saleAmount), "销售收款") +
+    metricHtml(`总支出 ${r.refunds.length}笔`, `<span class="refund-value">${money(r.refundAmount)}</span>`, "退货退款") +
+    metricHtml("净收入", `<span class="net-value">${money(r.netAmount)}</span>`, "收入 - 退款");
+
+  $("stockMetrics").innerHTML =
+    metricHtml("出库数", r.saleQty, "销售出库") +
+    metricHtml("出库金额", money(r.saleAmount), `出库毛利 ${money(r.saleProfit)}`) +
+    metricHtml("退货入库数", `<span class="refund-value">${r.refundQty}</span>`, `退货金额 ${money(r.refundAmount)}`) +
+    metricHtml("库存商品数", String(data.products.length), "当前商品资料");
+
+  renderTopProducts(range);
+}
+function productStats(range){
+  const stats={};
+  ordersInRange(range).filter(o=>!o.isVoid).forEach(o=>{
+    const refund=isRefundOrder(o);
+    (o.items||[]).forEach(i=>{
+      if(!stats[i.code])stats[i.code]={code:i.code,qty:0,amount:0,cost:0,refundQty:0,refundAmount:0,refundCost:0};
+      if(refund){
+        stats[i.code].refundQty+=n(i.qty);
+        stats[i.code].refundAmount+=n(i.qty)*n(i.price);
+        stats[i.code].refundCost+=n(i.qty)*n(i.cost);
+      }else{
+        stats[i.code].qty+=n(i.qty);
+        stats[i.code].amount+=n(i.qty)*n(i.price);
+        stats[i.code].cost+=n(i.qty)*n(i.cost);
+      }
+    });
+  });
+  return Object.values(stats).map(x=>{
+    x.netQty=x.qty-x.refundQty;
+    x.netAmount=x.amount-x.refundAmount;
+    x.netCost=x.cost-x.refundCost;
+    x.profit=x.netAmount-x.netCost;
+    x.margin=x.netAmount?x.profit/x.netAmount*100:0;
+    x.avg=x.qty?x.amount/x.qty:0;
+    x.stock=totalStock(getProduct(x.code)||{});
+    return x;
+  }).sort((a,b)=>b.netAmount-a.netAmount);
+}
+function renderTopProducts(range){
+  const rows=productStats(range).slice(0,4);
+  $("topProducts").innerHTML=rows.map(s=>{
+    const p=getProduct(s.code)||{};
+    return `<div class="cart-row"><img class="thumb sm" src="${esc(p.image||"")}" onclick="openImagePreview(event,this.src)"><div><b>${esc(s.code)} ${esc(p.name||"")}</b><div class="sub">销售 ${s.qty}　退货 ${s.refundQty}　净销 ${s.netQty}</div></div><b>${money(s.netAmount)}</b></div>`;
+  }).join("")||`<div class="empty">暂无销售数据</div>`;
+}
+function buildProductStats(os){
+  const stats={};
+  (os||[]).filter(o=>!o.isVoid).forEach(o=>{
+    const refund=isRefundOrder(o);
+    (o.items||[]).forEach(i=>{
+      if(!stats[i.code])stats[i.code]={code:i.code,qty:0,amount:0,cost:0,refundQty:0,refundAmount:0,refundCost:0};
+      if(refund){
+        stats[i.code].refundQty+=n(i.qty);
+        stats[i.code].refundAmount+=n(i.qty)*n(i.price);
+        stats[i.code].refundCost+=n(i.qty)*n(i.cost);
+      }else{
+        stats[i.code].qty+=n(i.qty);
+        stats[i.code].amount+=n(i.qty)*n(i.price);
+        stats[i.code].cost+=n(i.qty)*n(i.cost);
+      }
+    });
+  });
+  let rows=Object.values(stats).map(x=>{
+    x.netQty=x.qty-x.refundQty;
+    x.netAmount=x.amount-x.refundAmount;
+    x.netCost=x.cost-x.refundCost;
+    x.profit=x.netAmount-x.netCost;
+    x.margin=x.netAmount?x.profit/x.netAmount*100:0;
+    x.avg=x.qty?x.amount/x.qty:0;
+    x.stock=totalStock(getProduct(x.code)||{});
+    x.available=x.stock;
+    return x;
+  }).sort((a,b)=>b.netQty-a.netQty);
+  const kw=(paState.keyword||"").trim().toLowerCase();
+  if(kw)rows=rows.filter(s=>{const p=getProduct(s.code)||{};return (s.code+" "+(p.name||"")).toLowerCase().includes(kw)});
+  return rows;
 }
 
 function renderAll(){renderSaleProducts();renderCart();renderOrders();renderReport();renderManageProducts()}renderAll();
