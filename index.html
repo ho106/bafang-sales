@@ -720,5 +720,300 @@ function buildProductStats(os){
 
 function renderAll(){renderSaleProducts();renderCart();renderOrders();renderReport();renderManageProducts()}renderAll();
 </script>
+<style>
+#page-business{padding-bottom:24px}
+.business-filter-wrap{position:relative;background:#fff;padding:10px 16px 12px;border-bottom:1px solid var(--line)}
+.business-mode-btn{height:40px;border:0;background:#fff;font-size:17px;padding:0 4px;color:#111827}
+.business-mode-menu{position:absolute;left:16px;top:52px;z-index:20;background:#fff;border:1px solid #e5e7eb;border-radius:14px;box-shadow:0 10px 24px rgba(0,0,0,.08);overflow:hidden;min-width:124px}
+.business-mode-menu button{display:block;width:100%;padding:14px 18px;border:0;background:#fff;text-align:left;font-size:16px}
+.business-mode-menu button.active{color:#2563eb;font-weight:800;background:#f3f6ff}
+.business-quick-bar{display:flex;gap:10px;overflow-x:auto;padding-top:10px}
+.business-quick-bar button{min-width:74px;height:40px;padding:0 14px;border:1px solid #e5e7eb;border-radius:8px;background:#fff;font-size:15px;color:#111827;white-space:nowrap}
+.business-quick-bar button.active{background:#4f7df3;color:#fff;border-color:#4f7df3}
+.analysis-card{appearance:none;border:1px solid #dbe5f7;cursor:pointer;text-align:left;width:100%}
+.analysis-card .subnum{margin-top:10px}
+.business-chart-card .sub .up{color:#ef4444;font-weight:800}
+.business-chart-card .sub .down{color:#12a56f;font-weight:800}
+.business-table-card{padding:0;overflow:hidden}
+.business-table-head,.business-table-row{display:grid;grid-template-columns:1.2fr .9fr 1fr;gap:8px;padding:14px 16px;align-items:center}
+.business-table-head{font-size:14px;color:#6b7280;background:#f8fafc}
+.business-table-row{font-size:15px;border-top:1px solid #eef2f7;background:#fff}
+.business-table-row span:last-child{text-align:right;font-weight:700}
+.business-table-row span:nth-child(2){text-align:center;color:#4b5563}
+.business-date-sheet{position:fixed;inset:0;z-index:60}
+.business-date-mask{position:absolute;inset:0;background:rgba(15,23,42,.34)}
+.business-date-panel{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:18px 18px 0 0;padding:0 0 20px;box-shadow:0 -8px 28px rgba(0,0,0,.12)}
+.business-date-tabs{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid #e5e7eb}
+.business-date-tabs button{height:56px;border:0;background:#fff;font-size:17px;color:#6b7280}
+.business-date-tabs button.active{color:#4f7df3;border-bottom:3px solid #4f7df3}
+.business-date-input-wrap{padding:22px 16px}
+.business-date-input{width:100%;height:52px;border:1px solid #dbe5f7;border-radius:12px;padding:0 14px;font-size:18px;background:#fff}
+.business-date-actions{display:grid;grid-template-columns:1fr 1.6fr;gap:14px;padding:0 16px}
+</style>
+<script>
+// ===== V2.2 经营分析详情修复：销售/退货/毛利趋势图 + 自定义日期 =====
+let businessState={
+  mode:'day',
+  anchor:today(),
+  activeMetric:'sale',
+  customStart:today(),
+  customEnd:today(),
+  pickerField:'start'
+};
+const businessMetricMeta={
+  sale:{title:'销售金额趋势图',table:['日期','销售件数','销售金额']},
+  refund:{title:'退货金额趋势图',table:['日期','退货件数','退货金额']},
+  profit:{title:'毛利趋势图',table:['日期','毛利率','毛利']}
+};
+
+function localDateStr(input){
+  const d=input instanceof Date?new Date(input):new Date(input||Date.now());
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function parseLocalDate(str){return new Date((str||today())+'T00:00:00')}
+function addDaysStr(str,days){const d=parseLocalDate(str);d.setDate(d.getDate()+days);return localDateStr(d)}
+function formatMD(str){return String(str||'').slice(5).replace('-', '.')}
+function rangeEndTs(dateStr){return parseLocalDate(dateStr).getTime()+86400000-1}
+function sameOrSwapDates(a,b){return a<=b?[a,b]:[b,a]}
+function ordersBetweenTs(startTs,endTs){return data.orders.filter(o=>!o.isVoid&&n(o.createdTs)>=startTs&&n(o.createdTs)<=endTs)}
+function summarizeOrderList(list){
+  const all=(list||[]).filter(o=>!o.isVoid);
+  const sales=all.filter(o=>!isRefundOrder(o));
+  const refunds=all.filter(o=>isRefundOrder(o));
+  const saleQty=sales.reduce((s,o)=>s+n(o.totalQty),0);
+  const refundQty=refunds.reduce((s,o)=>s+n(o.totalQty),0);
+  const saleAmount=sales.reduce((s,o)=>s+n(o.receivable),0);
+  const refundAmount=refunds.reduce((s,o)=>s+n(o.receivable),0);
+  const saleCost=sales.reduce((s,o)=>s+orderCostSum(o),0);
+  const refundCost=refunds.reduce((s,o)=>s+orderCostSum(o),0);
+  const netAmount=saleAmount-refundAmount;
+  const netCost=saleCost-refundCost;
+  const profit=netAmount-netCost;
+  const margin=netAmount?profit/netAmount*100:0;
+  return {saleQty,refundQty,saleAmount,refundAmount,profit,margin,netAmount};
+}
+function summarizeBetweenDates(startStr,endStr){return summarizeOrderList(ordersBetweenTs(parseLocalDate(startStr).getTime(),rangeEndTs(endStr)))}
+function seriesPointForRange(startStr,endStr,label){
+  const s=summarizeBetweenDates(startStr,endStr);
+  return {...s,label,date:startStr,start:startStr,end:endStr};
+}
+function getWeekStart(dateStr){const d=parseLocalDate(dateStr);const w=(d.getDay()+6)%7;d.setDate(d.getDate()-w);return localDateStr(d)}
+function getWeekEnd(dateStr){return addDaysStr(getWeekStart(dateStr),6)}
+function getMonthStart(dateStr){const d=parseLocalDate(dateStr);d.setDate(1);return localDateStr(d)}
+function getMonthEnd(dateStr){const d=parseLocalDate(dateStr);d.setMonth(d.getMonth()+1);d.setDate(0);return localDateStr(d)}
+function buildBusinessSeries(){
+  const mode=businessState.mode;
+  if(mode==='week'){
+    const arr=[];let anchor=getWeekStart(businessState.anchor);
+    for(let i=7;i>=0;i--){
+      const start=addDaysStr(anchor,-i*7),end=addDaysStr(start,6);
+      arr.push(seriesPointForRange(start,end,`${formatMD(start)}-${formatMD(end)}`));
+    }
+    return arr;
+  }
+  if(mode==='month'){
+    const arr=[];const anchor=parseLocalDate(getMonthStart(businessState.anchor));
+    for(let i=7;i>=0;i--){
+      const d=new Date(anchor);d.setMonth(d.getMonth()-i);
+      const start=localDateStr(new Date(d.getFullYear(),d.getMonth(),1));
+      const end=localDateStr(new Date(d.getFullYear(),d.getMonth()+1,0));
+      arr.push(seriesPointForRange(start,end,`${String(d.getMonth()+1).padStart(2,'0')}月`));
+    }
+    return arr;
+  }
+  if(mode==='7' || mode==='30'){
+    const days=mode==='7'?7:30;const end=businessState.anchor||today();const arr=[];
+    for(let i=days-1;i>=0;i--){const day=addDaysStr(end,-i);arr.push(seriesPointForRange(day,day,formatMD(day)))}
+    return arr;
+  }
+  if(mode==='custom'){
+    let [start,end]=sameOrSwapDates(businessState.customStart||today(),businessState.customEnd||today());
+    const arr=[];let cur=start;let guard=0;
+    while(cur<=end && guard<120){arr.push(seriesPointForRange(cur,cur,formatMD(cur)));cur=addDaysStr(cur,1);guard++;}
+    return arr;
+  }
+  const end=businessState.anchor||today();const arr=[];
+  for(let i=8;i>=0;i--){const day=addDaysStr(end,-i);arr.push(seriesPointForRange(day,day,formatMD(day)))}
+  return arr;
+}
+function getBusinessSummaryFromSeries(series){
+  return series.reduce((acc,x)=>{
+    acc.saleQty+=n(x.saleQty);acc.refundQty+=n(x.refundQty);acc.saleAmount+=n(x.saleAmount);acc.refundAmount+=n(x.refundAmount);acc.profit+=n(x.profit);acc.netAmount+=n(x.netAmount);return acc;
+  },{saleQty:0,refundQty:0,saleAmount:0,refundAmount:0,profit:0,netAmount:0});
+}
+function businessMargin(summary){return summary.netAmount?summary.profit/summary.netAmount*100:0}
+function businessMetricValue(point){return businessState.activeMetric==='sale'?n(point.saleAmount):businessState.activeMetric==='refund'?n(point.refundAmount):n(point.profit)}
+function businessMetricTableSecondary(point){return businessState.activeMetric==='sale'?String(n(point.saleQty)):businessState.activeMetric==='refund'?String(n(point.refundQty)):`${n(point.margin).toFixed(2)}%`}
+function getBusinessCompareText(series){
+  if(!series.length)return '环比 --';
+  const first=series[0],last=series[series.length-1];
+  const startTs=parseLocalDate(first.start).getTime(),endTs=rangeEndTs(last.end||last.start),duration=endTs-startTs+1;
+  const prevEnd=startTs-1,prevStart=Math.max(0,startTs-duration);
+  const prev=summarizeOrderList(ordersBetweenTs(prevStart,prevEnd));
+  const cur=getBusinessSummaryFromSeries(series);
+  const curVal=businessState.activeMetric==='sale'?cur.saleAmount:businessState.activeMetric==='refund'?cur.refundAmount:cur.profit;
+  const prevVal=businessState.activeMetric==='sale'?prev.saleAmount:businessState.activeMetric==='refund'?prev.refundAmount:prev.profit;
+  if(!prevVal)return '环比 --';
+  const pct=((curVal-prevVal)/Math.abs(prevVal))*100;
+  const cls=pct>0?'up':pct<0?'down':'';
+  const arrow=pct>0?'↑':pct<0?'↓':'';
+  return `环比 <span class="${cls}">${pct>0?'+':''}${pct.toFixed(2)}% ${arrow}</span>`;
+}
+function ensureBusinessPageTemplate(){
+  const page=$('page-business');if(!page)return;
+  page.innerHTML=`
+    <div class="business-filter-wrap">
+      <button id="businessModeBtn" class="business-mode-btn" onclick="toggleBusinessModeMenu()">按天 ▾</button>
+      <div id="businessModeMenu" class="business-mode-menu" style="display:none"></div>
+      <div id="businessQuickBar" class="business-quick-bar"></div>
+    </div>
+    <div class="analysis-cards" id="analysisCards"></div>
+    <div class="chart-card business-chart-card">
+      <div class="row"><b id="businessChartTitle">销售金额趋势图</b><span class="sub" id="businessRatio">环比 --</span></div>
+      <svg id="businessChart" class="svg-chart" viewBox="0 0 360 220"></svg>
+    </div>
+    <div class="chart-card business-table-card">
+      <div class="business-table-head" id="businessTableHead"></div>
+      <div id="businessTableBody"></div>
+    </div>
+    <div class="business-date-sheet" id="businessCustomSheet" style="display:none">
+      <div class="business-date-mask" onclick="closeBusinessCustomPicker()"></div>
+      <div class="business-date-panel">
+        <div class="business-date-tabs">
+          <button id="businessStartTab" class="active" onclick="switchBusinessPickerField('start')"></button>
+          <button id="businessEndTab" onclick="switchBusinessPickerField('end')"></button>
+        </div>
+        <div class="business-date-input-wrap">
+          <input id="businessCustomInput" type="date" class="business-date-input">
+        </div>
+        <div class="business-date-actions">
+          <button class="btn btn-gray" onclick="closeBusinessCustomPicker()">取消</button>
+          <button class="btn btn-blue" onclick="confirmBusinessCustomPicker()">确认</button>
+        </div>
+      </div>
+    </div>`;
+}
+function renderBusinessModeMenu(){
+  const box=$('businessModeMenu');if(!box)return;
+  const opts=[['day','按天'],['week','按周'],['month','按月'],['7','近 7 天'],['30','近 30 天'],['custom','自定义']];
+  box.innerHTML=opts.map(x=>`<button class="${businessState.mode===x[0]?'active':''}" onclick="setBusinessMode('${x[0]}')">${x[1]}</button>`).join('');
+}
+function renderBusinessModeBtn(){
+  const labels={day:'按天',week:'按周',month:'按月','7':'近 7 天','30':'近 30 天',custom:'自定义'};
+  if($('businessModeBtn'))$('businessModeBtn').innerText=(labels[businessState.mode]||'按天')+' ▾';
+}
+function toggleBusinessModeMenu(){const box=$('businessModeMenu');if(!box)return;box.style.display=box.style.display==='none'?'block':'none';renderBusinessModeMenu()}
+function setBusinessMode(mode){
+  if(mode==='custom'){if($('businessModeMenu'))$('businessModeMenu').style.display='none';openBusinessCustomPicker();return;}
+  businessState.mode=mode; if(mode!=='7'&&mode!=='30'&&mode!=='day'&&mode!=='week'&&mode!=='month')businessState.anchor=today();
+  if($('businessModeMenu'))$('businessModeMenu').style.display='none';
+  renderBusinessAnalysis();
+}
+function setBusinessAnchor(dateStr){businessState.anchor=dateStr;renderBusinessAnalysis()}
+function renderBusinessQuickBar(){
+  const box=$('businessQuickBar');if(!box)return;
+  let html='';
+  if(businessState.mode==='day'){
+    const end=businessState.anchor||today();
+    const items=[];
+    for(let i=5;i>=0;i--){const d=addDaysStr(end,-i);items.push(`<button class="${d===end?'active':''}" onclick="setBusinessAnchor('${d}')">${d===today()?'今天':formatMD(d)}</button>`)}
+    html=items.join('');
+  }else if(businessState.mode==='week'){
+    const anchor=getWeekStart(businessState.anchor||today());
+    const items=[];
+    for(let i=4;i>=0;i--){const s=addDaysStr(anchor,-i*7);items.push(`<button class="${s===anchor?'active':''}" onclick="setBusinessAnchor('${s}')">${formatMD(s)}</button>`)}
+    html=items.join('');
+  }else if(businessState.mode==='month'){
+    const d=parseLocalDate(getMonthStart(businessState.anchor||today()));
+    const items=[];
+    for(let i=4;i>=0;i--){const x=new Date(d.getFullYear(),d.getMonth()-i,1);const s=localDateStr(x);items.push(`<button class="${localDateStr(d)===s?'active':''}" onclick="setBusinessAnchor('${s}')">${String(x.getMonth()+1).padStart(2,'0')}月</button>`)}
+    html=items.join('');
+  }else if(businessState.mode==='custom'){
+    let [s,e]=sameOrSwapDates(businessState.customStart||today(),businessState.customEnd||today());
+    html=`<button class="active" onclick="openBusinessCustomPicker()">${s} 开始</button><button class="active" onclick="switchBusinessPickerField('end');openBusinessCustomPicker()">${e} 结束</button>`;
+  }else{
+    html=`<button class="active">${businessState.mode==='7'?'近 7 天':'近 30 天'}</button><button onclick="setBusinessMode('day')">今天</button>`;
+  }
+  box.innerHTML=html;
+}
+function setBusinessMetric(metric){businessState.activeMetric=metric;renderBusinessAnalysis()}
+function renderBusinessCards(summary){
+  const margin=businessMargin(summary);
+  $('analysisCards').innerHTML=`
+    <button class="analysis-card ${businessState.activeMetric==='sale'?'active':''}" onclick="setBusinessMetric('sale')"><div class="num">${money(summary.saleAmount)}</div><div class="txt">销售金额</div><div class="num subnum">${summary.saleQty}</div><div class="txt">销售数</div></button>
+    <button class="analysis-card ${businessState.activeMetric==='refund'?'active':''}" onclick="setBusinessMetric('refund')"><div class="num">${money(summary.refundAmount)}</div><div class="txt">退货金额</div><div class="num subnum">${summary.refundQty}</div><div class="txt">退货数</div></button>
+    <button class="analysis-card ${businessState.activeMetric==='profit'?'active':''}" onclick="setBusinessMetric('profit')"><div class="num">${money(summary.profit)}</div><div class="txt">毛利</div><div class="num subnum">${margin.toFixed(2)}%</div><div class="txt">毛利率</div></button>`;
+}
+function renderBusinessChart(series){
+  const el=$('businessChart');if(!el)return;
+  const values=series.map(businessMetricValue);
+  const max=Math.max(1,...values);
+  const min=Math.min(0,...values);
+  const span=Math.max(1,max-min);
+  const left=26,right=340,bottom=186,top=28;
+  const step=series.length>1?(right-left)/(series.length-1):0;
+  const pts=series.map((p,i)=>{const v=businessMetricValue(p);const x=left+i*step;const y=bottom-((v-min)/span)*(bottom-top);return [x,y,v,p.label]});
+  const poly=pts.map(p=>`${p[0]},${p[1]}`).join(' ');
+  const yLines=[0,1,2,3].map(i=>{const y=bottom-(bottom-top)*(i/3);return `<line x1="${left}" y1="${y}" x2="${right}" y2="${y}" stroke="#e5e7eb"/>`;}).join('');
+  const dots=pts.map((p,i)=>`<circle cx="${p[0]}" cy="${p[1]}" r="3.6" fill="#4f7df3"/><text x="${Math.max(left,Math.min(right-24,p[0]-14))}" y="${Math.max(18,p[1]-10)}" font-size="11" fill="#111827">${money(p[2]).replace(/\.00$/,'')}</text>${(series.length<=10||i===0||i===series.length-1||i%Math.ceil(series.length/6)===0)?`<text x="${p[0]-12}" y="208" font-size="11" fill="#6b7280">${esc(p[3])}</text>`:''}`).join('');
+  const zeroY=bottom-((0-min)/span)*(bottom-top);
+  const zeroLine=min<0&&max>0?`<line x1="${left}" y1="${zeroY}" x2="${right}" y2="${zeroY}" stroke="#d1d5db" stroke-dasharray="4 4"/>`:'';
+  el.innerHTML=`${yLines}${zeroLine}<polyline points="${poly}" fill="none" stroke="#4f7df3" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>${dots}`;
+}
+function renderBusinessTable(series){
+  const meta=businessMetricMeta[businessState.activeMetric];
+  $('businessTableHead').innerHTML=`<span>${meta.table[0]}</span><span>${meta.table[1]}</span><span>${meta.table[2]}</span>`;
+  $('businessTableBody').innerHTML=series.slice().reverse().map(p=>`<div class="business-table-row"><span>${p.label}</span><span>${businessMetricTableSecondary(p)}</span><span>${money(businessMetricValue(p))}</span></div>`).join('')||'<div class="empty">暂无数据</div>';
+}
+function renderBusinessAnalysis(){
+  ensureBusinessPageTemplate();
+  renderBusinessModeBtn();
+  renderBusinessModeMenu();
+  renderBusinessQuickBar();
+  const series=buildBusinessSeries();
+  const summary=getBusinessSummaryFromSeries(series);
+  renderBusinessCards(summary);
+  $('businessChartTitle').innerText=businessMetricMeta[businessState.activeMetric].title;
+  $('businessRatio').innerHTML=getBusinessCompareText(series);
+  renderBusinessChart(series);
+  renderBusinessTable(series);
+}
+function openBusinessAnalysis(){showPage('business');renderBusinessAnalysis()}
+function openBusinessCustomPicker(){
+  businessState.mode='custom';
+  if($('businessModeMenu'))$('businessModeMenu').style.display='none';
+  updateBusinessPickerTabs();
+  $('businessCustomSheet').style.display='block';
+}
+function closeBusinessCustomPicker(){if($('businessCustomSheet'))$('businessCustomSheet').style.display='none'}
+function updateBusinessPickerTabs(){
+  if(!$('businessStartTab'))return;
+  $('businessStartTab').classList.toggle('active',businessState.pickerField==='start');
+  $('businessEndTab').classList.toggle('active',businessState.pickerField==='end');
+  $('businessStartTab').innerText=`${businessState.customStart} 开始`;
+  $('businessEndTab').innerText=`${businessState.customEnd} 结束`;
+  $('businessCustomInput').value=businessState.pickerField==='start'?businessState.customStart:businessState.customEnd;
+}
+function persistBusinessPickerField(){
+  const val=$('businessCustomInput')&&$('businessCustomInput').value?$('businessCustomInput').value:today();
+  if(businessState.pickerField==='start')businessState.customStart=val;else businessState.customEnd=val;
+}
+function switchBusinessPickerField(field){persistBusinessPickerField();businessState.pickerField=field;updateBusinessPickerTabs()}
+function confirmBusinessCustomPicker(){
+  persistBusinessPickerField();
+  let pair=sameOrSwapDates(businessState.customStart||today(),businessState.customEnd||today());
+  businessState.customStart=pair[0];businessState.customEnd=pair[1];businessState.mode='custom';closeBusinessCustomPicker();renderBusinessAnalysis();
+}
+(function initBusinessPatch(){
+  const reportBtn=document.querySelector('#page-report .report-card .small-link');
+  if(reportBtn)reportBtn.setAttribute('onclick','openBusinessAnalysis()');
+  const oldShowPage=showPage;
+  showPage=function(id){oldShowPage(id);if(id==='business'){if($('topRight'))$('topRight').innerHTML='<span style="font-size:16px;color:#111827">店铺🔒</span>';renderBusinessAnalysis();}};
+  const oldRenderReport=renderReport;
+  renderReport=function(){oldRenderReport();const reportBtn2=document.querySelector('#page-report .report-card .small-link');if(reportBtn2)reportBtn2.setAttribute('onclick','openBusinessAnalysis()');};
+  ensureBusinessPageTemplate();
+})();
+</script>
+
 </body>
 </html>
