@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<title>八方来财销售开单版 V2.1</title>
+<title>八方来财销售开单版 V2.4</title>
 <style>
 :root{--blue:#2f6df6;--green:#18a058;--red:#ef4444;--orange:#ff7a1a;--bg:#f3f5f9;--card:#fff;--text:#1f2937;--muted:#8791a3;--line:#e8edf5}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",Arial,sans-serif;color:var(--text)}
@@ -137,7 +137,7 @@ body.hide-bottom-nav .app{padding-bottom:0!important}
 .note-save-btn{min-height:34px;border-radius:10px;padding:0 10px;font-weight:900;background:#edf4ff;color:#2563eb}
 
 
-/* V2.1 报表与商品分析优化 */
+/* V2.4 报表与商品分析优化 */
 .report-head-simple{display:flex;gap:10px;align-items:center;padding:10px 16px;background:#fff;border-bottom:1px solid var(--line)}
 .report-head-simple select{flex:1;height:44px;border:1px solid #d9dfeb;border-radius:14px;background:#fff;padding:0 14px;font-size:17px}
 .report-analysis-entry{border-top:1px solid var(--line);margin-top:14px;padding-top:12px}
@@ -204,7 +204,7 @@ body.hide-bottom-nav .app{padding-bottom:0!important}
 .pa-date-modal .actions .confirm{border:none;background:#ff6243;color:#fff}
 
 
-/* V2.1 退货流程 */
+/* V2.4 退货流程 */
 .sale-modebar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 14px 8px;background:#fff;border-bottom:1px solid var(--line)}
 .sale-mode-select{height:42px;border:1px solid #d4dbe6;border-radius:8px;padding:0 12px;background:#fff;font-size:16px;color:#111827}
 .sale-tools{display:flex;align-items:center;gap:14px;font-size:16px;color:#111827;white-space:nowrap}
@@ -223,19 +223,19 @@ body.hide-bottom-nav .app{padding-bottom:0!important}
 .refund-neg{color:#ef4444 !important}
 
 
-/* V2.1 退货选款：点减号产生负数退货数量 */
+/* V2.4 退货选款：点减号产生负数退货数量 */
 .pick-refund-tip{margin:10px 0 0;color:#ef4444;font-weight:800;font-size:14px}
 .qty-num.refund{color:#ef4444}
 
 
-/* V2.1 不用切换销售/退货：选款页 + 为销售，- 为退货 */
+/* V2.4 不用切换销售/退货：选款页 + 为销售，- 为退货 */
 .pick-mode-tip{margin-top:8px;color:#6b7280;font-size:14px;line-height:1.45}
 .pick-mode-tip b{color:#ef4444}
 .qty-num.refund,.refund-neg{color:#ef4444!important}
 .qty-num.sale{color:#111827}
 
 
-/* V2.1 报表：销售和退货分开统计 */
+/* V2.4 报表：销售和退货分开统计 */
 .metric .refund-value{color:#ef4444}
 .metric .net-value{color:#111827}
 
@@ -243,7 +243,7 @@ body.hide-bottom-nav .app{padding-bottom:0!important}
 </head>
 <body>
 <div class="app">
-  <div class="topbar"><span id="topTitle">八方来财销售开单版 V2.1</span><div class="left" id="topLeft"></div><div class="right" id="topRight"></div></div>
+  <div class="topbar"><span id="topTitle">八方来财销售开单版 V2.4</span><div class="left" id="topLeft"></div><div class="right" id="topRight"></div></div>
   <section id="page-sale" class="page active"><div class="sale-modebar"><div class="sale-tools" style="margin-left:auto"><button class="sale-tool-btn" onclick="focusSaleSearch()">⌕ 搜索选款</button><button class="sale-tool-btn" onclick="alert('扫码功能后期接小程序摄像头接口')">▣ 扫描选款</button><button class="sale-tool-btn" onclick="alert('更多功能后续补充')">⋮</button></div></div><div class="sale-customer-bar"><span>散客</span><span>主仓</span></div><div class="tabs"><button id="tab-hot" class="active" onclick="setSaleTab('hot')">热卖</button><button id="tab-new" onclick="setSaleTab('new')">新款</button><button id="tab-bought" onclick="setSaleTab('bought')">买过</button></div><div class="product-list" id="saleProductList"></div><div class="searchbar"><div class="searchbox"><span style="font-size:24px">⌕</span><input id="saleSearch" placeholder="搜索款号/商品名称或扫码款号" oninput="renderSaleProducts()"><button onclick="alert('扫码功能后期接小程序摄像头接口')">▣</button></div></div></section>
   <section id="page-pick" class="page"><div id="pickBox"></div><div class="bottom-bar"><div class="bottom-inner"><button class="btn btn-light" onclick="addCurrentSelection(false)">继续选款</button><button class="btn btn-blue" onclick="addCurrentSelection(true)">立即结算</button></div></div></section>
   <section id="page-cart" class="page"><div class="card"><div class="row"><div class="title">销售清单</div><button class="btn-small btn-gray" onclick="showPage('sale')">继续选款</button></div><div id="cartList"></div></div><div class="bottom-bar"><div class="bottom-inner"><div class="cart-total">共 <b id="cartQty">0</b> 件<br><span class="cart-detail">合计 <span id="cartAmount">0.00</span></span></div><button class="btn btn-blue" id="cartActionBtn" onclick="handleCartMainAction()">去结算</button></div></div></section>
@@ -439,7 +439,7 @@ function calcSummary(range){const os=ordersInRange(range).filter(o=>!isRefundOrd
 function productStats(range){const stats={};ordersInRange(range).filter(o=>!isRefundOrder(o)).forEach(o=>o.items.forEach(i=>{if(!stats[i.code])stats[i.code]={code:i.code,qty:0,amount:0,cost:0,returns:0,unship:0};stats[i.code].qty+=n(i.qty);stats[i.code].amount+=n(i.qty)*n(i.price);stats[i.code].cost+=n(i.qty)*n(i.cost)}));return Object.values(stats).map(x=>{x.profit=x.amount-x.cost;x.margin=x.amount?x.profit/x.amount*100:0;x.avg=x.qty?x.amount/x.qty:0;x.stock=totalStock(getProduct(x.code)||{});return x}).sort((a,b)=>b.amount-a.amount)}
 
 
-// ===== V2.1 覆盖逻辑：不需要销售/退货下拉，选择商品时 + 是销售，- 是退货 =====
+// ===== V2.4 覆盖逻辑：不需要销售/退货下拉，选择商品时 + 是销售，- 是退货 =====
 function cartOrderType(){
   const line=data.cart.find(x=>n(x.qty)>0);
   if(line && line.lineType) return line.lineType;
@@ -584,7 +584,7 @@ function confirmRefund(){
 }
 
 
-// ===== V2.1 报表统计修复：退货单在报表里单独体现 =====
+// ===== V2.4 报表统计修复：退货单在报表里单独体现 =====
 function orderCostSum(o){
   return (o.items||[]).reduce((s,i)=>s+n(i.qty)*n(i.cost),0);
 }
@@ -751,7 +751,7 @@ function renderAll(){renderSaleProducts();renderCart();renderOrders();renderRepo
 .business-date-actions{display:grid;grid-template-columns:1fr 1.6fr;gap:14px;padding:0 16px}
 </style>
 <script>
-// ===== V2.3 经营分析详情修复：销售/退货/毛利趋势图 + 自定义日期 =====
+// ===== V2.4 经营分析详情修复：销售/退货/毛利趋势图 + 自定义日期 =====
 let businessState={
   mode:'day',
   anchor:today(),
@@ -1008,7 +1008,7 @@ function confirmBusinessCustomPicker(){
   const reportBtn=document.querySelector('#page-report .report-card .small-link');
   if(reportBtn)reportBtn.setAttribute('onclick','openBusinessAnalysis()');
   const oldShowPage=showPage;
-  showPage=function(id){oldShowPage(id);if(id==='business'){if($('topRight'))$('topRight').innerHTML='<span style="font-size:16px;color:#111827">店铺🔒</span>';renderBusinessAnalysis();}};
+  showPage=function(id){oldShowPage(id);if(id==='business'){if($('topRight'))$('topRight').innerHTML='<span style="font-size:16px;color:#111827"></span>';renderBusinessAnalysis();}};
   const oldRenderReport=renderReport;
   renderReport=function(){oldRenderReport();const reportBtn2=document.querySelector('#page-report .report-card .small-link');if(reportBtn2)reportBtn2.setAttribute('onclick','openBusinessAnalysis()');};
   ensureBusinessPageTemplate();
@@ -1017,7 +1017,7 @@ function confirmBusinessCustomPicker(){
 
 
 <script>
-// ===== V2.3 修复：经营分析日期条可左右滑动，切换日期后不丢失最近日期；去掉顶部店铺锁 =====
+// ===== V2.4 修复：经营分析日期条可左右滑动，切换日期后不丢失最近日期；去掉顶部店铺锁 =====
 (function businessDateBarFixV23(){
   function ensureDateBarCssV23(){
     if(document.getElementById('businessDateBarFixCssV23')) return;
@@ -1098,7 +1098,7 @@ function confirmBusinessCustomPicker(){
     },30);
   };
 
-  // 重写 showPage 的 business 顶部：不要显示“店铺🔒”
+  // 重写 showPage 的 business 顶部：不要显示“”
   const oldShowPageV23 = window.showPage;
   window.showPage = function(id){
     oldShowPageV23(id);
@@ -1116,6 +1116,154 @@ function confirmBusinessCustomPicker(){
   };
 
   // 如果当前已经在经营分析页，立即刷新一次
+  try{
+    if(document.querySelector('#page-business.active')){
+      if($('topRight')) $('topRight').innerHTML='';
+      renderBusinessAnalysis();
+    }
+  }catch(e){}
+})();
+</script>
+
+
+<script>
+// ===== V2.4 修复：日期栏只允许手动滑动，点击日期不自动来回晃动 =====
+(function businessDateBarNoShakeV24(){
+  let lastBusinessDateScrollLeft = null;
+  let lastBusinessMode = null;
+
+  function ensureNoShakeCssV24(){
+    if(document.getElementById('businessDateBarNoShakeCssV24')) return;
+    const style=document.createElement('style');
+    style.id='businessDateBarNoShakeCssV24';
+    style.innerHTML=`
+      .business-quick-bar{
+        display:flex!important;
+        gap:10px;
+        overflow-x:auto!important;
+        overflow-y:hidden!important;
+        -webkit-overflow-scrolling:touch;
+        scroll-behavior:auto!important;
+        padding:10px 4px 2px;
+        white-space:nowrap;
+      }
+      .business-quick-bar::-webkit-scrollbar{display:none}
+      .business-quick-bar button{
+        flex:0 0 auto!important;
+        min-width:74px;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  function rememberBusinessDateScroll(){
+    const box=$('businessQuickBar');
+    if(!box) return;
+    lastBusinessDateScrollLeft = box.scrollLeft;
+  }
+
+  function restoreBusinessDateScroll(modeChanged){
+    const box=$('businessQuickBar');
+    if(!box) return;
+
+    // 第一次打开时，直接定位到最近日期，不用平滑动画，避免晃动
+    if(lastBusinessDateScrollLeft === null || modeChanged){
+      box.scrollLeft = box.scrollWidth;
+      lastBusinessDateScrollLeft = box.scrollLeft;
+      return;
+    }
+
+    // 点击日期后恢复用户原本手动滑到的位置，不自动居中、不自动来回动
+    box.scrollLeft = lastBusinessDateScrollLeft;
+  }
+
+  // 覆盖日期条渲染：固定日期池 + 保留手动滑动位置 + 不使用 scrollIntoView
+  window.renderBusinessQuickBar = function(){
+    ensureNoShakeCssV24();
+    const box=$('businessQuickBar');
+    if(!box) return;
+
+    const modeChanged = lastBusinessMode !== businessState.mode;
+    lastBusinessMode = businessState.mode;
+
+    let html='';
+    const todayStr=today();
+
+    if(businessState.mode==='day'){
+      const selected=businessState.anchor || todayStr;
+      const items=[];
+      // 固定展示最近45天：今天永远在最右侧，前面日期手动左右滑动查看
+      for(let i=44;i>=0;i--){
+        const d=addDaysStr(todayStr,-i);
+        const text=d===todayStr?'今天':formatMD(d);
+        items.push(`<button data-date="${d}" class="${d===selected?'active':''}" onclick="rememberBusinessDateScrollV24();setBusinessAnchor('${d}')">${text}</button>`);
+      }
+      html=items.join('');
+    }else if(businessState.mode==='week'){
+      const selected=getWeekStart(businessState.anchor || todayStr);
+      const thisWeek=getWeekStart(todayStr);
+      const items=[];
+      for(let i=24;i>=0;i--){
+        const s=addDaysStr(thisWeek,-i*7);
+        const e=addDaysStr(s,6);
+        items.push(`<button data-date="${s}" class="${s===selected?'active':''}" onclick="rememberBusinessDateScrollV24();setBusinessAnchor('${s}')">${formatMD(s)}-${formatMD(e)}</button>`);
+      }
+      html=items.join('');
+    }else if(businessState.mode==='month'){
+      const selected=getMonthStart(businessState.anchor || todayStr);
+      const base=parseLocalDate(getMonthStart(todayStr));
+      const items=[];
+      for(let i=17;i>=0;i--){
+        const x=new Date(base.getFullYear(),base.getMonth()-i,1);
+        const s=localDateStr(x);
+        const text=`${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}`;
+        items.push(`<button data-date="${s}" class="${s===selected?'active':''}" onclick="rememberBusinessDateScrollV24();setBusinessAnchor('${s}')">${text}</button>`);
+      }
+      html=items.join('');
+    }else if(businessState.mode==='custom'){
+      let pair=sameOrSwapDates(businessState.customStart||todayStr,businessState.customEnd||todayStr);
+      html=`<button class="active" onclick="openBusinessCustomPicker()">${pair[0]} 开始</button><button class="active" onclick="switchBusinessPickerField('end');openBusinessCustomPicker()">${pair[1]} 结束</button>`;
+    }else{
+      html=`<button class="active">${businessState.mode==='7'?'近 7 天':'近 30 天'}</button><button onclick="setBusinessMode('day')">今天</button>`;
+    }
+
+    box.innerHTML=html;
+
+    // 监听用户手动滑动，只记录，不主动动画
+    box.onscroll = function(){ lastBusinessDateScrollLeft = box.scrollLeft; };
+
+    // 恢复位置用 setTimeout 但没有动画，不会来回晃
+    setTimeout(()=>restoreBusinessDateScroll(modeChanged),0);
+  };
+
+  // 给按钮 onclick 调用，先记录当前滑动位置
+  window.rememberBusinessDateScrollV24 = rememberBusinessDateScroll;
+
+  // 覆盖设置日期：只更新数据和图表，不做自动滚动
+  const oldSetBusinessAnchorV24 = window.setBusinessAnchor;
+  window.setBusinessAnchor = function(dateStr){
+    rememberBusinessDateScroll();
+    businessState.anchor = dateStr;
+    renderBusinessAnalysis();
+  };
+
+  // 去掉经营分析顶部右侧“店铺锁”
+  const oldShowPageV24 = window.showPage;
+  window.showPage = function(id){
+    oldShowPageV24(id);
+    if(id==='business'){
+      if($('topRight')) $('topRight').innerHTML='';
+      renderBusinessAnalysis();
+    }
+  };
+
+  window.openBusinessAnalysis = function(){
+    showPage('business');
+    if($('topRight')) $('topRight').innerHTML='';
+    renderBusinessAnalysis();
+  };
+
+  // 当前页面若已经在经营分析，立即刷新
   try{
     if(document.querySelector('#page-business.active')){
       if($('topRight')) $('topRight').innerHTML='';
