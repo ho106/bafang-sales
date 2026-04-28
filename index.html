@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>八方来财销售开单版 V2.15</title>
+<title>八方来财销售开单版 V2.16</title>
 <style>
 :root{
   --blue:#2f6df6;
@@ -161,7 +161,7 @@ textarea{min-height:88px;resize:none}
 <body>
 <div id="app" class="app">
   <section id="page-sale" class="page active">
-    <div class="topbar"><div class="title">八方来财销售开单版 V2.15</div><div class="right"><button class="icon-btn" onclick="openCart()">🛒<span id="cartBadge" class="cart-badge" style="display:none">0</span></button></div></div>
+    <div class="topbar"><div class="title">八方来财销售开单版 V2.16</div><div class="right"><button class="icon-btn" onclick="openCart()">🛒<span id="cartBadge" class="cart-badge" style="display:none">0</span></button></div></div>
     <div class="toolbar">
       <div class="search">⌕<input id="saleSearch" placeholder="搜索款号/商品名称" oninput="UI.sale.render()"></div>
       <button class="small-btn btn-line" onclick="alert('扫码入口已预留，后期接小程序扫码')">扫码选款</button>
@@ -257,14 +257,14 @@ textarea{min-height:88px;resize:none}
 
 <script>
 /*
-  八方来财销售开单版 V2.15
+  八方来财销售开单版 V2.16
   清理稳定版原则：
   1. 只保留一个核心数据层 DataLayer
   2. 页面不得绕过 DataLayer 自己乱算
   3. 每个页面只保留一个 render 入口
   4. 销售单 qty 为正数，退货 qty 为负数；不再单独切换销售/退货模式
 */
-const VERSION = "V2.15";
+const VERSION = "V2.16";
 const STORAGE_KEY = "bafang_sales_v1";
 const $ = id => document.getElementById(id);
 const n = v => Number(v || 0) || 0;
@@ -384,10 +384,14 @@ const DataLayer = {
       o.salesman = o.salesman || d.settings.salesman || "李飞";
       o.paymentMethod = o.paymentMethod || "微信支付";
       o.note = o.note || "";
+      // V2.16 抹零字段兼容：
+      // roundOff 为订单级抹零金额；旧数据没有该字段则默认为 0。
+      o.roundOff = Math.abs(n(o.roundOff || o.roundAmount || o.eraseZero || o.moling || o.maling || o.discountAmount));
+      o.actualNetAmount = n(o.actualNetAmount || o.paidAmount || o.realAmount || 0);
       o.isVoid = !!o.isVoid;
       o.items = Array.isArray(o.items) ? o.items : [];
 
-      // V2.15 旧数据兼容：
+      // V2.16 旧数据兼容：
       // 早期版本有可能把“退货单”的 qty 存成正数。
       // 这里优先看订单标记和明细标记，最后才看 qty 正负，并统一转成：
       // 销售 qty > 0，退货 qty < 0。
@@ -438,6 +442,49 @@ const DataLayer = {
   },
   isRefundLine(item){ return n(item.qty) < 0 || item.lineType === "refund"; },
   isSaleLine(item){ return n(item.qty) > 0 && item.lineType !== "refund"; },
+  orderRoundOff(order){
+    return Math.abs(n(order && (order.roundOff || order.roundAmount || order.eraseZero || order.moling || order.maling || order.discountAmount)));
+  },
+  netAfterRound(netAmount, roundOff){
+    const r = Math.abs(n(roundOff));
+    const v = n(netAmount);
+    if(!r) return v;
+    // 销售单：应收 78，抹零 8，实收 70
+    // 退货单：应退 -78，抹零 8，实退 -70
+    return v >= 0 ? Math.max(0, v - r) : Math.min(0, v + r);
+  },
+  orderBases(order){
+    const b = {saleAmount:0, refundAmount:0, saleCost:0, refundCost:0, saleQty:0, refundQty:0};
+    ((order && order.items) || []).forEach(i => {
+      const q = Math.abs(n(i.qty));
+      if(this.isRefundLine(i)){
+        b.refundQty += q;
+        b.refundAmount += q * n(i.price);
+        b.refundCost += q * n(i.cost);
+      }else if(n(i.qty) > 0){
+        b.saleQty += q;
+        b.saleAmount += q * n(i.price);
+        b.saleCost += q * n(i.cost);
+      }
+    });
+    return b;
+  },
+  adjustedLineAmount(order,item){
+    const q = Math.abs(n(item && item.qty));
+    const raw = q * n(item && item.price);
+    const round = this.orderRoundOff(order);
+    if(!round || !raw) return raw;
+    const b = this.orderBases(order);
+    // 抹零按订单实际方向分摊：
+    // 销售为主的单，分摊到销售行；退货为主的单，分摊到退货行。
+    if(this.isRefundLine(item) && b.refundAmount > b.saleAmount && b.refundAmount > 0){
+      return Math.max(0, raw - round * raw / b.refundAmount);
+    }
+    if(this.isSaleLine(item) && b.saleAmount >= b.refundAmount && b.saleAmount > 0){
+      return Math.max(0, raw - round * raw / b.saleAmount);
+    }
+    return raw;
+  },
   getValidOrders(range){
     let os = data.orders.filter(o => !o.isVoid);
     const now = Date.now();
@@ -452,19 +499,41 @@ const DataLayer = {
     return os;
   },
   calcOrderSummary(orders){
-    const s = {orderCount:0,saleOrderCount:0,refundOrderCount:0,qty:0,amount:0,cost:0,refundQty:0,refundAmount:0,refundCost:0,netQty:0,netAmount:0,profit:0,margin:0,refundRate:0};
+    const s = {
+      orderCount:0,saleOrderCount:0,refundOrderCount:0,
+      qty:0,amount:0,grossAmount:0,cost:0,
+      refundQty:0,refundAmount:0,grossRefundAmount:0,refundCost:0,
+      roundOff:0,netQty:0,netAmount:0,grossNetAmount:0,
+      profit:0,margin:0,refundRate:0
+    };
     (orders || []).forEach(o => {
-      let hasSale = false, hasRefund = false;
-      (o.items || []).forEach(i => {
-        const q = Math.abs(n(i.qty));
-        if(this.isRefundLine(i)){ s.refundQty += q; s.refundAmount += q*n(i.price); s.refundCost += q*n(i.cost); hasRefund = true; }
-        else if(n(i.qty) > 0){ s.qty += q; s.amount += q*n(i.price); s.cost += q*n(i.cost); hasSale = true; }
-      });
-      if(hasSale) s.saleOrderCount++;
-      if(hasRefund) s.refundOrderCount++;
+      const b = this.orderBases(o);
+      const round = this.orderRoundOff(o);
+      const applyToRefund = b.refundAmount > b.saleAmount;
+
+      let saleAmount = b.saleAmount;
+      let refundAmount = b.refundAmount;
+      if(round){
+        if(applyToRefund && refundAmount > 0) refundAmount = Math.max(0, refundAmount - round);
+        else if(saleAmount > 0) saleAmount = Math.max(0, saleAmount - round);
+      }
+
+      s.qty += b.saleQty;
+      s.refundQty += b.refundQty;
+      s.grossAmount += b.saleAmount;
+      s.grossRefundAmount += b.refundAmount;
+      s.amount += saleAmount;
+      s.refundAmount += refundAmount;
+      s.cost += b.saleCost;
+      s.refundCost += b.refundCost;
+      s.roundOff += round;
+
+      if(b.saleQty > 0) s.saleOrderCount++;
+      if(b.refundQty > 0) s.refundOrderCount++;
     });
     s.orderCount = (orders || []).length;
     s.netQty = s.qty - s.refundQty;
+    s.grossNetAmount = s.grossAmount - s.grossRefundAmount;
     s.netAmount = s.amount - s.refundAmount;
     s.profit = (s.amount - s.cost) - (s.refundAmount - s.refundCost);
     s.margin = s.netAmount ? s.profit / s.netAmount * 100 : 0;
@@ -477,8 +546,9 @@ const DataLayer = {
       const code = String(i.code || ""); if(!code) return;
       if(!map[code]) map[code] = {code,qty:0,amount:0,cost:0,refundQty:0,refundAmount:0,refundCost:0,stock:0,available:0};
       const q = Math.abs(n(i.qty));
-      if(this.isRefundLine(i)){ map[code].refundQty += q; map[code].refundAmount += q*n(i.price); map[code].refundCost += q*n(i.cost); }
-      else if(n(i.qty) > 0){ map[code].qty += q; map[code].amount += q*n(i.price); map[code].cost += q*n(i.cost); }
+      const actualAmount = this.adjustedLineAmount(o,i);
+      if(this.isRefundLine(i)){ map[code].refundQty += q; map[code].refundAmount += actualAmount; map[code].refundCost += q*n(i.cost); }
+      else if(n(i.qty) > 0){ map[code].qty += q; map[code].amount += actualAmount; map[code].cost += q*n(i.cost); }
     }));
     let rows = Object.values(map).map(r => {
       const p = this.getProduct(r.code) || {};
@@ -504,8 +574,9 @@ const DataLayer = {
       const key = (i.color || "") + ";" + (i.size || "");
       if(!map[key]) map[key] = {label:key, color:i.color, size:i.size, qty:0,amount:0,cost:0,refundQty:0,refundAmount:0,refundCost:0,stock:0,available:0};
       const q = Math.abs(n(i.qty));
-      if(this.isRefundLine(i)){ map[key].refundQty += q; map[key].refundAmount += q*n(i.price); map[key].refundCost += q*n(i.cost); }
-      else if(n(i.qty) > 0){ map[key].qty += q; map[key].amount += q*n(i.price); map[key].cost += q*n(i.cost); }
+      const actualAmount = this.adjustedLineAmount(o,i);
+      if(this.isRefundLine(i)){ map[key].refundQty += q; map[key].refundAmount += actualAmount; map[key].refundCost += q*n(i.cost); }
+      else if(n(i.qty) > 0){ map[key].qty += q; map[key].amount += actualAmount; map[key].cost += q*n(i.cost); }
     }));
     (p.colors || []).forEach(c => (p.sizes || []).forEach(z => {
       const key = c+";"+z;
@@ -544,12 +615,20 @@ const DataLayer = {
       return {code:i.code,name:p.name,color:i.color,size:i.size,qty:n(i.qty),price:n(i.price || p.price),cost:n(i.cost || p.cost),lineType:n(i.qty)<0?"refund":"sale"};
     });
     if(!clean.length){ alert("请先选择商品数量"); return null; }
+    const tempOrder = {items:clean};
+    const base = this.orderBases(tempOrder);
+    const roundOff = Math.abs(n(extra && extra.roundOff));
+    const grossNetAmount = base.saleAmount - base.refundAmount;
+    const actualNetAmount = this.netAfterRound(grossNetAmount, roundOff);
+
     const order = {
       id: uid("O"), no: String(1170000 + data.orders.length + 1),
       createdTs: Date.now(), storeName:"NN童装",
       salesman:(extra && extra.salesman) || data.settings.salesman || "李飞",
       paymentMethod:(extra && extra.paymentMethod) || "微信支付",
-      note:(extra && extra.note) || "", isVoid:false, items:clean
+      note:(extra && extra.note) || "",
+      roundOff, grossNetAmount, actualNetAmount,
+      isVoid:false, items:clean
     };
     data.orders.unshift(order);
     this.applyStockChange(data.products, clean, "create");
@@ -640,9 +719,9 @@ const UI = {
       $("checkoutTitle").innerText = s.netAmount < 0 ? "退款结算" : "收款结算";
       $("checkoutQtyAmount").innerText = `${s.absQty}件 / ${money(s.netAmount)}`;
       $("payLabel").innerText = s.netAmount < 0 ? "应退金额" : "应收金额";
-      const round = n($("roundOff").value);
-      $("receivable").innerText = money(s.netAmount - round);
-      $("receivable").className = s.netAmount < 0 ? "red" : "red";
+      const round = Math.abs(n($("roundOff").value));
+      $("receivable").innerText = money(DataLayer.netAfterRound(s.netAmount, round));
+      $("receivable").className = "red";
     }
   },
   orders:{
@@ -678,8 +757,9 @@ const UI = {
           <div class="detail-line"><span class="k">订单状态</span><span class="v">${o.isVoid?'已作废':'已结清'}</span><span></span></div>
           <div class="detail-line"><span class="k">下单时间</span><span class="v">${timeText(o.createdTs)}</span><span></span></div>
           <div class="detail-line"><span class="k">订单数量</span><span class="v">${s.netQty}件（销售${s.qty}，退货${s.refundQty}）</span><span></span></div>
-          <div class="detail-line"><span class="k">应收金额</span><span class="v">￥ ${money(s.amount)}</span><span></span></div>
-          <div class="detail-line"><span class="k">退货金额</span><span class="v">￥ ${money(s.refundAmount)}</span><span></span></div>
+          <div class="detail-line"><span class="k">应收金额</span><span class="v">￥ ${money(s.grossAmount)}</span><span></span></div>
+          <div class="detail-line"><span class="k">退货金额</span><span class="v">￥ ${money(s.grossRefundAmount)}</span><span></span></div>
+          <div class="detail-line"><span class="k">抹零金额</span><span class="v">￥ ${money(s.roundOff)}</span><span></span></div>
           <div class="detail-line"><span class="k">实收净额</span><span class="v">￥ ${money(s.netAmount)}</span><span></span></div>
           <div class="detail-line"><span class="k">支付方式</span><span class="v">${esc(o.paymentMethod || "微信支付")}</span><span></span></div>
           <div class="detail-line"><span class="k">业务员</span><span class="v">${esc(o.salesman || "李飞")}</span><span></span></div>
@@ -803,7 +883,7 @@ function calcCartSummary(){
 }
 function confirmOrder(){
   const s = calcCartSummary();
-  const order = DataLayer.createOrder(data.cart, {salesman:$("salesman").value, paymentMethod:$("payMethod").value, note:$("orderNote").value});
+  const order = DataLayer.createOrder(data.cart, {salesman:$("salesman").value, paymentMethod:$("payMethod").value, note:$("orderNote").value, roundOff:Math.abs(n($("roundOff").value))});
   if(!order) return;
   currentOrderId = order.id;
   UI.orders.renderDetail();
@@ -1074,6 +1154,7 @@ function verifyDataConsistency(){
     `净销量：${Math.round(summary.netQty)} 件`,
     `销售金额：${money(summary.amount)}`,
     `退货金额：${money(summary.refundAmount)}`,
+    `抹零金额：${money(summary.roundOff)}`,
     `净收入：${money(summary.netAmount)}`,
     `毛利：${money(summary.profit)}`
   ];
