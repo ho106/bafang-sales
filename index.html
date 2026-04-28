@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<title>八方来财销售开单版 V2.8</title>
+<title>八方来财销售开单版 V2.9</title>
 <style>
 :root{--blue:#2f6df6;--green:#18a058;--red:#ef4444;--orange:#ff7a1a;--bg:#f3f5f9;--card:#fff;--text:#1f2937;--muted:#8791a3;--line:#e8edf5}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",Arial,sans-serif;color:var(--text)}
@@ -137,7 +137,7 @@ body.hide-bottom-nav .app{padding-bottom:0!important}
 .note-save-btn{min-height:34px;border-radius:10px;padding:0 10px;font-weight:900;background:#edf4ff;color:#2563eb}
 
 
-/* V2.8 报表与商品分析优化 */
+/* V2.9 报表与商品分析优化 */
 .report-head-simple{display:flex;gap:10px;align-items:center;padding:10px 16px;background:#fff;border-bottom:1px solid var(--line)}
 .report-head-simple select{flex:1;height:44px;border:1px solid #d9dfeb;border-radius:14px;background:#fff;padding:0 14px;font-size:17px}
 .report-analysis-entry{border-top:1px solid var(--line);margin-top:14px;padding-top:12px}
@@ -204,7 +204,7 @@ body.hide-bottom-nav .app{padding-bottom:0!important}
 .pa-date-modal .actions .confirm{border:none;background:#ff6243;color:#fff}
 
 
-/* V2.8 退货流程 */
+/* V2.9 退货流程 */
 .sale-modebar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 14px 8px;background:#fff;border-bottom:1px solid var(--line)}
 .sale-mode-select{height:42px;border:1px solid #d4dbe6;border-radius:8px;padding:0 12px;background:#fff;font-size:16px;color:#111827}
 .sale-tools{display:flex;align-items:center;gap:14px;font-size:16px;color:#111827;white-space:nowrap}
@@ -223,19 +223,19 @@ body.hide-bottom-nav .app{padding-bottom:0!important}
 .refund-neg{color:#ef4444 !important}
 
 
-/* V2.8 退货选款：点减号产生负数退货数量 */
+/* V2.9 退货选款：点减号产生负数退货数量 */
 .pick-refund-tip{margin:10px 0 0;color:#ef4444;font-weight:800;font-size:14px}
 .qty-num.refund{color:#ef4444}
 
 
-/* V2.8 不用切换销售/退货：选款页 + 为销售，- 为退货 */
+/* V2.9 不用切换销售/退货：选款页 + 为销售，- 为退货 */
 .pick-mode-tip{margin-top:8px;color:#6b7280;font-size:14px;line-height:1.45}
 .pick-mode-tip b{color:#ef4444}
 .qty-num.refund,.refund-neg{color:#ef4444!important}
 .qty-num.sale{color:#111827}
 
 
-/* V2.8 报表：销售和退货分开统计 */
+/* V2.9 报表：销售和退货分开统计 */
 .metric .refund-value{color:#ef4444}
 .metric .net-value{color:#111827}
 
@@ -243,7 +243,7 @@ body.hide-bottom-nav .app{padding-bottom:0!important}
 </head>
 <body>
 <div class="app">
-  <div class="topbar"><span id="topTitle">八方来财销售开单版 V2.8</span><div class="left" id="topLeft"></div><div class="right" id="topRight"></div></div>
+  <div class="topbar"><span id="topTitle">八方来财销售开单版 V2.9</span><div class="left" id="topLeft"></div><div class="right" id="topRight"></div></div>
   <section id="page-sale" class="page active"><div class="sale-modebar"><div class="sale-tools" style="margin-left:auto"><button class="sale-tool-btn" onclick="focusSaleSearch()">⌕ 搜索选款</button><button class="sale-tool-btn" onclick="alert('扫码功能后期接小程序摄像头接口')">▣ 扫描选款</button><button class="sale-tool-btn" onclick="alert('更多功能后续补充')">⋮</button></div></div><div class="sale-customer-bar"><span>散客</span><span>主仓</span></div><div class="tabs"><button id="tab-hot" class="active" onclick="setSaleTab('hot')">热卖</button><button id="tab-new" onclick="setSaleTab('new')">新款</button><button id="tab-bought" onclick="setSaleTab('bought')">买过</button></div><div class="product-list" id="saleProductList"></div><div class="searchbar"><div class="searchbox"><span style="font-size:24px">⌕</span><input id="saleSearch" placeholder="搜索款号/商品名称或扫码款号" oninput="renderSaleProducts()"><button onclick="alert('扫码功能后期接小程序摄像头接口')">▣</button></div></div></section>
   <section id="page-pick" class="page"><div id="pickBox"></div><div class="bottom-bar"><div class="bottom-inner"><button class="btn btn-light" onclick="addCurrentSelection(false)">继续选款</button><button class="btn btn-blue" onclick="addCurrentSelection(true)">立即结算</button></div></div></section>
   <section id="page-cart" class="page"><div class="card"><div class="row"><div class="title">销售清单</div><button class="btn-small btn-gray" onclick="showPage('sale')">继续选款</button></div><div id="cartList"></div></div><div class="bottom-bar"><div class="bottom-inner"><div class="cart-total">共 <b id="cartQty">0</b> 件<br><span class="cart-detail">合计 <span id="cartAmount">0.00</span></span></div><button class="btn btn-blue" id="cartActionBtn" onclick="handleCartMainAction()">去结算</button></div></div></section>
@@ -439,7 +439,7 @@ function calcSummary(range){const os=ordersInRange(range).filter(o=>!isRefundOrd
 function productStats(range){const stats={};ordersInRange(range).filter(o=>!isRefundOrder(o)).forEach(o=>o.items.forEach(i=>{if(!stats[i.code])stats[i.code]={code:i.code,qty:0,amount:0,cost:0,returns:0,unship:0};stats[i.code].qty+=n(i.qty);stats[i.code].amount+=n(i.qty)*n(i.price);stats[i.code].cost+=n(i.qty)*n(i.cost)}));return Object.values(stats).map(x=>{x.profit=x.amount-x.cost;x.margin=x.amount?x.profit/x.amount*100:0;x.avg=x.qty?x.amount/x.qty:0;x.stock=totalStock(getProduct(x.code)||{});return x}).sort((a,b)=>b.amount-a.amount)}
 
 
-// ===== V2.8 覆盖逻辑：不需要销售/退货下拉，选择商品时 + 是销售，- 是退货 =====
+// ===== V2.9 覆盖逻辑：不需要销售/退货下拉，选择商品时 + 是销售，- 是退货 =====
 function cartOrderType(){
   const line=data.cart.find(x=>n(x.qty)>0);
   if(line && line.lineType) return line.lineType;
@@ -584,7 +584,7 @@ function confirmRefund(){
 }
 
 
-// ===== V2.8 报表统计修复：退货单在报表里单独体现 =====
+// ===== V2.9 报表统计修复：退货单在报表里单独体现 =====
 function orderCostSum(o){
   return (o.items||[]).reduce((s,i)=>s+n(i.qty)*n(i.cost),0);
 }
@@ -751,7 +751,7 @@ function renderAll(){renderSaleProducts();renderCart();renderOrders();renderRepo
 .business-date-actions{display:grid;grid-template-columns:1fr 1.6fr;gap:14px;padding:0 16px}
 </style>
 <script>
-// ===== V2.8 经营分析详情修复：销售/退货/毛利趋势图 + 自定义日期 =====
+// ===== V2.9 经营分析详情修复：销售/退货/毛利趋势图 + 自定义日期 =====
 let businessState={
   mode:'day',
   anchor:today(),
@@ -1017,7 +1017,7 @@ function confirmBusinessCustomPicker(){
 
 
 <script>
-// ===== V2.8 修复：经营分析日期条可左右滑动，切换日期后不丢失最近日期；去掉顶部店铺锁 =====
+// ===== V2.9 修复：经营分析日期条可左右滑动，切换日期后不丢失最近日期；去掉顶部店铺锁 =====
 (function businessDateBarFixV23(){
   function ensureDateBarCssV23(){
     if(document.getElementById('businessDateBarFixCssV23')) return;
@@ -1127,7 +1127,7 @@ function confirmBusinessCustomPicker(){
 
 
 <script>
-// ===== V2.8 修复：日期栏只允许手动滑动，点击日期不自动来回晃动 =====
+// ===== V2.9 修复：日期栏只允许手动滑动，点击日期不自动来回晃动 =====
 (function businessDateBarNoShakeV24(){
   let lastBusinessDateScrollLeft = null;
   let lastBusinessMode = null;
@@ -1276,7 +1276,7 @@ function confirmBusinessCustomPicker(){
 
 
 <style id="pa-v25-style">
-/* ===== V2.8 商品分析对齐参考图 ===== */
+/* ===== V2.9 商品分析对齐参考图 ===== */
 .pa-screen{background:#f5f6fa;min-height:calc(100vh - 56px);padding-bottom:24px}
 .pa-topbar{display:flex;align-items:center;justify-content:center;position:relative;height:56px;background:#fff;border-bottom:1px solid #eceff5;font-size:20px;font-weight:900;color:#1f2937}
 .pa-topbar .right-actions{position:absolute;right:14px;top:50%;transform:translateY(-50%);display:flex;gap:18px;align-items:center}
@@ -1351,7 +1351,7 @@ function confirmBusinessCustomPicker(){
 </style>
 
 <script id="pa-v25-script">
-// ===== V2.8 商品分析：按参考截图重做功能 =====
+// ===== V2.9 商品分析：按参考截图重做功能 =====
 (function patchProductAnalysisV25(){
   const vColumns=[
     {key:'qty',label:'销量'},
@@ -2069,152 +2069,377 @@ function confirmBusinessCustomPicker(){
 </script>
 
 
-<style id="pa-v28-fix-style">
-/* V2.8 商品分析修复：今天无数据 + 列挤压 + 顶部重复 */
-#page-product-analysis .pa-topbar{display:none !important}
-#page-product-analysis .pa-screen{min-height:calc(100vh - 56px)}
+<style id="pa-v29-final-style">
+/* V2.9 商品分析空白修复：日期回退、规格明细、横向表格 */
+#page-product-analysis .pa-topbar{display:none!important}
 #page-product-analysis .pa-toolbar{top:56px}
 #page-product-analysis .pa-grid{overflow-x:auto;-webkit-overflow-scrolling:touch}
-#page-product-analysis .pa-table{table-layout:auto !important;min-width:920px}
-#page-product-analysis .pa-table th,
-#page-product-analysis .pa-table td{min-width:96px;white-space:normal;word-break:break-word;padding:14px 10px}
-#page-product-analysis .pa-table th:first-child,
-#page-product-analysis .pa-table td:first-child{min-width:190px}
-#page-product-analysis .pa-table th:last-child,
-#page-product-analysis .pa-table td:last-child{min-width:44px;width:44px}
-#page-product-analysis .pa-prod-wrap{padding-right:24px}
-#page-product-analysis .pa-prod-code{display:block;line-height:1.25}
-#page-product-analysis .pa-prod-name{display:none}
-#page-product-analysis .pa-arrow-btn{position:absolute;right:0;top:50%;transform:translateY(-50%);border:none;background:none;color:#c2c8d5;font-size:16px;padding:0}
+#page-product-analysis .pa-table{table-layout:auto!important;min-width:760px!important}
+#page-product-analysis .pa-table th,#page-product-analysis .pa-table td{white-space:normal!important;word-break:break-word!important;min-width:96px!important}
+#page-product-analysis .pa-table th:first-child,#page-product-analysis .pa-table td:first-child{min-width:210px!important;width:210px!important}
+#page-product-analysis .pa-table th:last-child,#page-product-analysis .pa-table td:last-child{min-width:44px!important;width:44px!important}
 #paDetailPanel .pa-grid{overflow-x:auto;-webkit-overflow-scrolling:touch}
-#paDetailPanel .pa-grid .pa-table{table-layout:auto !important;min-width:760px}
-#paDetailPanel .pa-grid .pa-table th,
-#paDetailPanel .pa-grid .pa-table td{min-width:90px;white-space:normal;word-break:break-word}
-#paDetailPanel .pa-grid .pa-table th:first-child,
-#paDetailPanel .pa-grid .pa-table td:first-child{min-width:160px}
+#paDetailPanel .pa-table{table-layout:auto!important;min-width:760px!important}
+#paDetailPanel .pa-table th,#paDetailPanel .pa-table td{white-space:normal!important;word-break:break-word!important;min-width:90px!important}
+#paDetailPanel .pa-table th:first-child,#paDetailPanel .pa-table td:first-child{min-width:170px!important;width:170px!important}
+.pa-spec-bars .empty{padding:18px 4px;color:#94a3b8;font-size:14px}
+.pa-arrow-btn{position:absolute;right:0;top:50%;transform:translateY(-50%);border:none;background:none;color:#c2c8d5;font-size:16px;padding:0}
+.pa-prod-wrap{padding-right:24px}
 </style>
-<script id="pa-v28-fix-script">
+
+<script id="pa-v29-final-script">
 (function(){
-  if(window.__paV28Fix) return; window.__paV28Fix=true;
-  function dateOnly(ts){ return fullDay(ts); }
-  function addDays(dateStr, delta){ var d=new Date((dateStr||today())+'T00:00:00'); d.setDate(d.getDate()+delta); return d.toISOString().slice(0,10); }
-  function localWeekStart(dateStr){ var d=new Date((dateStr||today())+'T00:00:00'); var day=(d.getDay()+6)%7; d.setDate(d.getDate()-day); return d.toISOString().slice(0,10); }
-  function localMonthStart(dateStr){ var d=new Date((dateStr||today())+'T00:00:00'); d.setDate(1); return d.toISOString().slice(0,10); }
-  function formatChip(dateStr){ return String(dateStr||'').slice(5).replace('-', '.'); }
-  function latestOrderDate(){
-    var arr=(data.orders||[]).filter(function(o){ return !o.isVoid && n(o.createdTs); }).map(function(o){ return n(o.createdTs); });
-    if(!arr.length) return today();
-    return dateOnly(Math.max.apply(null, arr));
+  if(window.__bafangV29Final) return;
+  window.__bafangV29Final = true;
+
+  const DAY = 86400000;
+  const safeNum = v => Number(v || 0) || 0;
+
+  function dayOf(ts){
+    const d = new Date(safeNum(ts));
+    if(!safeNum(ts) || isNaN(d.getTime())) return today();
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
   }
-  function closePaMenus(){ if($('paModeMenu')) $('paModeMenu').style.display='none'; if($('paDetailModeMenu')) $('paDetailModeMenu').style.display='none'; }
-  function buildChipsFixed(mode){
-    var base=latestOrderDate(), items=[];
-    if(mode==='day'){
-      for(var i=5;i>=0;i--){ var v=addDays(base,-i); items.push({v:v,label:i===0?'今天':formatChip(v)}); }
-    }else if(mode==='week'){
-      var wb=localWeekStart(base);
-      for(var j=5;j>=0;j--){ var w=addDays(wb,-j*7); items.push({v:w,label:formatChip(w)}); }
-    }else if(mode==='month'){
-      var mb=localMonthStart(base); var bd=new Date(mb+'T00:00:00');
-      for(var k=5;k>=0;k--){ var d=new Date(bd.getFullYear(), bd.getMonth()-k, 1); var s=d.toISOString().slice(0,10); items.push({v:s,label:s.slice(0,7)}); }
-    }else if(mode==='custom'){
-      items.push({v:paState.customEnd||base,label:(paState.customStart||base)+' 至 '+(paState.customEnd||base)});
-    }else if(mode==='7'){
-      items.push({v:base,label:'近 7 天'});
-    }else if(mode==='30'){
-      items.push({v:base,label:'近 30 天'});
+  function parseDay(s){ return new Date(String(s || today()) + 'T00:00:00'); }
+  function addDay(s, delta){ const d = parseDay(s); d.setDate(d.getDate()+delta); return dayOf(d.getTime()); }
+  function fmtMD(s){ return String(s || '').slice(5).replace('-', '.'); }
+  function weekStart(s){ const d=parseDay(s); d.setDate(d.getDate()-((d.getDay()+6)%7)); return dayOf(d.getTime()); }
+  function monthStart(s){ const d=parseDay(s); d.setDate(1); return dayOf(d.getTime()); }
+  function validOrders(){ return (data.orders || []).filter(o => !o.isVoid && safeNum(o.createdTs)); }
+  function latestDate(code){
+    let os = validOrders();
+    if(code) os = os.filter(o => (o.items || []).some(i => String(i.code) === String(code)));
+    if(!os.length) return today();
+    return dayOf(Math.max(...os.map(o => safeNum(o.createdTs))));
+  }
+  function rangeFor(code){
+    if(!window.paState) window.paState = {};
+    paState.mode = paState.mode || 'day';
+    const base = latestDate(code);
+    if(paState.mode === 'custom'){
+      let s = paState.customStart || base, e = paState.customEnd || base;
+      if(s > e){ const t=s; s=e; e=t; }
+      return {s,e};
     }
-    return items;
+    if(paState.mode === '7' || paState.mode === '30'){
+      const days = paState.mode === '7' ? 7 : 30;
+      return {s:addDay(base, -(days-1)), e:base};
+    }
+    if(paState.mode === 'week'){
+      const s = weekStart(paState.anchor || base);
+      return {s, e:addDay(s, 6)};
+    }
+    if(paState.mode === 'month'){
+      const s = monthStart(paState.anchor || base);
+      const d = parseDay(s);
+      return {s, e:dayOf(new Date(d.getFullYear(), d.getMonth()+1, 0).getTime())};
+    }
+    let a = paState.anchor || base;
+    const has = validOrders().some(o => dayOf(o.createdTs) === a);
+    if(!has) a = base;
+    paState.anchor = a;
+    return {s:a, e:a};
   }
-  function renderChipsFixed(boxId){
-    var box=$(boxId); if(!box) return; var items=buildChipsFixed(paState.mode); var active=paState.anchor||latestOrderDate();
-    box.innerHTML=items.map(function(x,idx){
-      var on = (paState.mode==='7'||paState.mode==='30'||paState.mode==='custom') ? idx===0 : active===x.v;
-      return '<button class="pa-chip '+(on?'active':'')+'" onclick="selectPaChip(\''+x.v+'\')">'+esc(x.label)+'</button>';
+  function inRange(o, r){ const d=dayOf(o.createdTs); return d>=r.s && d<=r.e; }
+
+  window.paOrders = function(){
+    const r = rangeFor('');
+    return validOrders().filter(o => inRange(o, r));
+  };
+
+  function productOrders(code, currentRangeOnly){
+    let os = validOrders().filter(o => (o.items || []).some(i => String(i.code) === String(code)));
+    if(currentRangeOnly){
+      const r = rangeFor(code);
+      os = os.filter(o => inRange(o, r));
+    }
+    return os;
+  }
+
+  function chips(code){
+    const mode = paState.mode || 'day';
+    const base = latestDate(code);
+    const arr = [];
+    if(mode === 'day'){
+      for(let i=5;i>=0;i--){
+        const d = addDay(base, -i);
+        arr.push({v:d, label:i===0?'今天':fmtMD(d)});
+      }
+    }else if(mode === 'week'){
+      const b = weekStart(base);
+      for(let i=5;i>=0;i--){ const d=addDay(b,-i*7); arr.push({v:d,label:fmtMD(d)}); }
+    }else if(mode === 'month'){
+      const b = parseDay(monthStart(base));
+      for(let i=5;i>=0;i--){ const d=new Date(b.getFullYear(),b.getMonth()-i,1); const s=dayOf(d.getTime()); arr.push({v:s,label:s.slice(0,7)}); }
+    }else if(mode === 'custom'){
+      arr.push({v:paState.customEnd||base,label:(paState.customStart||base)+' 至 '+(paState.customEnd||base)});
+    }else{
+      arr.push({v:base,label:mode==='7'?'近 7 天':'近 30 天'});
+    }
+    return arr;
+  }
+  function renderChipBox(id, code){
+    const box = $(id); if(!box) return;
+    const base = latestDate(code);
+    const current = (paState.mode === '7' || paState.mode === '30' || paState.mode === 'custom') ? base : (paState.anchor || base);
+    box.innerHTML = chips(code).map((x,idx)=>{
+      const active = (paState.mode === '7' || paState.mode === '30' || paState.mode === 'custom') ? idx===0 : x.v===current;
+      return '<button class="pa-chip '+(active?'active':'')+'" onclick="selectPaChip(\''+x.v+'\')">'+esc(x.label)+'</button>';
     }).join('');
   }
-  function syncDateInputs(){ var base=latestOrderDate(); if($('paStartDate')) $('paStartDate').value=paState.customStart||base; if($('paEndDate')) $('paEndDate').value=paState.customEnd||base; }
-  function normalizePaAnchor(){
-    var base=latestOrderDate();
-    if(!window.paState) window.paState={};
-    paState.mode = paState.mode || 'day';
-    if(paState.mode==='day') paState.anchor = paState.anchor || base;
-    else if(paState.mode==='week') paState.anchor = paState.anchor || localWeekStart(base);
-    else if(paState.mode==='month') paState.anchor = paState.anchor || localMonthStart(base);
-    else paState.anchor = paState.anchor || base;
-    if(paState.mode==='day' && paState.anchor>base) paState.anchor=base;
-    if(paState.mode==='7' || paState.mode==='30') paState.anchor=base;
-    if(paState.mode==='custom'){
+  window.renderPaChips = function(){ renderChipBox('paChips', ''); };
+  window.renderPaDetailChips = function(){ renderChipBox('paDetailChips', paDetailState && paDetailState.code); };
+  window.selectPaChip = function(d){ paState.anchor = d; renderPaAll(); };
+  window.setPaMode = function(mode){
+    paState.mode = mode;
+    if($('paModeMenu')) $('paModeMenu').style.display='none';
+    if($('paDetailModeMenu')) $('paDetailModeMenu').style.display='none';
+    const code = paDetailState && paDetailState.open ? paDetailState.code : '';
+    const base = latestDate(code);
+    if(mode === 'custom'){
       paState.customStart = paState.customStart || base;
       paState.customEnd = paState.customEnd || base;
-      paState.anchor = paState.customEnd;
+      if($('paStartDate')) $('paStartDate').value = paState.customStart;
+      if($('paEndDate')) $('paEndDate').value = paState.customEnd;
+      openPaDateModal();
+      return;
     }
-    syncDateInputs();
-  }
-  window.paOrders = function(){
-    normalizePaAnchor();
-    var os=(data.orders||[]).filter(function(o){ return !o.isVoid; });
-    var base=latestOrderDate();
-    var anchor=paState.anchor || base;
-    if(paState.mode==='7' || paState.mode==='30'){
-      var days=paState.mode==='7'?7:30;
-      var endTs=new Date(base+'T23:59:59').getTime();
-      var startTs=new Date(addDays(base,-(days-1))+'T00:00:00').getTime();
-      return os.filter(function(o){ var t=n(o.createdTs); return t>=startTs && t<=endTs; });
-    }
-    if(paState.mode==='custom'){
-      var s=new Date((paState.customStart||base)+'T00:00:00').getTime();
-      var e=new Date((paState.customEnd||base)+'T23:59:59').getTime();
-      return os.filter(function(o){ var t=n(o.createdTs); return t>=s && t<=e; });
-    }
-    if(paState.mode==='month'){
-      var ms=localMonthStart(anchor); var d0=new Date(ms+'T00:00:00'); var y=d0.getFullYear(), m=d0.getMonth();
-      return os.filter(function(o){ var d=new Date(n(o.createdTs)); return d.getFullYear()===y && d.getMonth()===m; });
-    }
-    if(paState.mode==='week'){
-      var ws=localWeekStart(anchor); var st=new Date(ws+'T00:00:00').getTime(); var et=new Date(addDays(ws,6)+'T23:59:59').getTime();
-      return os.filter(function(o){ var t=n(o.createdTs); return t>=st && t<=et; });
-    }
-    return os.filter(function(o){ return dateOnly(o.createdTs)===(anchor||base); });
-  };
-  window.renderPaChips = function(){ normalizePaAnchor(); renderChipsFixed('paChips'); };
-  window.renderPaDetailChips = function(){ normalizePaAnchor(); renderChipsFixed('paDetailChips'); };
-  window.selectPaChip = function(v){ paState.anchor=v; renderPaAll(); };
-  window.setPaMode = function(mode){
-    normalizePaAnchor();
-    paState.mode=mode; closePaMenus(); var base=latestOrderDate();
-    if(mode==='custom'){ syncDateInputs(); openPaDateModal(); return; }
-    if(mode==='day') paState.anchor=base;
-    else if(mode==='week') paState.anchor=localWeekStart(base);
-    else if(mode==='month') paState.anchor=localMonthStart(base);
-    else paState.anchor=base;
+    if(mode === 'day') paState.anchor = base;
+    else if(mode === 'week') paState.anchor = weekStart(base);
+    else if(mode === 'month') paState.anchor = monthStart(base);
+    else paState.anchor = base;
     renderPaAll();
   };
+
+  function aggregateProductRows(os){
+    const stats = {};
+    (os || []).forEach(o=>{
+      const refund = isRefundOrder(o);
+      (o.items || []).forEach(i=>{
+        const code = String(i.code || '');
+        if(!stats[code]) stats[code] = {code, qty:0, amount:0, cost:0, refundQty:0, refundAmount:0, refundCost:0, stock:0, transit:0, unsent:0};
+        const q=safeNum(i.qty), price=safeNum(i.price), cost=safeNum(i.cost);
+        if(refund){ stats[code].refundQty += q; stats[code].refundAmount += q*price; stats[code].refundCost += q*cost; }
+        else { stats[code].qty += q; stats[code].amount += q*price; stats[code].cost += q*cost; }
+      });
+    });
+    let rows = Object.values(stats).map(r=>{
+      const p=getProduct(r.code)||{};
+      r.stock = typeof totalStock === 'function' ? totalStock(p) : safeNum(p.stock);
+      r.available = r.stock;
+      return fillDerivedStats(r);
+    });
+    const kw=(paState.keyword||'').trim().toLowerCase();
+    if(kw) rows = rows.filter(r=>{ const p=getProduct(r.code)||{}; return (r.code+' '+(p.name||'')).toLowerCase().includes(kw); });
+    return rows.sort((a,b)=>safeNum(b.qty)-safeNum(a.qty) || safeNum(b.amount)-safeNum(a.amount));
+  }
+  window.buildProductStats = function(os){ return aggregateProductRows(os); };
+
+  function specRows(code, currentOnly){
+    const p = getProduct(code) || {};
+    const stats = {};
+    productOrders(code, currentOnly).forEach(o=>{
+      const refund = isRefundOrder(o);
+      (o.items || []).forEach(i=>{
+        if(String(i.code) !== String(code)) return;
+        const key = (i.color || '') + ';' + (i.size || '');
+        if(!stats[key]) stats[key] = {label:key || '--', qty:0, amount:0, cost:0, refundQty:0, refundAmount:0, refundCost:0, stock:0, transit:0, unsent:0};
+        const q=safeNum(i.qty), price=safeNum(i.price), cost=safeNum(i.cost);
+        if(refund){ stats[key].refundQty += q; stats[key].refundAmount += q*price; stats[key].refundCost += q*cost; }
+        else { stats[key].qty += q; stats[key].amount += q*price; stats[key].cost += q*cost; }
+      });
+    });
+    (p.colors || []).forEach(c => (p.sizes || []).forEach(s=>{
+      const key = (c || '') + ';' + (s || '');
+      if(!stats[key]) stats[key] = {label:key, qty:0, amount:0, cost:0, refundQty:0, refundAmount:0, refundCost:0, stock:0, transit:0, unsent:0};
+    }));
+    return Object.values(stats).map(r=>{
+      const parts = String(r.label).split(';');
+      r.stock = stockOf(p, parts[0], parts[1]);
+      r.available = r.stock;
+      return fillDerivedStats(r);
+    }).sort((a,b)=>safeNum(b.qty)-safeNum(a.qty) || safeNum(b.refundQty)-safeNum(a.refundQty) || String(a.label).localeCompare(String(b.label)));
+  }
+
+  function ensureBlocks(){
+    const panel = $('paDetailPanel'); if(!panel) return;
+    const grid = panel.querySelector('.pa-grid'); if(!grid) return;
+    if(!$('paSpecChartWrap')){
+      const div = document.createElement('div');
+      div.id = 'paSpecChartWrap';
+      div.className = 'pa-spec-chart-wrap';
+      div.innerHTML = '<div class="pa-spec-chart-head"><b>规格销售分布</b><span>按净销量占比</span></div><div id="paSpecBars" class="pa-spec-bars"></div>';
+      grid.insertBefore(div, grid.firstChild);
+    }
+    if(!$('paTrendWrap')){
+      const div = document.createElement('div');
+      div.id = 'paTrendWrap';
+      div.className = 'pa-trend-wrap';
+      div.innerHTML = '<div id="paTrendMetrics" class="pa-trend-metrics v27"></div><div class="pa-trend-chart-card"><div class="pa-trend-chart-head"><b id="paTrendTitle">销售件数趋势图</b><span id="paTrendCompare" class="sub">环比 --</span></div><svg id="paTrendChart" class="svg-chart" viewBox="0 0 360 220"></svg></div><div class="pa-trend-table-card"><div id="paTrendTableHead" class="pa-trend-table-head"></div><div id="paTrendTableBody"></div></div>';
+      grid.insertBefore(div, grid.firstChild);
+    }
+  }
+
+  function renderBars(rows){
+    const box=$('paSpecBars'); if(!box) return;
+    const visible = rows.filter(r=>safeNum(r.qty)||safeNum(r.refundQty)||safeNum(r.stock)).slice(0,8);
+    const max = Math.max(1, ...visible.map(r=>Math.max(safeNum(r.qty), safeNum(r.netQty), safeNum(r.stock))));
+    box.innerHTML = visible.map(r=>{
+      const val = Math.max(safeNum(r.qty), safeNum(r.netQty), safeNum(r.stock));
+      const pct = Math.max(4, Math.round(val/max*100));
+      return '<div class="pa-spec-bar-row"><div class="pa-spec-bar-label">'+esc(r.label)+'</div><div class="pa-spec-bar-bg"><div class="pa-spec-bar-fill" style="width:'+pct+'%"></div></div><div class="pa-spec-bar-num">'+Math.round(safeNum(r.qty))+'</div></div>';
+    }).join('') || '<div class="empty">当前日期没有规格销售，已显示该款基础规格。</div>';
+  }
+
+  function aggProductByOrders(os, code){
+    const s={qty:0,amount:0,cost:0,refundQty:0,refundAmount:0,refundCost:0};
+    (os||[]).forEach(o=>{
+      const refund=isRefundOrder(o);
+      (o.items||[]).forEach(i=>{
+        if(String(i.code)!==String(code)) return;
+        const q=safeNum(i.qty), price=safeNum(i.price), cost=safeNum(i.cost);
+        if(refund){s.refundQty+=q;s.refundAmount+=q*price;s.refundCost+=q*cost}
+        else{s.qty+=q;s.amount+=q*price;s.cost+=q*cost}
+      });
+    });
+    s.netQty=s.qty-s.refundQty; s.netAmount=s.amount-s.refundAmount; s.profit=s.netAmount-(s.cost-s.refundCost);
+    s.refundRate=s.qty?s.refundQty/s.qty*100:0; s.marginRate=s.netAmount?s.profit/s.netAmount*100:0;
+    return s;
+  }
+  function trendSeries(code){
+    const base = latestDate(code);
+    const anchor = (paState.mode==='day' ? (paState.anchor || base) : base);
+    const arr=[];
+    for(let i=7;i>=0;i--){
+      const d = addDay(anchor, -i);
+      const s = aggProductByOrders(validOrders().filter(o=>dayOf(o.createdTs)===d), code);
+      const p = getProduct(code)||{}; let stock=0; (p.colors||[]).forEach(c=>(p.sizes||[]).forEach(sz=>stock+=stockOf(p,c,sz)));
+      s.stock=stock; s.label=fmtMD(d); arr.push(s);
+    }
+    return arr;
+  }
+  const metricMeta = {
+    saleQty:{label:'销售件数', title:'销售件数趋势图', value:s=>safeNum(s.qty), fmt:v=>String(Math.round(v)), table:['日期','销售件数','销售金额'], sec:s=>money(s.amount)},
+    netQty:{label:'净销量', title:'净销量趋势图', value:s=>safeNum(s.netQty), fmt:v=>String(Math.round(v)), table:['日期','净销量','净销售额'], sec:s=>money(s.netAmount)},
+    refundRate:{label:'退货率', title:'退货率趋势图', value:s=>safeNum(s.refundRate), fmt:v=>safeNum(v).toFixed(2)+'%', table:['日期','退货件数','退货率'], sec:s=>safeNum(s.refundRate).toFixed(2)+'%'},
+    refundQty:{label:'退货件数', title:'退货件数趋势图', value:s=>safeNum(s.refundQty), fmt:v=>String(Math.round(v)), table:['日期','退货件数','退货金额'], sec:s=>money(s.refundAmount)},
+    saleAmount:{label:'销售金额', title:'销售金额趋势图', value:s=>safeNum(s.amount), fmt:v=>money(v), table:['日期','销售件数','销售金额'], sec:s=>money(s.amount)},
+    refundAmount:{label:'退货金额', title:'退货金额趋势图', value:s=>safeNum(s.refundAmount), fmt:v=>money(v), table:['日期','退货件数','退货金额'], sec:s=>money(s.refundAmount)},
+    profit:{label:'毛利', title:'毛利趋势图', value:s=>safeNum(s.profit), fmt:v=>money(v), table:['日期','净销量','毛利'], sec:s=>money(s.profit)},
+    marginRate:{label:'毛利率', title:'毛利率趋势图', value:s=>safeNum(s.marginRate), fmt:v=>safeNum(v).toFixed(2)+'%', table:['日期','净销售额','毛利率'], sec:s=>safeNum(s.marginRate).toFixed(2)+'%'},
+    stockTrend:{label:'库存趋势', title:'库存趋势图', value:s=>safeNum(s.stock), fmt:v=>String(Math.round(v)), table:['日期','销售/退货','估算库存'], sec:s=>String(Math.round(safeNum(s.stock)))}
+  };
+  window.setPaTrendMetric = function(k){ paTrendState.metric=k; renderPaDetail(); };
+
+  function drawTrend(series){
+    if(!window.paTrendState) window.paTrendState={metric:'saleQty'};
+    const key = paTrendState.metric || 'saleQty';
+    const meta = metricMeta[key] || metricMeta.saleQty;
+    if($('paTrendTitle')) $('paTrendTitle').innerText = meta.title;
+    const vals = series.map(meta.value);
+    if($('paTrendCompare')){
+      const prev = vals.length>1 ? safeNum(vals[vals.length-2]) : 0;
+      if(!prev) $('paTrendCompare').innerHTML='环比 --';
+      else{
+        const pct = (safeNum(vals[vals.length-1])-prev)/Math.abs(prev)*100;
+        $('paTrendCompare').innerHTML = '环比 <span class="'+(pct>=0?'up':'down')+'">'+pct.toFixed(2)+'% '+(pct>=0?'↑':'↓')+'</span>';
+      }
+    }
+    const svg=$('paTrendChart');
+    if(svg){
+      const max=Math.max(1,...vals), min=Math.min(0,...vals), span=Math.max(1,max-min);
+      const left=28,right=340,bottom=186,top=30,step=series.length>1?(right-left)/(series.length-1):0;
+      const pts=series.map((p,i)=>{const v=meta.value(p),x=left+i*step,y=bottom-((v-min)/span)*(bottom-top);return[x,y,v,p.label]});
+      const lines=[0,1,2,3].map(i=>{const y=bottom-(bottom-top)*i/3;return '<line x1="'+left+'" y1="'+y+'" x2="'+right+'" y2="'+y+'" stroke="#e5e7eb"/>'}).join('');
+      const poly=pts.map(p=>p[0]+','+p[1]).join(' ');
+      const dots=pts.map((p,i)=>'<circle cx="'+p[0]+'" cy="'+p[1]+'" r="3.6" fill="#4f7df3"/><text x="'+Math.max(left,Math.min(right-28,p[0]-14))+'" y="'+Math.max(18,p[1]-10)+'" font-size="11" fill="#111827">'+esc(String(meta.fmt(p[2]).replace(/\.00$/,'')))+'</text>'+((series.length<=10||i===0||i===series.length-1)?'<text x="'+(p[0]-13)+'" y="208" font-size="11" fill="#6b7280">'+esc(p[3])+'</text>':'')).join('');
+      svg.innerHTML=lines+'<polyline points="'+poly+'" fill="none" stroke="#4f7df3" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>'+dots;
+    }
+    if($('paTrendTableHead')) $('paTrendTableHead').innerHTML='<span>'+meta.table[0]+'</span><span>'+meta.table[1]+'</span><span>'+meta.table[2]+'</span>';
+    if($('paTrendTableBody')) $('paTrendTableBody').innerHTML=series.slice().reverse().map(p=>{
+      let mid=String(Math.round(safeNum(p.qty)));
+      if(key.includes('refund')) mid=String(Math.round(safeNum(p.refundQty)));
+      if(['netQty','profit','marginRate'].includes(key)) mid=String(Math.round(safeNum(p.netQty)));
+      return '<div class="pa-trend-table-row"><span>'+esc(p.label)+'</span><span>'+mid+'</span><span>'+meta.sec(p)+'</span></div>';
+    }).join('');
+  }
+
+  window.renderPaDetail = function(){
+    if(!paDetailState.open) return;
+    ensureBlocks();
+    const code = paDetailState.code;
+    const p = getProduct(code) || {};
+    if($('paDetailPanel')) $('paDetailPanel').style.display='block';
+    const titleEl=document.querySelector('#paDetailPanel .detail-head .title'); if(titleEl) titleEl.textContent='商品分析';
+    if($('paDetailSubtitle')) $('paDetailSubtitle').textContent=(p.code||code||'')+(p.name?(' '+p.name):'')+(p.category?('/'+p.category):'');
+    renderPaDetailModeMenu(); renderPaDetailChips();
+    if(!paDetailState.tab || ['customer','store'].includes(paDetailState.tab)) paDetailState.tab='spec';
+    if($('paDetailTabs')) $('paDetailTabs').innerHTML=[{key:'spec',label:'规格'},{key:'trend',label:'趋势'},{key:'stockin',label:'入库'}].map(x=>'<button class="'+(paDetailState.tab===x.key?'active':'')+'" onclick="setPaDetailTab(\''+x.key+'\')">'+x.label+'</button>').join('');
+    const trend=$('paTrendWrap'), spec=$('paSpecChartWrap'), table=document.querySelector('#paDetailPanel .pa-grid table'), empty=$('paDetailEmpty'), cols=paState.columns||['qty','refundQty'];
+
+    if(paDetailState.tab==='trend'){
+      if(spec) spec.style.display='none';
+      if(table) table.style.display='none';
+      if(empty) empty.style.display='none';
+      if(trend) trend.style.display='block';
+      const series = trendSeries(code);
+      const total = aggProductByOrders(productOrders(code, true), code);
+      if($('paTrendMetrics')){
+        const keys=['saleQty','netQty','refundRate','refundQty','saleAmount','refundAmount','profit','marginRate','stockTrend'];
+        $('paTrendMetrics').classList.add('v27');
+        $('paTrendMetrics').innerHTML=keys.map(k=>{
+          const value = k==='stockTrend' ? (series.length?metricMeta[k].fmt(series[series.length-1].stock):'0') : metricMeta[k].fmt(metricMeta[k].value(total));
+          return '<button class="pa-trend-card '+((paTrendState.metric||'saleQty')===k?'active':'')+'" onclick="setPaTrendMetric(\''+k+'\')"><div class="num">'+value+'</div><div class="txt">'+metricMeta[k].label+'</div></button>';
+        }).join('');
+      }
+      drawTrend(series);
+      return;
+    }
+
+    if(trend) trend.style.display='none';
+    if(spec) spec.style.display = paDetailState.tab==='spec' ? 'block' : 'none';
+    if(table) table.style.display='table';
+    let rows = specRows(code, true);
+    if(!rows.some(r=>safeNum(r.qty)||safeNum(r.refundQty))) rows = specRows(code, false);
+    if(paDetailState.tab==='spec') renderBars(rows);
+    if($('paDetailHead')) $('paDetailHead').innerHTML='<th>商品规格</th>'+cols.map(k=>'<th>'+paColLabel(k)+' <span class="pa-sort-icon">◆</span></th>').join('')+'<th style="width:44px"><button class="pa-head-setting" onclick="openPaColumns()">☰</button></th>';
+    if(empty) empty.style.display=rows.length?'none':'block';
+    if($('paDetailRows')){
+      $('paDetailRows').innerHTML=rows.map(r=>'<tr><td>'+esc(r.label)+'</td>'+cols.map(k=>'<td><span class="pa-value">'+paFormatValue(k,r)+'</span></td>').join('')+'<td></td></tr>').join('');
+      if(rows.length){
+        const total={qty:0,refundQty:0,refundAmount:0,amount:0,cost:0,refundCost:0,stock:0,transit:0,available:0,unsent:0};
+        rows.forEach(r=>Object.keys(total).forEach(k=>total[k]+=safeNum(r[k])));
+        fillDerivedStats(total);
+        $('paDetailRows').innerHTML += '<tr class="pa-total-row"><td>总计</td>'+cols.map(k=>'<td>'+paFormatValue(k,total)+'</td>').join('')+'<td></td></tr>';
+      }
+    }
+  };
+
+  window.openPaDetail = function(code){
+    paDetailState.open=true;
+    paDetailState.code=code;
+    if(!paDetailState.tab || ['customer','store'].includes(paDetailState.tab)) paDetailState.tab='spec';
+    if($('paDetailPanel')) $('paDetailPanel').style.display='block';
+    renderPaDetail();
+  };
+
+  const oldRenderProductAnalysis = window.renderProductAnalysis;
+  window.renderProductAnalysis = function(){
+    if(oldRenderProductAnalysis) oldRenderProductAnalysis();
+    const body=$('productAnalysisRows');
+    if(body && !body.children.length && validOrders().length){
+      paState.anchor=latestDate('');
+      if(oldRenderProductAnalysis) oldRenderProductAnalysis();
+    }
+    const table=document.querySelector('#page-product-analysis .pa-table');
+    if(table){ const cols=(paState.columns&&paState.columns.length?paState.columns.length:2); table.style.minWidth=(210+Math.max(cols,2)*96+44)+'px'; }
+  };
+
   window.openProductAnalysis = function(){
     if(typeof ensurePaTemplate==='function') ensurePaTemplate();
-    normalizePaAnchor();
+    if(!paState.anchor) paState.anchor=latestDate('');
     showPage('product-analysis');
     renderPaAll();
-  };
-  var oldRenderProductAnalysis=window.renderProductAnalysis;
-  window.renderProductAnalysis = function(){
-    normalizePaAnchor();
-    if(oldRenderProductAnalysis) oldRenderProductAnalysis();
-    var table=document.querySelector('#page-product-analysis .pa-table');
-    if(table){
-      var cols=(paState && Array.isArray(paState.columns) ? paState.columns.length : 2);
-      table.style.minWidth=(190 + Math.max(cols,2)*96 + 44)+'px';
-    }
-  };
-  var oldRenderPaDetail=window.renderPaDetail;
-  window.renderPaDetail=function(){
-    normalizePaAnchor();
-    if(oldRenderPaDetail) oldRenderPaDetail();
-    var table=document.querySelector('#paDetailPanel .pa-table');
-    if(table){
-      var cols=(paState && Array.isArray(paState.columns) ? paState.columns.length : 2);
-      table.style.minWidth=(160 + Math.max(cols,2)*90 + 44)+'px';
-    }
   };
 })();
 </script>
