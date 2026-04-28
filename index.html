@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<title>八方来财销售开单版 V1.9</title>
+<title>八方来财销售开单版 V2.0</title>
 <style>
 :root{--blue:#2f6df6;--green:#18a058;--red:#ef4444;--orange:#ff7a1a;--bg:#f3f5f9;--card:#fff;--text:#1f2937;--muted:#8791a3;--line:#e8edf5}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",Arial,sans-serif;color:var(--text)}
@@ -137,7 +137,7 @@ body.hide-bottom-nav .app{padding-bottom:0!important}
 .note-save-btn{min-height:34px;border-radius:10px;padding:0 10px;font-weight:900;background:#edf4ff;color:#2563eb}
 
 
-/* V1.9 报表与商品分析优化 */
+/* V2.0 报表与商品分析优化 */
 .report-head-simple{display:flex;gap:10px;align-items:center;padding:10px 16px;background:#fff;border-bottom:1px solid var(--line)}
 .report-head-simple select{flex:1;height:44px;border:1px solid #d9dfeb;border-radius:14px;background:#fff;padding:0 14px;font-size:17px}
 .report-analysis-entry{border-top:1px solid var(--line);margin-top:14px;padding-top:12px}
@@ -204,7 +204,7 @@ body.hide-bottom-nav .app{padding-bottom:0!important}
 .pa-date-modal .actions .confirm{border:none;background:#ff6243;color:#fff}
 
 
-/* V1.9 退货流程 */
+/* V2.0 退货流程 */
 .sale-modebar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 14px 8px;background:#fff;border-bottom:1px solid var(--line)}
 .sale-mode-select{height:42px;border:1px solid #d4dbe6;border-radius:8px;padding:0 12px;background:#fff;font-size:16px;color:#111827}
 .sale-tools{display:flex;align-items:center;gap:14px;font-size:16px;color:#111827;white-space:nowrap}
@@ -223,16 +223,23 @@ body.hide-bottom-nav .app{padding-bottom:0!important}
 .refund-neg{color:#ef4444 !important}
 
 
-/* V1.9 退货选款：点减号产生负数退货数量 */
+/* V2.0 退货选款：点减号产生负数退货数量 */
 .pick-refund-tip{margin:10px 0 0;color:#ef4444;font-weight:800;font-size:14px}
 .qty-num.refund{color:#ef4444}
+
+
+/* V2.0 不用切换销售/退货：选款页 + 为销售，- 为退货 */
+.pick-mode-tip{margin-top:8px;color:#6b7280;font-size:14px;line-height:1.45}
+.pick-mode-tip b{color:#ef4444}
+.qty-num.refund,.refund-neg{color:#ef4444!important}
+.qty-num.sale{color:#111827}
 
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="topbar"><span id="topTitle">八方来财销售开单版 V1.9</span><div class="left" id="topLeft"></div><div class="right" id="topRight"></div></div>
-  <section id="page-sale" class="page active"><div class="sale-modebar"><select id="orderModeSelect" class="sale-mode-select" onchange="switchOrderMode(this.value)"><option value="sale">销售单</option><option value="refund">退货单</option></select><div class="sale-tools"><button class="sale-tool-btn" onclick="focusSaleSearch()">⌕ 搜索选款</button><button class="sale-tool-btn" onclick="alert('扫码功能后期接小程序摄像头接口')">▣ 扫描选款</button><button class="sale-tool-btn" onclick="alert('更多功能后续补充')">⋮</button></div></div><div class="sale-customer-bar"><span>散客</span><span>主仓</span></div><div class="tabs"><button id="tab-hot" class="active" onclick="setSaleTab('hot')">热卖</button><button id="tab-new" onclick="setSaleTab('new')">新款</button><button id="tab-bought" onclick="setSaleTab('bought')">买过</button></div><div class="product-list" id="saleProductList"></div><div class="searchbar"><div class="searchbox"><span style="font-size:24px">⌕</span><input id="saleSearch" placeholder="搜索款号/商品名称或扫码款号" oninput="renderSaleProducts()"><button onclick="alert('扫码功能后期接小程序摄像头接口')">▣</button></div></div></section>
+  <div class="topbar"><span id="topTitle">八方来财销售开单版 V2.0</span><div class="left" id="topLeft"></div><div class="right" id="topRight"></div></div>
+  <section id="page-sale" class="page active"><div class="sale-modebar"><div class="sale-tools" style="margin-left:auto"><button class="sale-tool-btn" onclick="focusSaleSearch()">⌕ 搜索选款</button><button class="sale-tool-btn" onclick="alert('扫码功能后期接小程序摄像头接口')">▣ 扫描选款</button><button class="sale-tool-btn" onclick="alert('更多功能后续补充')">⋮</button></div></div><div class="sale-customer-bar"><span>散客</span><span>主仓</span></div><div class="tabs"><button id="tab-hot" class="active" onclick="setSaleTab('hot')">热卖</button><button id="tab-new" onclick="setSaleTab('new')">新款</button><button id="tab-bought" onclick="setSaleTab('bought')">买过</button></div><div class="product-list" id="saleProductList"></div><div class="searchbar"><div class="searchbox"><span style="font-size:24px">⌕</span><input id="saleSearch" placeholder="搜索款号/商品名称或扫码款号" oninput="renderSaleProducts()"><button onclick="alert('扫码功能后期接小程序摄像头接口')">▣</button></div></div></section>
   <section id="page-pick" class="page"><div id="pickBox"></div><div class="bottom-bar"><div class="bottom-inner"><button class="btn btn-light" onclick="addCurrentSelection(false)">继续选款</button><button class="btn btn-blue" onclick="addCurrentSelection(true)">立即结算</button></div></div></section>
   <section id="page-cart" class="page"><div class="card"><div class="row"><div class="title">销售清单</div><button class="btn-small btn-gray" onclick="showPage('sale')">继续选款</button></div><div id="cartList"></div></div><div class="bottom-bar"><div class="bottom-inner"><div class="cart-total">共 <b id="cartQty">0</b> 件<br><span class="cart-detail">合计 <span id="cartAmount">0.00</span></span></div><button class="btn btn-blue" id="cartActionBtn" onclick="handleCartMainAction()">去结算</button></div></div></section>
   <section id="page-checkout" class="page"><div class="card"><div class="title">收款结算</div><div><div class="checkout-line"><span>数量 / 金额</span><b id="checkoutQtyAmount">0件 / 0.00</b></div><div class="checkout-line"><span>抹零金额</span><input id="roundOff" type="number" value="0" oninput="renderCheckout()" style="width:110px;text-align:right"></div><div class="checkout-line"><span>待收金额</span><strong id="receivable">0.00</strong></div></div><div class="grid2"><div><label>客户</label><input id="customerName" value="散客"></div><div><label>业务员</label><input id="salesman" value="李飞"></div></div><label>订单标签</label><select id="orderTag"><option>普通销售</option><option>代客下单</option><option>线上订单</option></select><label>备注</label><textarea id="orderNote" placeholder="请输入备注"></textarea><div class="offline-note">线下扫码收款，订单信息已精简。</div></div><div class="card"><div class="title">收款方式</div><div class="pay-row"><span>微信支付</span><input id="payWechat" type="number"></div><div class="pay-row"><span>支付宝</span><input id="payAlipay" type="number" value="0"></div><div class="pay-row"><span>银行卡</span><input id="payBank" type="number" value="0"></div><div class="pay-row"><span>现金支付</span><input id="payCash" type="number" value="0"></div></div><div class="bottom-bar"><div class="bottom-inner"><button class="btn btn-light" onclick="showPage('cart')">返回清单</button><button class="btn btn-blue" onclick="confirmPayment()">确认收款</button></div></div></section>
@@ -426,7 +433,152 @@ function ordersInRange(range){const base=data.orders.filter(o=>!o.isVoid);if(ran
 function calcSummary(range){const os=ordersInRange(range).filter(o=>!isRefundOrder(o)),qty=os.reduce((s,o)=>s+n(o.totalQty),0),amount=os.reduce((s,o)=>s+n(o.receivable),0),cost=os.reduce((s,o)=>s+o.items.reduce((a,i)=>a+n(i.qty)*n(i.cost),0),0),profit=amount-cost,margin=amount?profit/amount*100:0;return {os,qty,amount,cost,profit,margin}}
 function productStats(range){const stats={};ordersInRange(range).filter(o=>!isRefundOrder(o)).forEach(o=>o.items.forEach(i=>{if(!stats[i.code])stats[i.code]={code:i.code,qty:0,amount:0,cost:0,returns:0,unship:0};stats[i.code].qty+=n(i.qty);stats[i.code].amount+=n(i.qty)*n(i.price);stats[i.code].cost+=n(i.qty)*n(i.cost)}));return Object.values(stats).map(x=>{x.profit=x.amount-x.cost;x.margin=x.amount?x.profit/x.amount*100:0;x.avg=x.qty?x.amount/x.qty:0;x.stock=totalStock(getProduct(x.code)||{});return x}).sort((a,b)=>b.amount-a.amount)}
 
-function renderAll(){renderSaleProducts();renderCart();renderOrders();renderReport();renderManageProducts();if($("orderModeSelect"))$("orderModeSelect").value=orderMode}renderAll();
+
+// ===== V2.0 覆盖逻辑：不需要销售/退货下拉，选择商品时 + 是销售，- 是退货 =====
+function cartOrderType(){
+  const line=data.cart.find(x=>n(x.qty)>0);
+  if(line && line.lineType) return line.lineType;
+  if(orderMode==="refund") return "refund";
+  return "sale";
+}
+function isRefundMode(){
+  return cartOrderType()==="refund";
+}
+function sameCartTypeOrEmpty(type){
+  const line=data.cart.find(x=>n(x.qty)>0);
+  return !line || (line.lineType||"sale")===type;
+}
+function focusSaleSearch(){
+  if($("saleSearch")){
+    $("saleSearch").focus();
+    window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});
+  }
+}
+function renderSaleProducts(){
+  const q=($("saleSearch")&&$("saleSearch").value.trim())||"";
+  let list=data.products.slice();
+  if(q)list=list.filter(p=>p.code.includes(q)||p.name.includes(q)||p.category.includes(q));
+  if(saleTab==="new")list.sort((a,b)=>n(b.created)-n(a.created));
+  if(saleTab==="hot")list.sort((a,b)=>salesQtyByCode(b.code)-salesQtyByCode(a.code));
+  if(saleTab==="bought"){
+    const bought=new Set(data.orders.filter(o=>!isRefundOrder(o)).flatMap(o=>o.items.map(i=>i.code)));
+    list=list.filter(p=>bought.has(p.code));
+  }
+  $("saleProductList").innerHTML=list.map(p=>`<div class="product-row" onclick="openPick('${esc(p.code)}')"><img class="thumb" src="${esc(p.image)}" onclick="openImagePreview(event,this.src)"><div><div class="product-name">${esc(p.code)}${esc(p.name)}</div><div class="product-cat">${esc(p.category||"商品")}</div></div><div class="price">${money(p.price)}</div></div>`).join("")||`<div class="empty">暂无商品</div>`;
+  $("topRight").innerHTML=`<button class="icon-btn" onclick="showPage('cart')">🛒 ${cartQty()?cartQty():""}</button>`;
+}
+function renderPick(){
+  const p=getProduct(pickCode);
+  if(!p)return;
+  const rows=(p.sizes||[]).map(size=>{
+    const avail=stockOf(p,pickColor,size);
+    const qty=n(pickQty[size]); // 正数=销售，负数=退货
+    const showPrice=skuPriceOf(p,pickColor,size);
+    const selectedText=qty===0?"0/0":`${qty}/0`;
+    const qtyClass=qty<0?"refund":(qty>0?"sale":"");
+    return `<tr><td>${esc(size)}</td><td style="color:#f97316">${money(showPrice)}</td><td class="${qty<0?'refund-neg':''}">${selectedText}</td><td style="color:#f97316;font-weight:900">${avail}</td><td><div class="qty-step"><button onclick="changePickQty('${esc(size)}',-1)">−</button><span class="qty-num ${qtyClass}">${qty}</span><button onclick="changePickQty('${esc(size)}',1)">＋</button></div></td></tr>`;
+  }).join("");
+  const hasRefund=Object.values(pickQty).some(v=>n(v)<0),hasSale=Object.values(pickQty).some(v=>n(v)>0);
+  const actionText=hasRefund?"立即退款":"立即结算";
+  $("pickBox").innerHTML=`<div class="pick-head"><img class="thumb lg" src="${esc(p.image)}" onclick="openImagePreview(event,this.src)"><div><div class="pick-title">${esc(p.code)}${esc(p.name)}</div><div class="product-cat">${esc(p.category)}</div><div style="margin-top:8px"><b style="color:#ef4444">${money(p.price)}</b></div><div class="pick-mode-tip">点 <b>−</b> 是退货，点 <b>＋</b> 是销售；同一张单不能同时销售和退货。</div></div><button class="icon-btn" onclick="showPage('sale')">×</button></div><div class="card" style="margin-top:0;border-radius:0"><div>${(p.colors||[]).map(c=>`<button class="color-chip ${c===pickColor?'active':''}" onclick="pickColor='${esc(c)}';pickQty={};renderPick()">${esc(c)}</button>`).join("")}</div><table class="size-table"><thead><tr><th>规格</th><th>价格</th><th>已选</th><th>可售库存</th><th>数量</th></tr></thead><tbody>${rows}</tbody></table></div><div class="bottom-bar"><div class="bottom-inner"><button class="btn btn-light" onclick="addCurrentSelection(false)">继续选款</button><button class="btn btn-blue" onclick="addCurrentSelection(true)">${actionText}</button></div></div>`;
+}
+function changePickQty(size,delta){
+  const p=getProduct(pickCode),avail=stockOf(p,pickColor,size);
+  let current=n(pickQty[size]);
+  let next=current+delta;
+  // 如果从退货负数点 +，先回到 0；从销售正数点 -，先回到 0
+  if(current<0 && delta>0) next=Math.min(0,next);
+  if(current>0 && delta<0) next=Math.max(0,next);
+  // 正数是销售，不能超过库存；负数是退货，不限制原库存
+  if(next>avail) return alert("不能超过可售库存");
+  pickQty[size]=next;
+  renderPick();
+}
+function addCurrentSelection(goCheckout){
+  const p=getProduct(pickCode);
+  if(!p)return;
+  const selected=Object.entries(pickQty).filter(([s,q])=>n(q)!==0);
+  if(!selected.length)return alert("请先选择数量");
+  const hasSale=selected.some(([s,q])=>n(q)>0);
+  const hasRefund=selected.some(([s,q])=>n(q)<0);
+  if(hasSale&&hasRefund)return alert("同一张单不能同时销售和退货，请分开开单");
+  const lineType=hasRefund?"refund":"sale";
+  if(!sameCartTypeOrEmpty(lineType)){
+    return alert(lineType==="refund"?"当前清单已有销售商品，退货请另开一张单":"当前清单已有退货商品，销售请另开一张单");
+  }
+  orderMode=lineType;
+  selected.forEach(([size,qty])=>{
+    qty=n(qty);
+    const absQty=Math.abs(qty);
+    const exist=data.cart.find(x=>x.code===p.code&&x.color===pickColor&&x.size===size&&(x.lineType||"sale")===lineType);
+    if(exist)exist.qty+=absQty;
+    else data.cart.push({id:uid("C"),lineType,code:p.code,name:p.name,category:p.category,color:pickColor,size,qty:absQty,price:skuPriceOf(p,pickColor,size)});
+  });
+  save();
+  if(goCheckout)openCheckout();
+  else showPage("sale");
+}
+function renderCart(){
+  const refund=isRefundMode();
+  const title=refund?"退货清单":"销售清单";
+  const banner=editingOrderId?`<div class="edit-banner"><span>正在修改中...</span><button onclick="cancelOrderEdit()">取消修改</button></div>`:"";
+  const items=data.cart.map(x=>{
+    const p=getProduct(x.code)||{};
+    const qtyText=(x.lineType==="refund")?`<span class="refund-neg">-${x.qty}</span>`:x.qty;
+    const amtText=(x.lineType==="refund")?`<span class="refund-neg">-${money(x.qty*x.price)}</span>`:money(x.qty*x.price);
+    return `<div class="cart-row"><img class="thumb sm" src="${esc(p.image||'')}" onclick="openImagePreview(event,this.src)"><div><div class="name">${esc(x.code)} ${esc(x.name)}</div><div class="sub">${x.lineType==="refund"?"退货":"销售"}　${esc(x.color)} / ${esc(x.size)}　${money(x.price)}</div></div><div style="text-align:right"><div style="font-size:20px;font-weight:900">${qtyText}</div><div class="sub">${amtText}</div><div class="row" style="margin-top:6px"><button class="btn-small btn-gray" onclick="changeCartQty('${x.id}',-1)">−</button><b style="min-width:20px;text-align:center">${x.qty}</b><button class="btn-small btn-gray" onclick="changeCartQty('${x.id}',1)">＋</button></div></div></div>`;
+  }).join("")||`<div class="empty">还没有选择商品</div>`;
+  $("cartList").innerHTML=`<div class="row"><div class="title">${title}</div><button class="btn-small btn-gray" onclick="showPage('sale')">继续选款</button></div>${banner}${items}`;
+  $("cartQty").innerText=cartQty();
+  $("cartAmount").innerText=refund?("-"+money(cartAmount())):money(cartAmount());
+  const total=document.querySelector("#page-cart .cart-total");
+  if(total)total.innerHTML=refund?`退<b id="cartQty">${cartQty()}</b>件 <span class="refund-neg">-<span id="cartAmount">${money(cartAmount())}</span></span> <span class="cart-detail">明细</span>`:`共 <b id="cartQty">${cartQty()}</b> 件<br><span class="cart-detail">合计 <span id="cartAmount">${money(cartAmount())}</span></span>`;
+  if($("cartActionBtn"))$("cartActionBtn").innerText=editingOrderId?"保存修改":(refund?"去退款":"去结算");
+}
+function changeCartQty(id,delta){
+  const x=data.cart.find(i=>i.id===id);
+  if(!x)return;
+  const p=getProduct(x.code),avail=stockOf(p,x.color,x.size);
+  x.qty=Math.max(0,n(x.qty)+delta);
+  if((x.lineType||"sale")==="sale"&&x.qty>avail){x.qty=avail;alert("不能超过库存")}
+  data.cart=data.cart.filter(i=>n(i.qty)>0);
+  if(!editingOrderId)save();
+  renderCart();
+}
+function openCheckout(){
+  if(!data.cart.length)return alert("请先选择商品");
+  const type=cartOrderType();
+  orderMode=type;
+  if(type==="refund"){showPage("refund-checkout");renderRefundCheckout()}
+  else{showPage("checkout");renderCheckout()}
+}
+function checkStockBeforePay(){
+  for(const x of data.cart){
+    if((x.lineType||"sale")==="refund")continue;
+    const p=getProduct(x.code);
+    if(!p)return `${x.code} 商品不存在`;
+    if(stockOf(p,x.color,x.size)<n(x.qty))return `${x.code} ${x.color} ${x.size} 库存不足`;
+  }
+  return "";
+}
+function confirmPayment(){
+  const err=checkStockBeforePay();
+  if(err)return alert(err);
+  const amount=cartAmount(),round=n($("roundOff").value),receivable=Math.max(0,amount-round),paid=n($("payWechat").value)+n($("payAlipay").value)+n($("payBank").value)+n($("payCash").value);
+  if(paid<receivable)return alert("收款金额不足，请检查");
+  const order={id:makeOrderId(),orderType:"sale",customer:$("customerName").value.trim()||"散客",salesman:$("salesman").value.trim()||"李飞",items:data.cart.map(x=>{const p=getProduct(x.code)||{};return {...x,lineType:"sale",cost:skuCostOf(p,x.color,x.size)}}),totalQty:cartQty(),amount,roundOff:round,receivable,paid,pay:{wechat:n($("payWechat").value),alipay:n($("payAlipay").value),bank:n($("payBank").value),cash:n($("payCash").value)},payMethod:n($("payWechat").value)>0?"微信支付":n($("payAlipay").value)>0?"支付宝":n($("payBank").value)>0?"银行卡":"现金支付",paidStatus:"已结清",orderTag:$("orderTag").value,note:$("orderNote").value.trim(),created:nowText(),createdTs:Date.now(),pickupCode:makePickupCode()};
+  order.items.forEach(x=>{const p=getProduct(x.code);setStock(p,x.color,x.size,stockOf(p,x.color,x.size)-n(x.qty))});
+  data.orders.unshift(order);data.cart=[];orderMode="sale";save();renderSuccess(order);showPage("success");
+}
+function confirmRefund(){
+  const amount=cartAmount(),round=n($("refundRoundOff")?$("refundRoundOff").value:0),pending=Math.max(0,amount-round),paid=n($("refundWechat").value)+n($("refundAlipay").value)+n($("refundBank").value)+n($("refundCash").value);
+  if(paid<pending)return alert("退款金额不足，请检查");
+  const order={id:makeOrderId(),orderType:"refund",customer:"散客",salesman:(data.settings&&data.settings.salesman)||"李飞",items:data.cart.map(x=>{const p=getProduct(x.code)||{};return {...x,lineType:"refund",cost:skuCostOf(p,x.color,x.size)}}),totalQty:cartQty(),amount,roundOff:round,receivable:pending,paid,pay:{wechat:n($("refundWechat").value),alipay:n($("refundAlipay").value),bank:n($("refundBank").value),cash:n($("refundCash").value)},payMethod:n($("refundWechat").value)>0?"微信支付":n($("refundAlipay").value)>0?"支付宝":n($("refundBank").value)>0?"银行卡":"现金支付",paidStatus:"已退款",orderTag:"退货退款",note:$("refundNote")?$("refundNote").value.trim():"",created:nowText(),createdTs:Date.now(),pickupCode:makePickupCode()};
+  order.items.forEach(x=>{const p=getProduct(x.code);setStock(p,x.color,x.size,stockOf(p,x.color,x.size)+n(x.qty))});
+  data.orders.unshift(order);data.cart=[];orderMode="sale";save();renderSuccess(order);showPage("success");
+}
+
+function renderAll(){renderSaleProducts();renderCart();renderOrders();renderReport();renderManageProducts()}renderAll();
 </script>
 </body>
 </html>
