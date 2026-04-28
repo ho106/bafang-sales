@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>八方来财销售开单版 V2.14-alpha</title>
+<title>八方来财销售开单版 V2.15</title>
 <style>
 :root{
   --blue:#2f6df6;
@@ -161,7 +161,7 @@ textarea{min-height:88px;resize:none}
 <body>
 <div id="app" class="app">
   <section id="page-sale" class="page active">
-    <div class="topbar"><div class="title">八方来财销售开单版 V2.14-alpha</div><div class="right"><button class="icon-btn" onclick="openCart()">🛒<span id="cartBadge" class="cart-badge" style="display:none">0</span></button></div></div>
+    <div class="topbar"><div class="title">八方来财销售开单版 V2.15</div><div class="right"><button class="icon-btn" onclick="openCart()">🛒<span id="cartBadge" class="cart-badge" style="display:none">0</span></button></div></div>
     <div class="toolbar">
       <div class="search">⌕<input id="saleSearch" placeholder="搜索款号/商品名称" oninput="UI.sale.render()"></div>
       <button class="small-btn btn-line" onclick="alert('扫码入口已预留，后期接小程序扫码')">扫码选款</button>
@@ -234,7 +234,11 @@ textarea{min-height:88px;resize:none}
   <section id="page-me" class="page">
     <div class="topbar"><div class="title">我的</div></div>
     <div class="card"><div class="row"><div class="title" style="margin:0">商品资料</div><button class="small-btn btn-blue" onclick="openProductEdit('')">＋新增</button></div><div id="productManageList"></div></div>
-    <div class="card"><div class="title">数据工具</div><div class="bottom-inner" style="position:static;padding:0"><button class="btn btn-gray" onclick="exportData()">备份数据</button><label class="btn btn-gray" style="text-align:center;line-height:50px">恢复备份<input type="file" accept=".json" onchange="importData(event)" style="display:none"></label></div></div>
+    <div class="card"><div class="title">数据工具</div><div class="bottom-inner one" style="position:static;padding:0">
+      <button class="btn btn-blue" onclick="verifyDataConsistency()">数据一致性检查</button>
+      <button class="btn btn-gray" onclick="exportData()">备份数据</button>
+      <label class="btn btn-gray" style="text-align:center;line-height:50px">恢复备份<input type="file" accept=".json" onchange="importData(event)" style="display:none"></label>
+    </div></div>
   </section>
 
   <section id="page-product-edit" class="page">
@@ -253,14 +257,14 @@ textarea{min-height:88px;resize:none}
 
 <script>
 /*
-  八方来财销售开单版 V2.14-alpha
+  八方来财销售开单版 V2.15
   清理稳定版原则：
   1. 只保留一个核心数据层 DataLayer
   2. 页面不得绕过 DataLayer 自己乱算
   3. 每个页面只保留一个 render 入口
   4. 销售单 qty 为正数，退货 qty 为负数；不再单独切换销售/退货模式
 */
-const VERSION = "V2.14-alpha";
+const VERSION = "V2.15";
 const STORAGE_KEY = "bafang_sales_v1";
 const $ = id => document.getElementById(id);
 const n = v => Number(v || 0) || 0;
@@ -382,16 +386,30 @@ const DataLayer = {
       o.note = o.note || "";
       o.isVoid = !!o.isVoid;
       o.items = Array.isArray(o.items) ? o.items : [];
+
+      // V2.15 旧数据兼容：
+      // 早期版本有可能把“退货单”的 qty 存成正数。
+      // 这里优先看订单标记和明细标记，最后才看 qty 正负，并统一转成：
+      // 销售 qty > 0，退货 qty < 0。
+      const orderText = String(o.type || o.orderType || o.orderTag || o.tag || o.status || o.paidStatus || o.title || "").toLowerCase();
+      const orderIsRefund = /refund|return|退货|退款|已退款|退单/.test(orderText);
+
       o.items.forEach(i => {
         i.code = String(i.code || "");
         const p = d.products.find(p => p.code === i.code) || {};
         i.name = i.name || p.name || "";
         i.color = i.color || (p.colors && p.colors[0]) || "默认";
         i.size = i.size || (p.sizes && p.sizes[0]) || "均码";
-        i.qty = n(i.qty);
+
+        const rawQty = n(i.qty);
+        const itemText = String(i.lineType || i.type || i.kind || i.orderType || "").toLowerCase();
+        const itemIsRefund = /refund|return|退货|退款|已退款|退单/.test(itemText);
+        const shouldRefund = orderIsRefund || itemIsRefund || rawQty < 0;
+
+        i.qty = shouldRefund ? -Math.abs(rawQty) : Math.abs(rawQty);
         i.price = n(i.price || p.price);
         i.cost = n(i.cost || p.cost);
-        i.lineType = i.qty < 0 ? "refund" : "sale";
+        i.lineType = shouldRefund ? "refund" : "sale";
       });
     });
     return d;
@@ -997,6 +1015,88 @@ function saveProductEdit(){
 
 function openImagePreview(e,src){ e && e.stopPropagation(); $("imageModalImg").src = src; $("imageModal").style.display = "flex"; }
 function closeImagePreview(){ $("imageModal").style.display = "none"; }
+
+function verifyDataConsistency(){
+  const issues = [];
+  const warnings = [];
+
+  const productMap = {};
+  data.products.forEach(p => {
+    if(!p.code) issues.push("发现无货号商品资料");
+    if(productMap[p.code]) issues.push(`商品货号重复：${p.code}`);
+    productMap[p.code] = p;
+
+    (p.colors || []).forEach(c => (p.sizes || []).forEach(s => {
+      const stock = DataLayer.stockOf(p,c,s);
+      if(stock < 0) issues.push(`${p.code} ${c}/${s} 库存为负：${stock}`);
+    }));
+
+    if(!Array.isArray(p.colors) || !p.colors.length) warnings.push(`${p.code} 缺少颜色资料`);
+    if(!Array.isArray(p.sizes) || !p.sizes.length) warnings.push(`${p.code} 缺少尺码资料`);
+  });
+
+  data.orders.forEach(o => {
+    if(!o.items || !o.items.length){
+      issues.push(`订单 ${o.no || o.id} 无商品明细`);
+      return;
+    }
+
+    o.items.forEach(i => {
+      const p = productMap[i.code];
+      if(!p){
+        issues.push(`订单 ${o.no || o.id} 中商品 ${i.code || "空货号"} 找不到商品资料`);
+        return;
+      }
+
+      if(!p.colors.includes(i.color)) warnings.push(`订单 ${o.no || o.id}：${i.code} 颜色 ${i.color} 不在商品资料中`);
+      if(!p.sizes.includes(i.size)) warnings.push(`订单 ${o.no || o.id}：${i.code} 尺码 ${i.size} 不在商品资料中`);
+
+      if(!n(i.qty)) issues.push(`订单 ${o.no || o.id}：${i.code} 数量为 0`);
+      if(n(i.price) < 0) issues.push(`订单 ${o.no || o.id}：${i.code} 单价为负`);
+      if(n(i.cost) < 0) issues.push(`订单 ${o.no || o.id}：${i.code} 成本为负`);
+
+      const shouldRefund = DataLayer.isRefundLine(i);
+      if(shouldRefund && n(i.qty) > 0){
+        issues.push(`订单 ${o.no || o.id}：${i.code} 标记为退货，但 qty 是正数`);
+      }
+      if(!shouldRefund && n(i.qty) < 0){
+        issues.push(`订单 ${o.no || o.id}：${i.code} 标记为销售，但 qty 是负数`);
+      }
+    });
+  });
+
+  const validOrders = DataLayer.getValidOrders("all");
+  const summary = DataLayer.calcOrderSummary(validOrders);
+  const lines = [
+    `有效单据：${validOrders.length} 张`,
+    `销售件数：${Math.round(summary.qty)} 件`,
+    `退货件数：${Math.round(summary.refundQty)} 件`,
+    `净销量：${Math.round(summary.netQty)} 件`,
+    `销售金额：${money(summary.amount)}`,
+    `退货金额：${money(summary.refundAmount)}`,
+    `净收入：${money(summary.netAmount)}`,
+    `毛利：${money(summary.profit)}`
+  ];
+
+  let msg = "数据一致性检查完成\\n\\n" + lines.join("\\n");
+
+  if(issues.length){
+    msg += "\\n\\n发现严重问题：\\n" + issues.slice(0,20).join("\\n");
+    if(issues.length > 20) msg += `\\n……还有 ${issues.length - 20} 条`;
+  }else{
+    msg += "\\n\\n严重问题：0 条";
+  }
+
+  if(warnings.length){
+    msg += "\\n\\n提醒：\\n" + warnings.slice(0,20).join("\\n");
+    if(warnings.length > 20) msg += `\\n……还有 ${warnings.length - 20} 条`;
+  }else{
+    msg += "\\n提醒：0 条";
+  }
+
+  alert(msg);
+}
+
 function exportData(){
   const blob = new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
   const a = document.createElement("a");
