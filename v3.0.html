@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>八方来财销售开单版 V3.0</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f5f6fa;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",Arial,sans-serif}
+#appFrame{position:fixed;inset:0;width:100%;height:100%;border:0;background:#f5f6fa}
+#loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;color:#64748b;background:#f5f6fa;font-size:16px;z-index:2}
+</style>
+</head>
+<body>
+<div id="loading">正在打开 V3.0 修复版...</div>
+<iframe id="appFrame" src="./index.html?v=3.0-stable-detail"></iframe>
+<script>
+(function(){
+  var frame=document.getElementById('appFrame');
+  var loading=document.getElementById('loading');
+  var patched=false;
+  frame.addEventListener('load', function(){ setTimeout(tryPatch, 120); });
+  setTimeout(tryPatch, 800);
+
+  function tryPatch(){
+    if(patched) return;
+    var w=frame.contentWindow;
+    if(!w || !w.document || !w.document.body || !w.data || !w.showPage){ setTimeout(tryPatch,150); return; }
+    patched=true;
+    if(loading) loading.style.display='none';
+    patch(w);
+  }
+
+  function patch(w){
+    if(w.__bafangV30StableDetail) return;
+    w.__bafangV30StableDetail=true;
+    var d=w.document;
+    try{ d.title='八方来财销售开单版 V3.0'; }catch(e){}
+    try{ var topTitle=d.getElementById('topTitle'); if(topTitle) topTitle.textContent='八方来财销售开单版 V3.0'; }catch(e){}
+
+    function $(id){return d.getElementById(id)}
+    function n(v){var x=Number(v);return isFinite(x)?x:0}
+    function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+    function money(v){try{return w.money(v)}catch(e){return n(v).toFixed(2)}}
+    function today(){try{return w.today()}catch(e){return new Date().toISOString().slice(0,10)}}
+    function isRefundOrder(o){try{return !!w.isRefundOrder(o)}catch(e){return String((o&&o.orderType)||'').indexOf('refund')>-1}}
+    function getProduct(code){try{return w.getProduct(code)||{}}catch(e){return ((w.data&&w.data.products)||[]).find(function(p){return sameCode(p.code,code)})||{}}}
+    function stockOf(p,c,s){try{return w.stockOf(p,c,s)}catch(e){return n(p&&p.stock&&p.stock[c]&&p.stock[c][s])}}
+    function totalStock(p){try{return w.totalStock(p)}catch(e){var t=0;(p.colors||[]).forEach(function(c){(p.sizes||[]).forEach(function(s){t+=stockOf(p,c,s)})});return t}}
+    function norm(s){return String(s==null?'':s).replace(/\s+/g,'').toLowerCase()}
+    function leadNum(s){var m=String(s==null?'').match(/\d+/);return m?m[0]:''}
+    function sameCode(a,b){var aa=norm(a),bb=norm(b);if(aa&&bb&&aa===bb)return true;var la=leadNum(a),lb=leadNum(b);return !!(la&&lb&&la===lb)}
+    function dayOf(ts){var x=n(ts);if(!x)return today();var dt=new Date(x);return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0')}
+    function parseDay(s){return new Date(String(s||today())+'T00:00:00')}
+    function addDay(s,delta){var dt=parseDay(s);dt.setDate(dt.getDate()+delta);return dayOf(dt.getTime())}
+    function fmtMD(s){return String(s||'').slice(5).replace('-', '.')}
+    function weekStart(s){var dt=parseDay(s);dt.setDate(dt.getDate()-((dt.getDay()+6)%7));return dayOf(dt.getTime())}
+    function monthStart(s){var dt=parseDay(s);dt.setDate(1);return dayOf(dt.getTime())}
+    function validOrders(){return ((w.data&&w.data.orders)||[]).filter(function(o){return !o.isVoid&&n(o.createdTs)})}
+    function latestDate(code){var os=validOrders();if(code)os=os.filter(function(o){return (o.items||[]).some(function(i){return sameCode(i.code,code)})});if(!os.length)return today();return dayOf(Math.max.apply(null,os.map(function(o){return n(o.createdTs)})))}
+    function rangeFor(code){
+      if(!w.paState)w.paState={};
+      var st=w.paState, base=latestDate(code); st.mode=st.mode||'day';
+      if(st.mode==='custom'){var s=st.customStart||base,e=st.customEnd||base;if(s>e){var t=s;s=e;e=t}return{s:s,e:e}}
+      if(st.mode==='7'||st.mode==='30'){var days=st.mode==='7'?7:30;return{s:addDay(base,-(days-1)),e:base}}
+      if(st.mode==='week'){var ws=weekStart(st.anchor||base);return{s:ws,e:addDay(ws,6)}}
+      if(st.mode==='month'){var ms=monthStart(st.anchor||base);var dt=parseDay(ms);return{s:ms,e:dayOf(new Date(dt.getFullYear(),dt.getMonth()+1,0).getTime())}}
+      var a=st.anchor||base;if(!validOrders().some(function(o){return dayOf(o.createdTs)===a}))a=base;st.anchor=a;return{s:a,e:a}
+    }
+    function inRange(o,r){var dd=dayOf(o.createdTs);return dd>=r.s&&dd<=r.e}
+    function productOrders(code,currentOnly){var os=validOrders().filter(function(o){return (o.items||[]).some(function(i){return sameCode(i.code,code)})});if(currentOnly){var r=rangeFor(code);os=os.filter(function(o){return inRange(o,r)})}return os}
+    function fill(row){
+      row.qty=n(row.qty);row.amount=n(row.amount);row.cost=n(row.cost);row.refundQty=n(row.refundQty);row.refundAmount=n(row.refundAmount);row.refundCost=n(row.refundCost);row.stock=n(row.stock);row.transit=n(row.transit);row.unsent=n(row.unsent);
+      row.netQty=row.qty-row.refundQty;row.netAmount=row.amount-row.refundAmount;row.netCost=row.cost-row.refundCost;row.profit=row.netAmount-row.netCost;row.margin=row.netAmount?row.profit/row.netAmount*100:0;row.avg=row.qty?row.amount/row.qty:0;row.refundRate=row.qty?row.refundQty/row.qty*100:0;row.available=n(row.available||row.stock)-row.unsent;if(row.available<0)row.available=0;return row;
+    }
+    w.fillDerivedStats=fill;
+    function formatValue(k,row){if(['qty','refundQty','netQty','stock','transit','available','unsent'].indexOf(k)>-1)return String(Math.round(n(row[k])));if(['margin','refundRate'].indexOf(k)>-1)return n(row[k]).toFixed(2)+'%';return money(row[k])}
+    w.paFormatValue=formatValue;
+    function colLabel(k){var list=w.paColumnsMeta||[];var m=list.find(function(x){return x.key===k});return m?m.label:k}
+    w.paColLabel=colLabel;
+
+    var style=d.createElement('style');
+    style.id='v30-stable-detail-style';
+    style.textContent='\n#page-product-analysis .pa-topbar{display:none!important}\n#page-product-analysis .pa-grid,#paDetailPanel .pa-grid{overflow-x:auto!important;-webkit-overflow-scrolling:touch!important}\n#page-product-analysis .pa-table,#paDetailPanel .pa-table{table-layout:auto!important;min-width:760px!important}\n#page-product-analysis .pa-table th,#page-product-analysis .pa-table td,#paDetailPanel .pa-table th,#paDetailPanel .pa-table td{white-space:normal!important;word-break:break-word!important;min-width:92px!important}\n#page-product-analysis .pa-table th:first-child,#page-product-analysis .pa-table td:first-child{min-width:210px!important;width:210px!important}\n#paDetailPanel .pa-table th:first-child,#paDetailPanel .pa-table td:first-child{min-width:170px!important;width:170px!important}\n.v30-spec-card{background:#fff;border-radius:10px;margin:0 0 12px;padding:14px}\n.v30-spec-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}\n.v30-spec-head b{font-size:18px;color:#111827}.v30-spec-head span{font-size:13px;color:#6b7280}\n.v30-bar-row{display:grid;grid-template-columns:86px 1fr 46px;gap:8px;align-items:center;margin:10px 0;font-size:13px}.v30-bar-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.v30-bar-bg{height:12px;background:#eef2f7;border-radius:999px;overflow:hidden}.v30-bar-fill{height:100%;background:#4f7df3;border-radius:999px}.v30-bar-num{text-align:right;font-weight:900}.pa-arrow-btn{position:absolute;right:0;top:50%;transform:translateY(-50%);border:none;background:none;color:#c2c8d5;font-size:16px;padding:0}.pa-prod-wrap{position:relative!important;padding-right:24px!important}\n';
+    d.head.appendChild(style);
+
+    function chipsHtml(code){
+      var mode=(w.paState&&w.paState.mode)||'day', base=latestDate(code), arr=[];
+      if(mode==='day'){for(var i=5;i>=0;i--){var dd=addDay(base,-i);arr.push({v:dd,label:i===0?'今天':fmtMD(dd)})}}
+      else if(mode==='week'){var b=weekStart(base);for(var j=5;j>=0;j--){var ww=addDay(b,-j*7);arr.push({v:ww,label:fmtMD(ww)})}}
+      else if(mode==='month'){var m=parseDay(monthStart(base));for(var k=5;k>=0;k--){var md=new Date(m.getFullYear(),m.getMonth()-k,1);var ms=dayOf(md.getTime());arr.push({v:ms,label:ms.slice(0,7)})}}
+      else if(mode==='custom')arr.push({v:(w.paState.customEnd||base),label:(w.paState.customStart||base)+' 至 '+(w.paState.customEnd||base)});
+      else arr.push({v:base,label:mode==='7'?'近 7 天':'近 30 天'});
+      var active=((w.paState&&w.paState.anchor)||base);
+      return arr.map(function(x,idx){var on=(mode==='7'||mode==='30'||mode==='custom')?idx===0:x.v===active;return '<button class="pa-chip '+(on?'active':'')+'" onclick="selectPaChip(\''+x.v+'\')">'+esc(x.label)+'</button>'}).join('')
+    }
+    w.renderPaChips=function(){var box=$('paChips');if(box)box.innerHTML=chipsHtml('')};
+    w.renderPaDetailChips=function(){var box=$('paDetailChips');if(box)box.innerHTML=chipsHtml(w.paDetailState&&w.paDetailState.code)};
+    w.selectPaChip=function(v){w.paState.anchor=v;w.renderPaAll()};
+    w.setPaMode=function(mode){w.paState.mode=mode;if($('paModeMenu'))$('paModeMenu').style.display='none';if($('paDetailModeMenu'))$('paDetailModeMenu').style.display='none';var code=w.paDetailState&&w.paDetailState.open?w.paDetailState.code:'';var base=latestDate(code);if(mode==='custom'){w.paState.customStart=w.paState.customStart||base;w.paState.customEnd=w.paState.customEnd||base;w.openPaDateModal&&w.openPaDateModal();return}if(mode==='day')w.paState.anchor=base;else if(mode==='week')w.paState.anchor=weekStart(base);else if(mode==='month')w.paState.anchor=monthStart(base);else w.paState.anchor=base;w.renderPaAll()};
+    w.paOrders=function(){var r=rangeFor('');return validOrders().filter(function(o){return inRange(o,r)})};
+
+    function aggregateProducts(os){
+      var stats={};(os||[]).forEach(function(o){var refund=isRefundOrder(o);(o.items||[]).forEach(function(i){var code=String(i.code||'');if(!stats[code])stats[code]={code:code,qty:0,amount:0,cost:0,refundQty:0,refundAmount:0,refundCost:0,stock:0,transit:0,unsent:0};var q=n(i.qty),price=n(i.price),cost=n(i.cost);if(refund){stats[code].refundQty+=q;stats[code].refundAmount+=q*price;stats[code].refundCost+=q*cost}else{stats[code].qty+=q;stats[code].amount+=q*price;stats[code].cost+=q*cost}})});
+      var rows=Object.values(stats).map(function(r){var p=getProduct(r.code)||{};r.stock=totalStock(p);r.available=r.stock;return fill(r)});var kw=(w.paState.keyword||'').trim().toLowerCase();if(kw)rows=rows.filter(function(r){var p=getProduct(r.code)||{};return (r.code+' '+(p.name||'')).toLowerCase().indexOf(kw)>-1});return rows.sort(function(a,b){return n(b.qty)-n(a.qty)||n(b.amount)-n(a.amount)})
+    }
+    w.buildProductStats=function(os){return aggregateProducts(os)};
+
+    function specRows(code,currentOnly){
+      var p=getProduct(code)||{},stats={};
+      productOrders(code,currentOnly).forEach(function(o){var refund=isRefundOrder(o);(o.items||[]).forEach(function(i){if(!sameCode(i.code,code))return;var key=(i.color||'')+';'+(i.size||'');if(!stats[key])stats[key]={label:key||'默认规格',qty:0,amount:0,cost:0,refundQty:0,refundAmount:0,refundCost:0,stock:0,transit:0,unsent:0};var q=n(i.qty),price=n(i.price),cost=n(i.cost);if(refund){stats[key].refundQty+=q;stats[key].refundAmount+=q*price;stats[key].refundCost+=q*cost}else{stats[key].qty+=q;stats[key].amount+=q*price;stats[key].cost+=q*cost}})});
+      (p.colors||[]).forEach(function(c){(p.sizes||[]).forEach(function(s){var key=(c||'')+';'+(s||'');if(!stats[key])stats[key]={label:key,qty:0,amount:0,cost:0,refundQty:0,refundAmount:0,refundCost:0,stock:0,transit:0,unsent:0}})});
+      return Object.values(stats).map(function(r){var parts=String(r.label).split(';');r.stock=stockOf(p,parts[0],parts[1]);r.available=r.stock;return fill(r)}).sort(function(a,b){return n(b.qty)-n(a.qty)||n(b.refundQty)-n(a.refundQty)||String(a.label).localeCompare(String(b.label))})
+    }
+    function calcTotal(rows){var t={qty:0,amount:0,cost:0,refundQty:0,refundAmount:0,refundCost:0,stock:0,transit:0,available:0,unsent:0};(rows||[]).forEach(function(r){Object.keys(t).forEach(function(k){t[k]+=n(r[k])})});return fill(t)}
+    function ensureDetailPanel(){
+      var panel=$('paDetailPanel');
+      if(!panel){panel=d.createElement('div');panel.id='paDetailPanel';panel.className='pa-detail-panel';d.body.appendChild(panel)}
+      if(!panel.querySelector('.detail-head')){
+        panel.innerHTML='<div class="detail-head"><div class="title">商品分析</div><button class="close" onclick="closePaDetail()">×</button></div><div id="paDetailSubtitle" class="detail-subtitle"></div><div class="pa-detail-toolbar"><div class="pa-toolbar-row"><button id="paDetailModeBtn" class="pa-mode-trigger" onclick="togglePaDetailModeMenu()">按天 ▾</button><div id="paDetailChips" class="pa-chips"></div></div></div><div class="pa-tabs" id="paDetailTabs"></div><div class="pa-grid"><div id="v30SpecCard" class="v30-spec-card"><div class="v30-spec-head"><b>规格销售分布</b><span>按销量占比</span></div><div id="v30SpecBars"></div></div><table class="pa-table"><thead><tr id="paDetailHead"></tr></thead><tbody id="paDetailRows"></tbody></table><div id="paDetailEmpty" class="pa-empty" style="display:none">暂无明细数据</div></div><div id="paDetailModeMenu" class="pa-overlay" onclick="if(event.target===this)this.style.display=\'none\'"><div class="pa-dropdown" id="paDetailModeMenuInner"></div></div>';
+      }else if(!$('v30SpecCard')){
+        var grid=panel.querySelector('.pa-grid');var div=d.createElement('div');div.id='v30SpecCard';div.className='v30-spec-card';div.innerHTML='<div class="v30-spec-head"><b>规格销售分布</b><span>按销量占比</span></div><div id="v30SpecBars"></div>';grid.insertBefore(div,grid.firstChild);
+      }
+      return panel;
+    }
+    function renderBars(rows){
+      var box=$('v30SpecBars');if(!box)return;var list=rows.filter(function(r){return n(r.qty)||n(r.refundQty)||n(r.stock)}).slice(0,8);var max=Math.max.apply(null,[1].concat(list.map(function(r){return Math.max(n(r.qty),n(r.netQty),n(r.stock))})));
+      box.innerHTML=list.map(function(r){var val=Math.max(n(r.qty),n(r.netQty),n(r.stock));var pct=Math.max(4,Math.round(val/max*100));return '<div class="v30-bar-row"><div class="v30-bar-label">'+esc(r.label)+'</div><div class="v30-bar-bg"><div class="v30-bar-fill" style="width:'+pct+'%"></div></div><div class="v30-bar-num">'+Math.round(n(r.qty))+'</div></div>'}).join('')||'<div class="pa-empty" style="padding:14px 0">当前日期没有规格销量，已显示该款基础规格。</div>'
+    }
+    function renderProductAnalysis(){
+      try{w.renderPaModeMenu&&w.renderPaModeMenu()}catch(e){}
+      w.renderPaChips();
+      var cols=(w.paState&&w.paState.columns&&w.paState.columns.length)?w.paState.columns:['qty','refundQty'];
+      if($('paTableHead'))$('paTableHead').innerHTML='<th>商品款号</th>'+cols.map(function(k){return '<th>'+colLabel(k)+' <span class="pa-sort-icon">◆</span></th>'}).join('')+'<th style="width:44px"><button class="pa-head-setting" onclick="openPaColumns()">☰</button></th>';
+      var rows=aggregateProducts(w.paOrders());var body=$('productAnalysisRows');if(!body)return;if($('paEmpty'))$('paEmpty').style.display=rows.length?'none':'block';
+      body.innerHTML=rows.map(function(s){var p=getProduct(s.code)||{};var short=(p.name||'').slice(0,12)+((p.name||'').length>12?'…':'');return '<tr><td><div class="pa-prod-wrap"><div class="pa-prod-text"><div class="pa-prod-code">'+esc(s.code)+esc(short)+'</div><img src="'+esc(p.image||'')+'" onclick="event.stopPropagation();openImagePreview(event,this.src)"><div class="pa-prod-name">'+esc(p.name||'')+'</div></div><button class="pa-arrow-btn" onclick="event.stopPropagation();openPaDetail(\''+esc(s.code)+'\')">▶</button></div></td>'+cols.map(function(k){return '<td><span class="pa-value">'+formatValue(k,s)+'</span></td>'}).join('')+'<td></td></tr>'}).join('');
+      if(rows.length){var total=calcTotal(rows);body.innerHTML+='<tr class="pa-total-row"><td>总计</td>'+cols.map(function(k){return '<td>'+formatValue(k,total)+'</td>'}).join('')+'<td></td></tr>'}
+    }
+    w.renderProductAnalysis=renderProductAnalysis;
+    w.renderPaAll=function(){renderProductAnalysis();if(w.paDetailState&&w.paDetailState.open)w.renderPaDetail()};
+    w.openPaDetail=function(code){w.paDetailState=w.paDetailState||{};w.paDetailState.open=true;w.paDetailState.code=code;w.paDetailState.tab=w.paDetailState.tab||'spec';ensureDetailPanel().style.display='block';w.renderPaDetail()};
+    w.closePaDetail=function(){if(w.paDetailState)w.paDetailState.open=false;var p=$('paDetailPanel');if(p)p.style.display='none'};
+    w.setPaDetailTab=function(tab){w.paDetailState.tab=tab;w.renderPaDetail()};
+    w.renderPaDetail=function(){
+      var st=w.paDetailState||{};if(!st.open||!st.code)return;var panel=ensureDetailPanel();panel.style.display='block';var p=getProduct(st.code)||{};if($('paDetailSubtitle'))$('paDetailSubtitle').textContent=(p.code||st.code||'')+(p.name?' '+p.name:'')+(p.category?'/'+p.category:'');w.renderPaDetailChips();try{w.renderPaDetailModeMenu&&w.renderPaDetailModeMenu()}catch(e){}
+      if(!st.tab)st.tab='spec';if(['customer','store'].indexOf(st.tab)>-1)st.tab='spec';if($('paDetailTabs'))$('paDetailTabs').innerHTML=['spec','trend','stockin'].map(function(k){var lab=k==='spec'?'规格':k==='trend'?'趋势':'入库';return '<button class="'+(st.tab===k?'active':'')+'" onclick="setPaDetailTab(\''+k+'\')">'+lab+'</button>'}).join('');
+      var specCard=$('v30SpecCard'),table=panel.querySelector('.pa-grid table'),empty=$('paDetailEmpty'),cols=(w.paState&&w.paState.columns&&w.paState.columns.length)?w.paState.columns:['qty','refundQty'];
+      if(st.tab==='trend'){if(specCard)specCard.style.display='none';if(table)table.style.display='table';var series=[];var base=latestDate(st.code);for(var i=7;i>=0;i--){var dd=addDay(base,-i);var agg=aggregateProducts(validOrders().filter(function(o){return dayOf(o.createdTs)===dd})).find(function(r){return sameCode(r.code,st.code)})||{qty:0,refundQty:0,amount:0,refundAmount:0,netQty:0};series.push(fill(agg));series[series.length-1].label=fmtMD(dd)}if($('paDetailHead'))$('paDetailHead').innerHTML='<th>日期</th><th>销量</th><th>退货</th><th>净销量</th><th>销售金额</th>';if($('paDetailRows'))$('paDetailRows').innerHTML=series.map(function(r){return '<tr><td>'+r.label+'</td><td>'+n(r.qty)+'</td><td>'+n(r.refundQty)+'</td><td>'+n(r.netQty)+'</td><td>'+money(r.amount)+'</td></tr>'}).join('');if(empty)empty.style.display='none';return;}
+      if(specCard)specCard.style.display=st.tab==='spec'?'block':'none';if(table)table.style.display='table';var rows=specRows(st.code,true);if(!rows.some(function(r){return n(r.qty)||n(r.refundQty)}))rows=specRows(st.code,false);if(st.tab==='spec')renderBars(rows);if($('paDetailHead'))$('paDetailHead').innerHTML='<th>商品规格</th>'+cols.map(function(k){return '<th>'+colLabel(k)+' <span class="pa-sort-icon">◆</span></th>'}).join('')+'<th style="width:44px"><button class="pa-head-setting" onclick="openPaColumns()">☰</button></th>';if(empty)empty.style.display=rows.length?'none':'block';if($('paDetailRows')){$('paDetailRows').innerHTML=rows.map(function(r){return '<tr><td>'+esc(r.label)+'</td>'+cols.map(function(k){return '<td><span class="pa-value">'+formatValue(k,r)+'</span></td>'}).join('')+'<td></td></tr>'}).join('');if(rows.length){var total=calcTotal(rows);$('paDetailRows').innerHTML+='<tr class="pa-total-row"><td>总计</td>'+cols.map(function(k){return '<td>'+formatValue(k,total)+'</td>'}).join('')+'<td></td></tr>'}}
+    };
+
+    try{w.renderProductAnalysis()}catch(e){console.error(e)}
+  }
+})();
+</script>
+</body>
+</html>
