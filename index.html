@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>八方来财销售开单版 V2.32</title>
+<title>八方来财销售开单版 V2.33</title>
 <style>
 :root{
   --blue:#2f6df6;
@@ -532,12 +532,87 @@ button:active,
   }
 }
 
+
+/* V2.33 收款/退款流程显示修复 */
+.picker-total{
+  font-weight:800;
+  color:#111827;
+}
+.picker-total b{
+  font-size:18px;
+}
+.pay-success-wrap{
+  padding:22px 18px;
+  background:#fff;
+  min-height:100vh;
+}
+.pay-success-card{
+  background:#f8fafc;
+  border-radius:6px;
+  padding:28px 20px 0;
+}
+.pay-check{
+  width:76px;
+  height:76px;
+  border-radius:50%;
+  margin:0 auto 14px;
+  background:#25d366;
+  color:#fff;
+  font-size:50px;
+  line-height:76px;
+  text-align:center;
+  font-weight:900;
+}
+.pay-check.refund{
+  background:#ef4444;
+}
+.pay-success-title{
+  text-align:center;
+  font-size:22px;
+  font-weight:800;
+  color:#111827;
+  margin-bottom:26px;
+}
+.pay-success-lines{
+  display:grid;
+  grid-template-columns:1fr 1.35fr;
+  gap:14px 10px;
+  font-size:16px;
+  padding-bottom:26px;
+}
+.pay-success-lines .k{
+  color:#8b95a7;
+}
+.pay-success-lines .v{
+  text-align:right;
+  color:#111827;
+}
+.pay-detail-link{
+  border-top:1px solid var(--line);
+  text-align:center;
+  padding:16px 0;
+  font-size:17px;
+  font-weight:800;
+}
+.pay-success-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+  margin:28px 16px 0;
+}
+.pay-success-actions .btn{
+  height:52px;
+  border-radius:4px;
+  font-size:18px;
+  font-weight:900;
+}
+
 </style>
 </head>
 <body>
 <div id="app" class="app">
   <section id="page-sale" class="page active">
-    <div class="topbar"><div class="title">八方来财销售开单版 V2.32</div><div class="right"><button class="icon-btn" onclick="openCart()">🛒<span id="cartBadge" class="cart-badge" style="display:none">0</span></button></div></div>
+    <div class="topbar"><div class="title">八方来财销售开单版 V2.33</div><div class="right"><button class="icon-btn" onclick="openCart()">🛒<span id="cartBadge" class="cart-badge" style="display:none">0</span></button></div></div>
     <div class="toolbar">
       <div class="search">⌕<input id="saleSearch" placeholder="搜索款号/商品名称" oninput="UI.sale.render()"></div>
       <button class="small-btn btn-line" onclick="alert('扫码入口已预留，后期接小程序扫码')">扫码选款</button>
@@ -564,7 +639,12 @@ button:active,
       <label style="display:block;margin-top:12px;color:#8b95a7">备注</label>
       <textarea id="orderNote" placeholder="请输入备注"></textarea>
     </div>
-    <div class="bottom-bar"><div class="bottom-inner"><button class="btn btn-light" onclick="showPage('picker')">返回修改</button><button class="btn btn-blue" onclick="confirmOrder()">确认结算</button></div></div>
+    <div class="bottom-bar"><div class="bottom-inner"><button class="btn btn-light" onclick="showPage('picker')">返回修改</button><button id="checkoutConfirmBtn" class="btn btn-blue" onclick="confirmOrder()">立即收款</button></div></div>
+  </section>
+
+  <section id="page-pay-success" class="page">
+    <div class="topbar"><div class="left"><button class="icon-btn" onclick="showPage('sale')">‹</button></div><div class="title" id="paySuccessTopTitle">支付成功</div><div class="right"><button class="icon-btn" onclick="UI.orders.openDetail(currentOrderId)">↗</button></div></div>
+    <div id="paySuccessBox"></div>
   </section>
 
   <section id="page-orders" class="page">
@@ -662,14 +742,14 @@ button:active,
 
 <script>
 /*
-  八方来财销售开单版 V2.32
+  八方来财销售开单版 V2.33
   清理稳定版原则：
   1. 只保留一个核心数据层 DataLayer
   2. 页面不得绕过 DataLayer 自己乱算
   3. 每个页面只保留一个 render 入口
   4. 销售单 qty 为正数，退货 qty 为负数；不再单独切换销售/退货模式
 */
-const VERSION = "V2.32";
+const VERSION = "V2.33";
 const STORAGE_KEY = "bafang_sales_v1";
 const $ = id => document.getElementById(id);
 const n = v => Number(v || 0) || 0;
@@ -1196,9 +1276,7 @@ const UI = {
       if(!p){ $("pickerBox").innerHTML = `<div class="pa-empty">商品不存在</div>`; return; }
       const color = pickerDraft.color || p.colors[0];
       pickerDraft.color = color;
-      const draftTotal = Object.values(pickerDraft.qty || {}).reduce((s,v) => s + Math.abs(n(v)),0);
-      const cartTotal = (data.cart || []).reduce((s,i) => s + Math.abs(n(i.qty)),0);
-      const total = cartTotal + draftTotal;
+      const pickerSummary = calcPickerSummary();
       const priceVals = p.sizes.map(size => DataLayer.getSkuPrice(p,color,size)).filter(v => n(v) > 0);
       const minPrice = priceVals.length ? Math.min(...priceVals.map(n)) : n(p.price);
       const maxPrice = priceVals.length ? Math.max(...priceVals.map(n)) : n(p.price);
@@ -1240,7 +1318,7 @@ const UI = {
       if(bottomBar) bottomBar.className = "picker-bottom";
       if(bottomInner){
         bottomInner.className = "picker-bottom-inner";
-        bottomInner.innerHTML = `<div class="picker-total">共 <b>${total}</b> 件</div><button class="btn btn-light" onclick="openCheckout()">立即结算</button><button class="btn btn-blue" onclick="continueSelect()">继续选款</button>`;
+        bottomInner.innerHTML = `<div class="picker-total">${cartSummaryText(pickerSummary)}</div><button class="btn btn-light" onclick="openCheckout()">立即结算</button><button class="btn btn-blue" onclick="continueSelect()">继续选款</button>`;
       }
     }
   },
@@ -1248,11 +1326,14 @@ const UI = {
     render(){
       const s = calcCartSummary();
       $("checkoutTitle").innerText = s.netAmount < 0 ? "退款结算" : "收款结算";
-      $("checkoutQtyAmount").innerText = `${s.absQty}件 / ${money(s.netAmount)}`;
-      $("payLabel").innerText = s.netAmount < 0 ? "应退金额" : "应收金额";
+      $("checkoutQtyAmount").innerText = cartSummaryText(s);
+      $("payLabel").innerText = s.netAmount < 0 ? "待退金额" : "待收金额";
       const round = Math.abs(n($("roundOff").value));
-      $("receivable").innerText = money(DataLayer.netAfterRound(s.netAmount, round));
+      const real = DataLayer.netAfterRound(s.netAmount, round);
+      $("receivable").innerText = money(real);
       $("receivable").className = "red";
+      const btn = $("checkoutConfirmBtn");
+      if(btn) btn.innerText = real < 0 ? "立即退款" : "立即收款";
     }
   },
   orders:{
@@ -1270,7 +1351,7 @@ const UI = {
         const tagTxt = o.isVoid ? "已作废" : s.refundQty && !s.qty ? "退货单" : s.refundQty ? "销售/退货" : "销售单";
         return `<div class="order-card ${o.isVoid?'void':''}" onclick="UI.orders.openDetail('${o.id}')">
           <div class="order-top"><span>${esc(o.no)}（${esc(o.salesman)}）</span><span>${timeText(o.createdTs)}</span></div>
-          <div class="order-main"><div><b>散客</b><div style="margin-top:8px"><span class="tag ${tagCls}">${tagTxt}</span></div></div><div style="text-align:right"><b>${s.netQty}件</b><div>${money(s.netAmount)}</div></div></div>
+          <div class="order-main"><div><b>散客</b><div style="margin-top:8px"><span class="tag ${tagCls}">${tagTxt}</span></div></div><div style="text-align:right"><b>${cartSummaryText(s)}</b></div></div>
           ${o.note?`<div class="sub" style="margin-top:10px">备注：${esc(o.note)}</div>`:""}
         </div>`;
       }).join("") || `<div class="pa-empty">暂无单据</div>`;
@@ -1452,6 +1533,7 @@ function mergePickerToCart(){
     if(old) old.qty += q;
     else data.cart.push({code:p.code,color,size,qty:q,price:skuPrice,cost:skuCost,lineType:q<0?"refund":"sale"});
   });
+  pickerDraft.qty = {};
   DataLayer.save();
   renderCartBadge();
 }
@@ -1471,20 +1553,79 @@ function calcCartSummary(){
   data.cart.forEach(i => {
     const q = n(i.qty);
     s.absQty += Math.abs(q);
-    if(q >= 0){ s.saleQty += q; s.amount += q*n(i.price); }
-    else { s.refundQty += Math.abs(q); s.refundAmount += Math.abs(q)*n(i.price); }
+    if(q > 0){ s.saleQty += q; s.amount += q*n(i.price); }
+    else if(q < 0){ s.refundQty += Math.abs(q); s.refundAmount += Math.abs(q)*n(i.price); }
   });
   s.netAmount = s.amount - s.refundAmount;
   return s;
 }
-function confirmOrder(){
+function addLineToSummary(s, q, price){
+  q = n(q); price = n(price);
+  s.absQty += Math.abs(q);
+  if(q > 0){ s.saleQty += q; s.amount += q*price; }
+  else if(q < 0){ s.refundQty += Math.abs(q); s.refundAmount += Math.abs(q)*price; }
+  s.netAmount = s.amount - s.refundAmount;
+  return s;
+}
+function calcPickerSummary(){
   const s = calcCartSummary();
+  const p = DataLayer.getProduct(pickerCode);
+  if(!p) return s;
+  const c = pickerDraft.color || (p.colors || [])[0];
+  Object.keys(pickerDraft.qty || {}).forEach(key => {
+    const q = n(pickerDraft.qty[key]);
+    if(!q) return;
+    const parts = key.split(";");
+    const color = parts[0] || c;
+    const size = parts[1] || "";
+    addLineToSummary(s, q, DataLayer.getSkuPrice(p,color,size));
+  });
+  return s;
+}
+function cartSummaryText(s){
+  s = s || {saleQty:0,refundQty:0,netAmount:0};
+  const parts = [];
+  if(n(s.saleQty) > 0) parts.push(`售${n(s.saleQty)}件`);
+  if(n(s.refundQty) > 0) parts.push(`退${n(s.refundQty)}件`);
+  if(!parts.length) parts.push("售0件");
+  return `${parts.join(" ")} ${money(s.netAmount)}`;
+}
+function confirmOrder(){
   const order = DataLayer.createOrder(data.cart, {salesman:$("salesman").value, paymentMethod:$("payMethod").value, note:$("orderNote").value, roundOff:Math.abs(n($("roundOff").value))});
   if(!order) return;
   currentOrderId = order.id;
-  UI.orders.renderDetail();
-  showPage("order-detail");
+  renderPaySuccess(order.id);
+  showPage("pay-success");
 }
+function renderPaySuccess(id){
+  const o = data.orders.find(o => o.id === id);
+  if(!o){ $("paySuccessBox").innerHTML = `<div class="pa-empty">订单不存在</div>`; return; }
+  const s = orderSummary(o);
+  const isRefund = s.netAmount < 0;
+  const amountText = money(Math.abs(s.netAmount));
+  $("paySuccessTopTitle").innerText = isRefund ? "退款成功" : "支付成功";
+  $("paySuccessBox").innerHTML = `
+    <div class="pay-success-wrap">
+      <div class="pay-success-card">
+        <div class="pay-check ${isRefund?'refund':''}">✓</div>
+        <div class="pay-success-title">${isRefund?'已退':'已收'} ${amountText}</div>
+        <div class="pay-success-lines">
+          <div class="k">客户</div><div class="v">散客</div>
+          <div class="k">订单号</div><div class="v">${esc(o.no)}</div>
+          <div class="k">商品数量/商品金额</div><div class="v">${cartSummaryText(s)}</div>
+          <div class="k">支付方式</div><div class="v">${esc(o.paymentMethod || "微信支付")}</div>
+          <div class="k">备注</div><div class="v">${esc(o.note || "")}</div>
+        </div>
+        <div class="pay-detail-link" onclick="UI.orders.openDetail('${esc(o.id)}')">查看详情</div>
+      </div>
+      <div class="pay-success-actions">
+        <button class="btn btn-line" onclick="UI.orders.openDetail('${esc(o.id)}')">查看详情</button>
+        <button class="btn btn-line blue" onclick="showPage('sale')">继续开单</button>
+      </div>
+    </div>
+  `;
+}
+
 function editOrder(id){
   const o = data.orders.find(o => o.id === id);
   if(!o || o.isVoid) return;
