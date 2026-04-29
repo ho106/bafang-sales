@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>八方来财销售开单版 V2.30</title>
+<title>八方来财销售开单版 V2.31</title>
 <style>
 :root{
   --blue:#2f6df6;
@@ -509,12 +509,35 @@ button:active,
   .picker-bottom .btn{font-size:16px}
 }
 
+
+/* V2.31 选择商品界面修复：删除仓库/购买记录/颜色全选/备注，增加批量加减 */
+.picker-colors{
+  border-top:1px solid var(--line);
+}
+.picker-batch-op{
+  border:0;
+  background:transparent;
+  color:#7b8494;
+  height:44px;
+  font-size:34px;
+  font-weight:900;
+  line-height:1;
+}
+.picker-bottom-inner{
+  grid-template-columns:1fr 128px 136px !important;
+}
+@media (max-width:420px){
+  .picker-bottom-inner{
+    grid-template-columns:1fr 104px 112px !important;
+  }
+}
+
 </style>
 </head>
 <body>
 <div id="app" class="app">
   <section id="page-sale" class="page active">
-    <div class="topbar"><div class="title">八方来财销售开单版 V2.30</div><div class="right"><button class="icon-btn" onclick="openCart()">🛒<span id="cartBadge" class="cart-badge" style="display:none">0</span></button></div></div>
+    <div class="topbar"><div class="title">八方来财销售开单版 V2.31</div><div class="right"><button class="icon-btn" onclick="openCart()">🛒<span id="cartBadge" class="cart-badge" style="display:none">0</span></button></div></div>
     <div class="toolbar">
       <div class="search">⌕<input id="saleSearch" placeholder="搜索款号/商品名称" oninput="UI.sale.render()"></div>
       <button class="small-btn btn-line" onclick="alert('扫码入口已预留，后期接小程序扫码')">扫码选款</button>
@@ -639,14 +662,14 @@ button:active,
 
 <script>
 /*
-  八方来财销售开单版 V2.30
+  八方来财销售开单版 V2.31
   清理稳定版原则：
   1. 只保留一个核心数据层 DataLayer
   2. 页面不得绕过 DataLayer 自己乱算
   3. 每个页面只保留一个 render 入口
   4. 销售单 qty 为正数，退货 qty 为负数；不再单独切换销售/退货模式
 */
-const VERSION = "V2.30";
+const VERSION = "V2.31";
 const STORAGE_KEY = "bafang_sales_v1";
 const $ = id => document.getElementById(id);
 const n = v => Number(v || 0) || 0;
@@ -1189,13 +1212,9 @@ const UI = {
             </div>
             <button class="picker-close" onclick="closePicker()">×</button>
           </div>
-          <div class="picker-meta">
-            <div class="picker-meta-left"><span>主仓 ›</span><span>购买记录 ›</span></div>
-            <div class="picker-meta-right"><span>颜色全选</span><span class="picker-switch"></span></div>
-          </div>
           <div class="picker-colors">${p.colors.map(c => `<button class="color-chip ${c===color?'active':''}" onclick="setPickerColor('${esc(c)}')">${esc(c)}</button>`).join("")}</div>
           <div class="picker-table">
-            <div class="picker-row head"><div>规格</div><div>价格</div><div>已选</div><div>可售<br>库存</div><div></div><div>−</div><div>＋</div></div>
+            <div class="picker-row head"><div>规格</div><div>价格</div><div>已选</div><div>可售<br>库存</div><div></div><button class="picker-batch-op" onclick="batchPickerQty(-1)">−</button><button class="picker-batch-op" onclick="batchPickerQty(1)">＋</button></div>
             ${p.sizes.map(size => {
               const key = color+";"+size;
               const q = n(pickerDraft.qty && pickerDraft.qty[key]);
@@ -1216,7 +1235,7 @@ const UI = {
       `;
       document.querySelector("#page-picker .bottom-bar").className = "picker-bottom";
       document.querySelector("#page-picker .bottom-inner").className = "picker-bottom-inner";
-      document.querySelector("#page-picker .picker-bottom-inner").innerHTML = `<button class="picker-note" onclick="alert('备注功能在结算页填写')">备注</button><div class="picker-total">共 <b>${total}</b> 件</div><button class="btn btn-light" onclick="openCheckout()">立即结算</button><button class="btn btn-blue" onclick="continueSelect()">继续选款</button>`;
+      document.querySelector("#page-picker .picker-bottom-inner").innerHTML = `<div class="picker-total">共 <b>${total}</b> 件</div><button class="btn btn-light" onclick="openCheckout()">立即结算</button><button class="btn btn-blue" onclick="continueSelect()">继续选款</button>`;
     }
   },
   checkout:{
@@ -1396,6 +1415,20 @@ function changePickerQty(size, delta){
   if(next > DataLayer.stockOf(p,c,size)){ alert("销售数量不能超过库存；退货请点减号"); return; }
   pickerDraft.qty[key] = next;
   UI.picker.render();
+}
+function batchPickerQty(delta){
+  const p = DataLayer.getProduct(pickerCode); if(!p) return;
+  const c = pickerDraft.color || p.colors[0];
+  let blocked = false;
+  (p.sizes || []).forEach(size => {
+    const key = c+";"+size;
+    const cur = n(pickerDraft.qty[key]);
+    const next = cur + delta;
+    if(delta > 0 && next > DataLayer.stockOf(p,c,size)){ blocked = true; return; }
+    pickerDraft.qty[key] = next;
+  });
+  UI.picker.render();
+  if(blocked) alert("部分尺码库存不足，已跳过不能继续增加的 SKU");
 }
 function mergePickerToCart(){
   const p = DataLayer.getProduct(pickerCode);
