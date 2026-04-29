@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>八方来财销售开单版 V2.28</title>
+<title>八方来财销售开单版 V2.29</title>
 <style>
 :root{
   --blue:#2f6df6;
@@ -186,12 +186,111 @@ textarea{min-height:88px;resize:none}
   .pa-table th,.pa-table td{width:72px;min-width:72px}
   .metric-grid{grid-template-columns:repeat(3,1fr)}
 }
+
+/* V2.29 手机端 UI 美化：只做视觉层优化，不改 DataLayer */
+button:active,
+.pm-item:active,
+.product-card:active,
+.color-chip:active,
+.option-item:active,
+.pe-upload-box:active{
+  opacity:.72;
+  transition:opacity .1s ease;
+}
+.topbar .title{font-size:21px}
+.product-list{padding-bottom:112px}
+.product-card{
+  grid-template-columns:72px 1fr auto;
+  min-height:96px;
+  padding:10px 12px;
+  margin:9px 0;
+  border-radius:16px;
+}
+.thumb{width:72px;height:72px}
+.product-name{
+  font-size:18px;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+.tabs button{height:46px}
+.card{margin:12px 16px;padding:16px}
+.chart-card{padding:16px;border-radius:16px}
+.metric .num{font-size:22px}
+.report-filter{padding:12px 16px}
+.pa-mode-trigger{height:46px;min-width:92px}
+.pa-chip,.ba-chip{
+  height:46px;
+  min-width:92px;
+  font-weight:800;
+}
+.pa-chip.today,.ba-chip.today{
+  font-weight:900;
+  border-color:#9ab9ff;
+  box-shadow:inset 0 0 0 1px rgba(47,109,246,.12);
+}
+.pa-chip.active.today,.ba-chip.active.today{
+  background:var(--blue);
+  border-color:var(--blue);
+  color:#fff;
+}
+.svg-chart{height:245px}
+.pm-summary{
+  background:#fff;
+  border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+}
+.pm-summary-item{padding:12px 10px}
+.pm-summary-num{font-size:17px}
+.pm-summary-label{font-size:12px}
+.pm-item{
+  cursor:pointer;
+  -webkit-tap-highlight-color:rgba(47,109,246,.08);
+}
+.pm-main{
+  grid-template-columns:78px 1fr auto;
+  padding:12px 16px 8px;
+}
+.pm-main img{width:60px;height:60px}
+.pm-title{
+  font-size:17px;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+.pm-arrow{color:#2f6df6;font-weight:900}
+.pm-values{padding:0 16px 12px}
+.pm-value-num{font-size:16px}
+.pm-values>div:nth-child(2) .pm-value-num,
+.pm-values>div:nth-child(3) .pm-value-num{
+  color:#64748b;
+  font-weight:800;
+}
+.pm-values>div:first-child .pm-value-num{
+  color:#111827;
+  font-weight:900;
+}
+.pe-upload-box:active{background:#eef5ff}
+.pe-row{min-height:56px}
+.matrix-table input{height:42px}
+.spec-zero-tip{
+  margin:12px 0 6px;
+  padding:12px;
+  border-radius:10px;
+  background:#f8fafc;
+  color:#94a3b8;
+  text-align:center;
+  font-weight:700;
+}
+
 </style>
 </head>
 <body>
 <div id="app" class="app">
   <section id="page-sale" class="page active">
-    <div class="topbar"><div class="title">八方来财销售开单版 V2.28</div><div class="right"><button class="icon-btn" onclick="openCart()">🛒<span id="cartBadge" class="cart-badge" style="display:none">0</span></button></div></div>
+    <div class="topbar"><div class="title">八方来财销售开单版 V2.29</div><div class="right"><button class="icon-btn" onclick="openCart()">🛒<span id="cartBadge" class="cart-badge" style="display:none">0</span></button></div></div>
     <div class="toolbar">
       <div class="search">⌕<input id="saleSearch" placeholder="搜索款号/商品名称" oninput="UI.sale.render()"></div>
       <button class="small-btn btn-line" onclick="alert('扫码入口已预留，后期接小程序扫码')">扫码选款</button>
@@ -211,7 +310,7 @@ textarea{min-height:88px;resize:none}
     <div class="card">
       <div class="title">订单结算</div>
       <div class="checkout-line"><span>数量 / 金额</span><b id="checkoutQtyAmount">0件 / 0</b></div>
-      <div class="checkout-line"><span>抹零金额</span><input id="roundOff" type="number" value="" placeholder="请输入" oninput="UI.checkout.render()" style="text-align:right"></div>
+      <div class="checkout-line"><span>抹零金额</span><input id="roundOff" type="number" inputmode="decimal" pattern="[0-9.]*" value="" placeholder="请输入" oninput="UI.checkout.render()" style="text-align:right"></div>
       <div class="checkout-line"><span id="payLabel">应收金额</span><strong id="receivable" class="red">0</strong></div>
       <div class="checkout-line"><span>支付方式</span><select id="payMethod"><option>微信支付</option><option>支付宝</option><option>现金支付</option><option>银行卡</option></select></div>
       <div class="checkout-line"><span>业务员</span><input id="salesman" value="李飞"></div>
@@ -316,14 +415,14 @@ textarea{min-height:88px;resize:none}
 
 <script>
 /*
-  八方来财销售开单版 V2.28
+  八方来财销售开单版 V2.29
   清理稳定版原则：
   1. 只保留一个核心数据层 DataLayer
   2. 页面不得绕过 DataLayer 自己乱算
   3. 每个页面只保留一个 render 入口
   4. 销售单 qty 为正数，退货 qty 为负数；不再单独切换销售/退货模式
 */
-const VERSION = "V2.28";
+const VERSION = "V2.29";
 const STORAGE_KEY = "bafang_sales_v1";
 const $ = id => document.getElementById(id);
 const n = v => Number(v || 0) || 0;
@@ -979,7 +1078,7 @@ const UI = {
               <div class="pm-sub">${esc(p.category || '未分类')}</div>
               <div class="pm-price">${p.multiPrice ? "多规格价 " : "零售价 "}${esc(productRetailPriceLabel(p))}</div>
             </div>
-            <div class="pm-arrow">▾</div>
+            <div class="pm-arrow">编辑 ›</div>
           </div>
           <div class="pm-values">
             <div><div class="pm-value-num">${stock}</div><div class="pm-value-label">库存数量</div></div>
@@ -1122,7 +1221,7 @@ function renderPaChips(boxId){
   const box = $(boxId); if(!box) return;
   const days = [];
   for(let i=5;i>=0;i--) days.push(shiftDay(today(), -i));
-  box.innerHTML = days.map(d => `<button class="pa-chip ${paState.anchor===d?'active':''}" onclick="selectPaChip('${d}')">${d===today()?'今天':md(d)}</button>`).join("");
+  box.innerHTML = days.map(d => `<button class="pa-chip ${paState.anchor===d?'active':''} ${d===today()?'today':''}" onclick="selectPaChip('${d}')">${d===today()?'今天':md(d)}</button>`).join("");
 }
 function selectPaChip(day){
   paState.anchor = day;
@@ -1207,7 +1306,7 @@ function ensureBaAnchor(){
 function renderBaChips(){
   const box = $("baChips"); if(!box) return;
   const items = ensureBaAnchor();
-  box.innerHTML = items.map(x => `<button class="ba-chip ${String(baState.anchor)===String(x.key)?'active':''}" onclick="selectBaAnchor('${esc(x.key)}')">${esc(x.label)}</button>`).join("");
+  box.innerHTML = items.map(x => `<button class="ba-chip ${String(baState.anchor)===String(x.key)?'active':''} ${x.label==='今天'?'today':''}" onclick="selectBaAnchor('${esc(x.key)}')">${esc(x.label)}</button>`).join("");
 }
 function selectBaAnchor(key){ baState.anchor = key; renderBusinessAnalysis(); }
 function currentBaRange(){
@@ -1271,7 +1370,7 @@ function renderBaChart(series, key, title){
     <line x1="24" y1="90" x2="340" y2="90" stroke="#e5e7eb"/>
     <line x1="24" y1="40" x2="340" y2="40" stroke="#e5e7eb"/>
     <polyline points="${poly}" fill="none" stroke="#4f7df3" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-    ${pts.map((p,i) => `<circle cx="${p[0]}" cy="${p[1]}" r="4" fill="#4f7df3"/><text x="${p[0]-14}" y="${Math.max(18,p[1]-10)}" font-size="11">${money(vals[i])}</text><text x="${p[0]-14}" y="214" font-size="11" fill="#6b7280">${esc(series[i].label)}</text>`).join("")}
+    ${pts.map((p,i) => `<circle cx="${p[0]}" cy="${p[1]}" r="4" fill="#4f7df3"/><text x="${p[0]-14}" y="${Math.max(18,(p[1]>168?p[1]-22:p[1]-10))}" font-size="11">${money(vals[i])}</text><text x="${p[0]-14}" y="214" font-size="11" fill="#6b7280">${esc(series[i].label)}</text>`).join("")}
   `;
   $("baChartTitle").innerText = title;
   const ring = baRingText(vals[vals.length-1] || 0, vals.length > 1 ? vals[vals.length-2] : 0);
@@ -1383,7 +1482,7 @@ function renderPaDetail(){
 function renderPaSpec(p){
   const rows = DataLayer.calcSKUStats(rangeOrdersFromPa(p.code), p.code);
   const max = Math.max(0,...rows.map(r => n(r.qty)));
-  $("paDetailContent").innerHTML = `<div class="spec-chart"><div class="row"><b>规格销售分布</b><span class="sub">按销量占比</span></div>${rows.map(r => {
+  $("paDetailContent").innerHTML = `<div class="spec-chart"><div class="row"><b>规格销售分布</b><span class="sub">按销量占比</span></div>${max===0?'<div class="spec-zero-tip">当前日期无销售记录</div>':''}${rows.map(r => {
     const w = max ? Math.round(n(r.qty)/max*100) : 0;
     return `<div class="spec-bar-row"><span>${esc(r.label)}</span><div class="spec-bar-bg"><div class="spec-bar-fill" style="width:${w}%"></div></div><b>${Math.round(n(r.qty))}</b></div>`;
   }).join("")}</div><div class="pa-grid"><table class="pa-table"><thead><tr><th>商品规格</th>${paState.columns.map(k => `<th>${paColLabel(k)}</th>`).join("")}<th></th></tr></thead><tbody>${rows.map(r => `<tr><td>${esc(r.label)}</td>${paState.columns.map(k => `<td><span class="pa-value">${paFmt(k,r)}</span></td>`).join("")}<td></td></tr>`).join("")}</tbody></table></div>`;
@@ -1422,13 +1521,13 @@ function renderPaTrend(p){
   <div class="chart-card"><div class="row"><b>${m[1]}</b><span class="sub">环比 --</span></div><svg class="svg-chart" viewBox="0 0 360 230">
     <line x1="24" y1="190" x2="340" y2="190" stroke="#e5e7eb"/><line x1="24" y1="140" x2="340" y2="140" stroke="#e5e7eb"/><line x1="24" y1="90" x2="340" y2="90" stroke="#e5e7eb"/><line x1="24" y1="40" x2="340" y2="40" stroke="#e5e7eb"/>
     <polyline points="${poly}" fill="none" stroke="#4f7df3" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-    ${pts.map((pnt,i) => `<circle cx="${pnt[0]}" cy="${pnt[1]}" r="4" fill="#4f7df3"/><text x="${pnt[0]-12}" y="${Math.max(18,pnt[1]-10)}" font-size="11">${m[3](vals[i])}</text><text x="${pnt[0]-12}" y="214" font-size="11" fill="#6b7280">${md(series[i].day)}</text>`).join("")}
+    ${pts.map((pnt,i) => `<circle cx="${pnt[0]}" cy="${pnt[1]}" r="4" fill="#4f7df3"/><text x="${pnt[0]-12}" y="${Math.max(18,(pnt[1]>168?pnt[1]-22:pnt[1]-10))}" font-size="11">${m[3](vals[i])}</text><text x="${pnt[0]-12}" y="214" font-size="11" fill="#6b7280">${md(series[i].day)}</text>`).join("")}
   </svg></div>`;
 }
 function renderPaStock(p){
   const rows = [];
   (p.colors || []).forEach(c => (p.sizes || []).forEach(z => rows.push({label:c+";"+z,stock:DataLayer.stockOf(p,c,z)})));
-  $("paDetailContent").innerHTML = `<div class="detail-card"><div class="title">库存</div>${rows.map(r => `<div class="stock-line"><b>${esc(r.label)}</b><input type="number" value="${numInputValue(r.stock)}" onchange="setPaStock('${esc(p.code)}','${esc(r.label)}',this.value)"></div>`).join("")}</div>`;
+  $("paDetailContent").innerHTML = `<div class="detail-card"><div class="title">库存</div>${rows.map(r => `<div class="stock-line"><b>${esc(r.label)}</b><input type="number" inputmode="decimal" pattern="[0-9.]*" value="${numInputValue(r.stock)}" onchange="setPaStock('${esc(p.code)}','${esc(r.label)}',this.value)"></div>`).join("")}</div>`;
 }
 function setPaStock(code,label,value){
   const p = DataLayer.getProduct(code);
@@ -1496,8 +1595,8 @@ function renderProductEdit(){
         <div class="pe-gap"></div>
         <div class="pe-form">
           <div class="pe-row"><span class="k">多规格多价格</span><span></span><span class="switch ${productDraft.multiPrice?'on':''}" onclick="toggleDraftMultiPrice(event)"></span></div>
-          <div class="pe-row"><span class="k">销售价<span class="req">*</span></span><input id="editPrice" type="number" value="${numInputValue(productDraft.price)}" placeholder="¥请输入" ${productDraft.multiPrice?'disabled':''}></div>
-          <div class="pe-row"><span class="k">成本价</span><input id="editCost" type="number" value="${numInputValue(productDraft.cost)}" placeholder="¥请输入" ${productDraft.multiPrice?'disabled':''}></div>
+          <div class="pe-row"><span class="k">销售价<span class="req">*</span></span><input id="editPrice" type="number" inputmode="decimal" pattern="[0-9.]*" value="${numInputValue(productDraft.price)}" placeholder="¥请输入" ${productDraft.multiPrice?'disabled':''}></div>
+          <div class="pe-row"><span class="k">成本价</span><input id="editCost" type="number" inputmode="decimal" pattern="[0-9.]*" value="${numInputValue(productDraft.cost)}" placeholder="¥请输入" ${productDraft.multiPrice?'disabled':''}></div>
           <div class="pe-row" ${productDraft.multiPrice?'onclick="openProductPricePage()"':''}><span class="k">价格设置</span><span class="v ${productDraft.multiPrice?'':'placeholder'}">${esc(productDraft.multiPrice ? priceText : '关闭后按统一销售价 / 成本价')}</span><span class="arrow">${productDraft.multiPrice?'›':''}</span></div>
         </div>
         <div class="pe-gap"></div>
@@ -1655,7 +1754,7 @@ function openProductPricePage(){
       <table class="matrix-table"><thead><tr><th>规格</th><th>销售价</th><th>成本价</th></tr></thead><tbody>${rows.map(r => {
         const one = productDraft.skuPrices[r.key] || {};
         const label = productDraft.colors.length > 1 && productDraft.sizes.length > 1 ? `${r.color}/${r.size}` : (productDraft.colors.length > 1 ? r.color : r.size);
-        return `<tr><td>${esc(label)}</td><td><input type="number" value="${numInputValue(one.price || productDraft.price)}" onchange="setDraftSkuPrice('${r.key}','price',this.value)"></td><td><input type="number" value="${numInputValue(one.cost || productDraft.cost)}" onchange="setDraftSkuPrice('${r.key}','cost',this.value)"></td></tr>`;
+        return `<tr><td>${esc(label)}</td><td><input type="number" inputmode="decimal" pattern="[0-9.]*" value="${numInputValue(one.price || productDraft.price)}" onchange="setDraftSkuPrice('${r.key}','price',this.value)"></td><td><input type="number" inputmode="decimal" pattern="[0-9.]*" value="${numInputValue(one.cost || productDraft.cost)}" onchange="setDraftSkuPrice('${r.key}','cost',this.value)"></td></tr>`;
       }).join('')}</tbody></table>
       <div class="matrix-foot"><button class="btn btn-blue" onclick="saveProductPricePage()">保存</button></div>
     </div>`;
@@ -1695,7 +1794,7 @@ function openProductStockPage(){
       <table class="matrix-table"><thead><tr><th>规格</th><th>库存</th></tr></thead><tbody>${rows.map(r => {
         const label = productDraft.colors.length > 1 && productDraft.sizes.length > 1 ? `${r.color}/${r.size}` : (productDraft.colors.length > 1 ? r.color : r.size);
         const val = n(productDraft.stock && productDraft.stock[r.color] && productDraft.stock[r.color][r.size]);
-        return `<tr><td>${esc(label)}</td><td><input type="number" value="${numInputValue(val)}" oninput="setDraftStock('${r.color}','${r.size}',this.value)" onchange="setDraftStock('${r.color}','${r.size}',this.value)"></td></tr>`;
+        return `<tr><td>${esc(label)}</td><td><input type="number" inputmode="decimal" pattern="[0-9.]*" value="${numInputValue(val)}" oninput="setDraftStock('${r.color}','${r.size}',this.value)" onchange="setDraftStock('${r.color}','${r.size}',this.value)"></td></tr>`;
       }).join('')}</tbody></table>
       <div class="matrix-foot"><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><button class="btn btn-light" onclick="batchSetDraftStock()">批量设置</button><button class="btn btn-blue" onclick="saveProductStockPage()">确认</button></div><button class="small-btn btn-line" style="margin-top:10px;width:100%" onclick="backFromProductStock()">取消本次库存修改</button></div>
     </div>`;
