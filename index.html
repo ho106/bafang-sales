@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>八方来财销售开单版 V2.38</title>
+<title>八方来财销售开单版 V2.39</title>
 <style>
 :root{
   --blue:#2f6df6;
@@ -612,7 +612,7 @@ button:active,
 <body>
 <div id="app" class="app">
   <section id="page-sale" class="page active">
-    <div class="topbar"><div class="title">八方来财销售开单版 V2.38</div><div class="right"><button class="icon-btn" onclick="openCart()">🛒<span id="cartBadge" class="cart-badge" style="display:none">0</span></button></div></div>
+    <div class="topbar"><div class="title">八方来财销售开单版 V2.39</div><div class="right"><button class="icon-btn" onclick="openCart()">🛒<span id="cartBadge" class="cart-badge" style="display:none">0</span></button></div></div>
     <div class="toolbar">
       <div class="search">⌕<input id="saleSearch" placeholder="搜索款号/商品名称" oninput="UI.sale.render()"></div>
       <button class="small-btn btn-line" onclick="alert('扫码入口已预留，后期接小程序扫码')">扫码选款</button>
@@ -742,14 +742,14 @@ button:active,
 
 <script>
 /*
-  八方来财销售开单版 V2.38
+  八方来财销售开单版 V2.39
   清理稳定版原则：
   1. 只保留一个核心数据层 DataLayer
   2. 页面不得绕过 DataLayer 自己乱算
   3. 每个页面只保留一个 render 入口
   4. 销售单 qty 为正数，退货 qty 为负数；不再单独切换销售/退货模式
 */
-const VERSION = "V2.38";
+const VERSION = "V2.39";
 const STORAGE_KEY = "bafang_sales_v1";
 const $ = id => document.getElementById(id);
 const n = v => Number(v || 0) || 0;
@@ -1423,13 +1423,17 @@ const UI = {
       const orders = range === "all" ? DataLayer.getValidOrders("all") : DataLayer.getValidOrders(range);
       const s = DataLayer.calcOrderSummary(orders);
       $("salesMetrics").innerHTML = [
-        ["销售 "+s.qty+"件",money(s.amount)],["退货 "+s.refundQty+"件",money(s.refundAmount)],["毛利率",pct(s.margin)]
+        ["销售 "+s.qty+"件",money(s.amount)],
+        ["退货 "+s.refundQty+"件",money(s.refundAmount)],
+        ["毛利率 "+pct(s.margin),money(s.profit)]
       ].map(metricHtml).join("");
       $("financeMetrics").innerHTML = [
         ["总收入 "+s.saleOrderCount+"笔",money(s.amount)],["总支出 "+s.refundOrderCount+"笔",money(s.refundAmount)],["净收入",money(s.netAmount)]
       ].map(metricHtml).join("");
       $("stockMetrics").innerHTML = [
-        ["出库数",s.qty],["入库数",s.refundQty],["出库毛利",money(s.profit)]
+        ["出库数",s.qty],
+        ["出库金额",money(s.amount)],
+        ["出库毛利",money(s.profit)]
       ].map(metricHtml).join("");
     }
   },
