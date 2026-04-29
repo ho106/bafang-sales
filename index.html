@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>八方来财销售开单版 V2.34</title>
+<title>八方来财销售开单版 V2.35</title>
 <style>
 :root{
   --blue:#2f6df6;
@@ -612,7 +612,7 @@ button:active,
 <body>
 <div id="app" class="app">
   <section id="page-sale" class="page active">
-    <div class="topbar"><div class="title">八方来财销售开单版 V2.34</div><div class="right"><button class="icon-btn" onclick="openCart()">🛒<span id="cartBadge" class="cart-badge" style="display:none">0</span></button></div></div>
+    <div class="topbar"><div class="title">八方来财销售开单版 V2.35</div><div class="right"><button class="icon-btn" onclick="openCart()">🛒<span id="cartBadge" class="cart-badge" style="display:none">0</span></button></div></div>
     <div class="toolbar">
       <div class="search">⌕<input id="saleSearch" placeholder="搜索款号/商品名称" oninput="UI.sale.render()"></div>
       <button class="small-btn btn-line" onclick="alert('扫码入口已预留，后期接小程序扫码')">扫码选款</button>
@@ -742,14 +742,14 @@ button:active,
 
 <script>
 /*
-  八方来财销售开单版 V2.34
+  八方来财销售开单版 V2.35
   清理稳定版原则：
   1. 只保留一个核心数据层 DataLayer
   2. 页面不得绕过 DataLayer 自己乱算
   3. 每个页面只保留一个 render 入口
   4. 销售单 qty 为正数，退货 qty 为负数；不再单独切换销售/退货模式
 */
-const VERSION = "V2.34";
+const VERSION = "V2.35";
 const STORAGE_KEY = "bafang_sales_v1";
 const $ = id => document.getElementById(id);
 const n = v => Number(v || 0) || 0;
@@ -1261,7 +1261,7 @@ const UI = {
 
       list = list.filter(p => (p.code+" "+p.name+" "+p.category).toLowerCase().includes(kw));
       $("saleProductList").innerHTML = list.map(p => `
-        <div class="product-card" onclick="openProductPicker('${esc(p.code)}')">
+        <div class="product-card" data-code="${esc(p.code)}" onclick="openProductPickerFromCard(this)">
           <img class="thumb" src="${esc(p.image)}">
           <div><div class="product-name">${esc(p.code)}${esc(p.name)}</div><div class="sub">${esc(p.category)}</div></div>
           <div class="price">${money(p.price)}</div>
@@ -1274,10 +1274,12 @@ const UI = {
     render(){
       const p = DataLayer.getProduct(pickerCode);
       if(!p){ $("pickerBox").innerHTML = `<div class="pa-empty">商品不存在</div>`; return; }
-      const color = pickerDraft.color || p.colors[0];
+      const colors = Array.isArray(p.colors) && p.colors.length ? p.colors : [""];
+      const sizes = Array.isArray(p.sizes) && p.sizes.length ? p.sizes : ["均码"];
+      const color = pickerDraft.color || colors[0];
       pickerDraft.color = color;
       const pickerSummary = calcPickerSummary();
-      const priceVals = p.sizes.map(size => DataLayer.getSkuPrice(p,color,size)).filter(v => n(v) > 0);
+      const priceVals = sizes.map(size => DataLayer.getSkuPrice(p,color,size)).filter(v => n(v) > 0);
       const minPrice = priceVals.length ? Math.min(...priceVals.map(n)) : n(p.price);
       const maxPrice = priceVals.length ? Math.max(...priceVals.map(n)) : n(p.price);
       const priceText = minPrice === maxPrice ? money(minPrice) : `${money(minPrice)}–${money(maxPrice)}`;
@@ -1292,10 +1294,10 @@ const UI = {
             </div>
             <button class="picker-close" onclick="closePicker()">×</button>
           </div>
-          <div class="picker-colors">${p.colors.map(c => `<button class="color-chip ${c===color?'active':''}" onclick="setPickerColor('${esc(c)}')">${esc(c)}</button>`).join("")}</div>
+          <div class="picker-colors">${colors.map(c => `<button class="color-chip ${c===color?'active':''}" onclick="setPickerColor('${esc(c)}')">${esc(c || "未设颜色")}</button>`).join("")}</div>
           <div class="picker-table">
             <div class="picker-row head"><div>规格</div><div>价格</div><div>已选</div><div>可售<br>库存</div><div></div><button class="picker-batch-op" onclick="batchPickerQty(-1)">−</button><button class="picker-batch-op" onclick="batchPickerQty(1)">＋</button></div>
-            ${p.sizes.map(size => {
+            ${sizes.map(size => {
               const key = color+";"+size;
               const q = n(pickerDraft.qty && pickerDraft.qty[key]);
               const stock = DataLayer.stockOf(p,color,size);
@@ -1481,17 +1483,26 @@ function setSaleTab(tab){
   UI.sale.render();
 }
 function renderCartBadge(){
+  const el = $("cartBadge");
+  if(!el) return;
   const q = data.cart.reduce((s,i) => s + Math.abs(n(i.qty)),0);
-  $("cartBadge").style.display = q ? "inline-flex" : "none";
-  $("cartBadge").innerText = q;
+  el.style.display = q ? "inline-flex" : "none";
+  el.innerText = q;
+}
+function openProductPickerFromCard(el){
+  openProductPicker(el && el.dataset ? el.dataset.code : "");
 }
 function openProductPicker(code){
   pickerCode = code;
-  const p = DataLayer.getProduct(code) || {};
-  pickerDraft = {color:(p.colors && p.colors[0]) || "默认", qty:{}};
+  const p = DataLayer.getProduct(code);
+  if(!p){ alert("商品不存在，请先到商品管理检查资料"); return; }
 
-  // V2.34：从购物车进入或重复点击同款时，把该商品已选 SKU 带回选择页，方便继续修改数量。
-  // 同时先从 data.cart 临时移出该商品，避免底部“售/退/金额”重复计算。
+  const colors = Array.isArray(p.colors) && p.colors.length ? p.colors : [""];
+  const sizes = Array.isArray(p.sizes) && p.sizes.length ? p.sizes : ["均码"];
+  pickerDraft = {color:colors[0], qty:{}};
+
+  // V2.35：从购物车进入或重复点击同款时，把该商品已选 SKU 带回选择页，方便继续修改数量。
+  // 注意：这里只做内存临时移出，不立即 DataLayer.save()，避免点击商品时因本地存储过大导致脚本中断。
   const remain = [];
   (data.cart || []).forEach(i => {
     if(String(i.code) === String(code)){
@@ -1503,7 +1514,6 @@ function openProductPicker(code){
     }
   });
   data.cart = remain;
-  DataLayer.save();
   renderCartBadge();
 
   showPage("picker");
@@ -1592,7 +1602,8 @@ function calcPickerSummary(){
   const s = calcCartSummary();
   const p = DataLayer.getProduct(pickerCode);
   if(!p) return s;
-  const c = pickerDraft.color || (p.colors || [])[0];
+  const colors = Array.isArray(p.colors) && p.colors.length ? p.colors : [""];
+  const c = pickerDraft.color || colors[0];
   Object.keys(pickerDraft.qty || {}).forEach(key => {
     const q = n(pickerDraft.qty[key]);
     if(!q) return;
@@ -2305,6 +2316,7 @@ function saveProductEdit(){
     Object.keys(p.skuPrices || {}).forEach(k => { p.skuPrices[k] = {price:n(p.price), cost:n(p.cost)}; });
   }
   DataLayer.save();
+  alert('保存成功');
   showPage('me');
 }
 function openImagePreview(e,src){ e && e.stopPropagation(); $("imageModalImg").src = src; $("imageModal").style.display = "flex"; }
