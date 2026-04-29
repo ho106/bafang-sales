@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>八方来财销售开单版 V2.29</title>
+<title>八方来财销售开单版 V2.30</title>
 <style>
 :root{
   --blue:#2f6df6;
@@ -285,12 +285,236 @@ button:active,
   font-weight:700;
 }
 
+
+/* V2.30 选择商品界面排版优化：只调整样式，不改销售/退货逻辑 */
+.picker-page .topbar{
+  height:54px;
+}
+.picker-wrap{
+  background:#fff;
+  min-height:calc(100vh - 54px);
+  padding-bottom:98px;
+}
+.picker-head{
+  display:grid;
+  grid-template-columns:110px 1fr 42px;
+  gap:12px;
+  padding:14px 16px 12px;
+  border-bottom:1px solid var(--line);
+  align-items:start;
+}
+.picker-head .picker-img{
+  width:110px;
+  height:110px;
+  border-radius:6px;
+  object-fit:cover;
+  background:#eef2ff;
+}
+.picker-title{
+  font-size:21px;
+  line-height:1.25;
+  font-weight:900;
+  color:#111827;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+.picker-cat{
+  margin-top:4px;
+  font-size:15px;
+  color:#8b95a5;
+}
+.picker-price{
+  margin-top:8px;
+  font-size:17px;
+  line-height:1.2;
+  color:#ef4444;
+  font-weight:900;
+}
+.picker-close{
+  width:38px;
+  height:38px;
+  border:0;
+  background:transparent;
+  color:#a3adbd;
+  font-size:32px;
+  font-weight:500;
+  line-height:1;
+}
+.picker-meta{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:11px 16px;
+  border-bottom:1px solid var(--line);
+  background:#fff;
+  font-size:15px;
+  color:#475569;
+}
+.picker-meta-left{
+  display:flex;
+  gap:18px;
+  align-items:center;
+  white-space:nowrap;
+}
+.picker-meta-right{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  white-space:nowrap;
+}
+.picker-switch{
+  width:48px;
+  height:28px;
+  border-radius:999px;
+  background:#e5e7eb;
+  position:relative;
+  display:inline-block;
+}
+.picker-switch:after{
+  content:"";
+  position:absolute;
+  width:24px;
+  height:24px;
+  border-radius:50%;
+  left:2px;
+  top:2px;
+  background:#fff;
+  box-shadow:0 1px 3px rgba(0,0,0,.18);
+}
+.picker-colors{
+  display:flex;
+  gap:10px;
+  overflow-x:auto;
+  padding:12px 16px;
+  border-bottom:1px solid var(--line);
+  background:#fff;
+}
+.picker-colors .color-chip{
+  min-width:56px;
+  height:36px;
+  border-radius:4px;
+  padding:0 12px;
+  margin:0;
+  font-size:15px;
+  border:1px solid #dbe4f0;
+  background:#f6f7fb;
+  color:#111827;
+}
+.picker-colors .color-chip.active{
+  color:#2f6df6;
+  border-color:#2f6df6;
+  background:#eef5ff;
+}
+.picker-table{
+  background:#fff;
+}
+.picker-row{
+  display:grid;
+  grid-template-columns:58px 70px 64px 76px 36px 40px 40px;
+  align-items:center;
+  min-height:56px;
+  padding:0 12px;
+  border-bottom:1px solid #f0f2f6;
+  column-gap:4px;
+  font-size:16px;
+  color:#111827;
+}
+.picker-row.head{
+  min-height:52px;
+  background:#f7f8fa;
+  color:#111827;
+  font-weight:800;
+  font-size:15px;
+}
+.picker-row .price{
+  color:#f97316;
+  font-size:16px;
+  font-weight:800;
+}
+.picker-stock{
+  color:#f97316;
+  font-weight:900;
+}
+.picker-q{
+  text-align:center;
+  font-size:18px;
+  font-weight:900;
+  color:#111827;
+}
+.picker-q.red{
+  color:#ef4444;
+}
+.picker-op{
+  border:0;
+  background:transparent;
+  color:#7b8494;
+  height:44px;
+  font-size:34px;
+  font-weight:900;
+  line-height:1;
+}
+.picker-op:disabled{
+  color:#cbd5e1;
+}
+.picker-bottom{
+  position:fixed;
+  left:0;
+  right:0;
+  bottom:0;
+  z-index:60;
+  background:#fff;
+  border-top:1px solid var(--line);
+  padding:10px 16px calc(10px + env(safe-area-inset-bottom));
+}
+.picker-bottom-inner{
+  max-width:560px;
+  margin:0 auto;
+  display:grid;
+  grid-template-columns:auto 1fr 128px 136px;
+  gap:10px;
+  align-items:center;
+}
+.picker-note{
+  height:36px;
+  border:1px solid #d8e3f6;
+  background:#fff;
+  border-radius:4px;
+  padding:0 12px;
+  font-size:15px;
+}
+.picker-total{
+  font-size:15px;
+  color:#111827;
+  white-space:nowrap;
+}
+.picker-total b{
+  font-size:18px;
+}
+.picker-bottom .btn{
+  height:50px;
+  border-radius:4px;
+  font-size:18px;
+  font-weight:900;
+}
+@media (max-width:420px){
+  .picker-head{grid-template-columns:94px 1fr 36px;padding:12px 16px}
+  .picker-head .picker-img{width:94px;height:94px}
+  .picker-title{font-size:20px}
+  .picker-row{grid-template-columns:48px 64px 50px 68px 32px 38px 38px;padding:0 10px;font-size:15px}
+  .picker-row.head{font-size:14px}
+  .picker-bottom-inner{grid-template-columns:auto 1fr 104px 112px;gap:8px}
+  .picker-bottom{padding-left:12px;padding-right:12px}
+  .picker-bottom .btn{font-size:16px}
+}
+
 </style>
 </head>
 <body>
 <div id="app" class="app">
   <section id="page-sale" class="page active">
-    <div class="topbar"><div class="title">八方来财销售开单版 V2.29</div><div class="right"><button class="icon-btn" onclick="openCart()">🛒<span id="cartBadge" class="cart-badge" style="display:none">0</span></button></div></div>
+    <div class="topbar"><div class="title">八方来财销售开单版 V2.30</div><div class="right"><button class="icon-btn" onclick="openCart()">🛒<span id="cartBadge" class="cart-badge" style="display:none">0</span></button></div></div>
     <div class="toolbar">
       <div class="search">⌕<input id="saleSearch" placeholder="搜索款号/商品名称" oninput="UI.sale.render()"></div>
       <button class="small-btn btn-line" onclick="alert('扫码入口已预留，后期接小程序扫码')">扫码选款</button>
@@ -299,7 +523,7 @@ button:active,
     <div id="saleProductList" class="product-list"></div>
   </section>
 
-  <section id="page-picker" class="page">
+  <section id="page-picker" class="page picker-page">
     <div class="topbar"><div class="left"><button class="icon-btn" onclick="showPage('sale')">‹</button></div><div class="title">选择商品</div><div class="right"><button class="icon-btn" onclick="closePicker()">×</button></div></div>
     <div id="pickerBox"></div>
     <div class="bottom-bar"><div class="bottom-inner"><button class="btn btn-light" onclick="continueSelect()">继续选款</button><button class="btn btn-blue" onclick="openCheckout()">立即结算</button></div></div>
@@ -415,14 +639,14 @@ button:active,
 
 <script>
 /*
-  八方来财销售开单版 V2.29
+  八方来财销售开单版 V2.30
   清理稳定版原则：
   1. 只保留一个核心数据层 DataLayer
   2. 页面不得绕过 DataLayer 自己乱算
   3. 每个页面只保留一个 render 入口
   4. 销售单 qty 为正数，退货 qty 为负数；不再单独切换销售/退货模式
 */
-const VERSION = "V2.29";
+const VERSION = "V2.30";
 const STORAGE_KEY = "bafang_sales_v1";
 const $ = id => document.getElementById(id);
 const n = v => Number(v || 0) || 0;
@@ -949,29 +1173,50 @@ const UI = {
       if(!p){ $("pickerBox").innerHTML = `<div class="pa-empty">商品不存在</div>`; return; }
       const color = pickerDraft.color || p.colors[0];
       pickerDraft.color = color;
+      const total = Object.values(pickerDraft.qty || {}).reduce((s,v) => s + Math.abs(n(v)),0);
+      const priceVals = p.sizes.map(size => DataLayer.getSkuPrice(p,color,size)).filter(v => n(v) > 0);
+      const minPrice = priceVals.length ? Math.min(...priceVals.map(n)) : n(p.price);
+      const maxPrice = priceVals.length ? Math.max(...priceVals.map(n)) : n(p.price);
+      const priceText = minPrice === maxPrice ? money(minPrice) : `${money(minPrice)}–${money(maxPrice)}`;
       $("pickerBox").innerHTML = `
-        <div class="card">
-          <div class="row" style="align-items:flex-start">
-            <img class="thumb" style="width:120px;height:120px" src="${esc(p.image)}">
-            <div style="flex:1"><div class="title" style="margin-bottom:8px">${esc(p.code)}${esc(p.name)}</div><div class="sub">${esc(p.category)}</div><div class="price" style="margin-top:8px">${money(p.price)}</div></div>
-            <button class="icon-btn" onclick="closePicker()">×</button>
+        <div class="picker-wrap">
+          <div class="picker-head">
+            <img class="picker-img" src="${esc(p.image)}">
+            <div>
+              <div class="picker-title">${esc(p.code)}${esc(p.name)}</div>
+              <div class="picker-cat">${esc(p.category)}</div>
+              <div class="picker-price">${priceText}</div>
+            </div>
+            <button class="picker-close" onclick="closePicker()">×</button>
           </div>
-        </div>
-        <div class="card">
-          <div>${p.colors.map(c => `<button class="color-chip ${c===color?'active':''}" onclick="setPickerColor('${esc(c)}')">${esc(c)}</button>`).join("")}</div>
-          <table class="sku-table" style="margin-top:18px">
-            <thead><tr><th>规格</th><th>价格</th><th>可售库存</th><th>数量</th></tr></thead>
-            <tbody>${p.sizes.map(size => {
+          <div class="picker-meta">
+            <div class="picker-meta-left"><span>主仓 ›</span><span>购买记录 ›</span></div>
+            <div class="picker-meta-right"><span>颜色全选</span><span class="picker-switch"></span></div>
+          </div>
+          <div class="picker-colors">${p.colors.map(c => `<button class="color-chip ${c===color?'active':''}" onclick="setPickerColor('${esc(c)}')">${esc(c)}</button>`).join("")}</div>
+          <div class="picker-table">
+            <div class="picker-row head"><div>规格</div><div>价格</div><div>已选</div><div>可售<br>库存</div><div></div><div>−</div><div>＋</div></div>
+            ${p.sizes.map(size => {
               const key = color+";"+size;
               const q = n(pickerDraft.qty && pickerDraft.qty[key]);
               const stock = DataLayer.stockOf(p,color,size);
               const skuPrice = DataLayer.getSkuPrice(p,color,size);
-              return `<tr><td>${esc(size)}</td><td class="price">${money(skuPrice)}</td><td style="font-weight:900;color:#f97316">${stock}</td><td><div class="qty-step"><button onclick="changePickerQty('${esc(size)}',-1)">−</button><span class="num ${q<0?'red':''}">${q}</span><button onclick="changePickerQty('${esc(size)}',1)">＋</button></div></td></tr>`;
-            }).join("")}</tbody>
-          </table>
-          <div class="sub" style="margin-top:10px">说明：＋是销售，−是退货；退货会自动加库存。</div>
+              return `<div class="picker-row">
+                <div>${esc(size)}</div>
+                <div class="price">${money(skuPrice)}</div>
+                <div>0/0</div>
+                <div class="picker-stock">${stock}</div>
+                <div class="picker-q ${q<0?'red':''}">${q}</div>
+                <button class="picker-op" onclick="changePickerQty('${esc(size)}',-1)">−</button>
+                <button class="picker-op" onclick="changePickerQty('${esc(size)}',1)">＋</button>
+              </div>`;
+            }).join("")}
+          </div>
         </div>
       `;
+      document.querySelector("#page-picker .bottom-bar").className = "picker-bottom";
+      document.querySelector("#page-picker .bottom-inner").className = "picker-bottom-inner";
+      document.querySelector("#page-picker .picker-bottom-inner").innerHTML = `<button class="picker-note" onclick="alert('备注功能在结算页填写')">备注</button><div class="picker-total">共 <b>${total}</b> 件</div><button class="btn btn-light" onclick="openCheckout()">立即结算</button><button class="btn btn-blue" onclick="continueSelect()">继续选款</button>`;
     }
   },
   checkout:{
