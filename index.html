@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>八方来财销售开单版 V2.40</title>
+<title>八方来财销售开单版 V2.41</title>
 <style>
 :root{
   --blue:#2f6df6;
@@ -607,12 +607,93 @@ button:active,
   font-weight:900;
 }
 
+
+/* V2.41 选择商品页固定布局：只有 SKU 行上下滑动，顶部和底部不晃动 */
+#page-picker.picker-page{
+  padding-bottom:0;
+}
+#page-picker.picker-page.active{
+  display:flex;
+  flex-direction:column;
+  height:100dvh;
+  min-height:100dvh;
+  overflow:hidden;
+  background:#fff;
+}
+#page-picker.picker-page .topbar{
+  position:relative;
+  top:auto;
+  flex:0 0 54px;
+  height:54px;
+  z-index:30;
+}
+#page-picker #pickerBox{
+  flex:1 1 auto;
+  min-height:0;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  background:#fff;
+}
+#page-picker .picker-wrap{
+  flex:1 1 auto;
+  min-height:0;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  padding-bottom:0 !important;
+}
+#page-picker .picker-head,
+#page-picker .picker-colors{
+  flex:0 0 auto;
+}
+#page-picker .picker-table{
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto;
+  overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  background:#fff;
+  padding-bottom:8px;
+}
+#page-picker .picker-row.head{
+  position:sticky;
+  top:0;
+  z-index:10;
+  box-shadow:0 1px 0 #f0f2f6;
+}
+#page-picker .picker-bottom,
+#page-picker .bottom-bar{
+  position:relative !important;
+  left:auto;
+  right:auto;
+  bottom:auto;
+  flex:0 0 auto;
+  z-index:40;
+  background:#fff;
+  border-top:1px solid var(--line);
+  padding:10px 16px calc(10px + env(safe-area-inset-bottom));
+}
+#page-picker .picker-bottom-inner,
+#page-picker .bottom-inner{
+  max-width:560px;
+  margin:0 auto;
+}
+@supports not (height: 100dvh){
+  #page-picker.picker-page.active{
+    height:100vh;
+    min-height:100vh;
+  }
+}
+
 </style>
 </head>
 <body>
 <div id="app" class="app">
   <section id="page-sale" class="page active">
-    <div class="topbar"><div class="title">八方来财销售开单版 V2.40</div><div class="right"><button class="icon-btn" onclick="openCart()">🛒<span id="cartBadge" class="cart-badge" style="display:none">0</span></button></div></div>
+    <div class="topbar"><div class="title">八方来财销售开单版 V2.41</div><div class="right"><button class="icon-btn" onclick="openCart()">🛒<span id="cartBadge" class="cart-badge" style="display:none">0</span></button></div></div>
     <div class="toolbar">
       <div class="search">⌕<input id="saleSearch" placeholder="搜索款号/商品名称" oninput="UI.sale.render()"></div>
       <button class="small-btn btn-line" onclick="alert('扫码入口已预留，后期接小程序扫码')">扫码选款</button>
@@ -742,14 +823,14 @@ button:active,
 
 <script>
 /*
-  八方来财销售开单版 V2.40
+  八方来财销售开单版 V2.41
   清理稳定版原则：
   1. 只保留一个核心数据层 DataLayer
   2. 页面不得绕过 DataLayer 自己乱算
   3. 每个页面只保留一个 render 入口
   4. 销售单 qty 为正数，退货 qty 为负数；不再单独切换销售/退货模式
 */
-const VERSION = "V2.40";
+const VERSION = "V2.41";
 const STORAGE_KEY = "bafang_sales_v1";
 const $ = id => document.getElementById(id);
 const n = v => Number(v || 0) || 0;
