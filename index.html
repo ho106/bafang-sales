@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>八方来财销售开单版 V2.41</title>
+<title>八方来财销售开单版 V2.42</title>
 <style>
 :root{
   --blue:#2f6df6;
@@ -688,12 +688,115 @@ button:active,
   }
 }
 
+
+/* V2.42 选择商品统一固定：表头和上方区域一起固定，只有 SKU 明细滚动 */
+html:has(#page-picker.active),
+body:has(#page-picker.active){
+  overflow:hidden;
+}
+#page-picker.picker-page{
+  padding-bottom:0 !important;
+  overflow:hidden !important;
+}
+#page-picker.picker-page.active{
+  display:flex !important;
+  flex-direction:column;
+  height:100dvh;
+  max-height:100dvh;
+  min-height:100dvh;
+  overflow:hidden !important;
+  background:#fff;
+}
+#page-picker.picker-page .topbar{
+  position:relative !important;
+  top:auto !important;
+  flex:0 0 54px;
+  height:54px;
+  z-index:80;
+}
+#page-picker #pickerBox{
+  flex:1 1 auto;
+  min-height:0;
+  overflow:hidden !important;
+  display:flex;
+  flex-direction:column;
+  background:#fff;
+}
+#page-picker .picker-wrap{
+  flex:1 1 auto;
+  min-height:0;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden !important;
+  padding-bottom:0 !important;
+}
+#page-picker .picker-head{
+  flex:0 0 auto;
+}
+#page-picker .picker-colors{
+  flex:0 0 auto;
+  max-height:58px;
+  overflow-x:auto;
+  overflow-y:hidden;
+  -webkit-overflow-scrolling:touch;
+}
+#page-picker .picker-table{
+  flex:1 1 auto;
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden !important;
+  background:#fff;
+}
+#page-picker .picker-row.head{
+  flex:0 0 52px;
+  position:relative !important;
+  top:auto !important;
+  z-index:30;
+  box-shadow:0 1px 0 #f0f2f6;
+}
+#page-picker .picker-body{
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto;
+  overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  background:#fff;
+  padding-bottom:8px;
+}
+#page-picker .picker-bottom,
+#page-picker .bottom-bar{
+  position:relative !important;
+  left:auto !important;
+  right:auto !important;
+  bottom:auto !important;
+  flex:0 0 auto;
+  z-index:90;
+  background:#fff;
+  border-top:1px solid var(--line);
+  padding:10px 16px calc(10px + env(safe-area-inset-bottom));
+}
+#page-picker .picker-bottom-inner,
+#page-picker .bottom-inner{
+  max-width:560px;
+  margin:0 auto;
+}
+@supports not (height: 100dvh){
+  #page-picker.picker-page.active{
+    height:100vh;
+    max-height:100vh;
+    min-height:100vh;
+  }
+}
+
 </style>
 </head>
 <body>
 <div id="app" class="app">
   <section id="page-sale" class="page active">
-    <div class="topbar"><div class="title">八方来财销售开单版 V2.41</div><div class="right"><button class="icon-btn" onclick="openCart()">🛒<span id="cartBadge" class="cart-badge" style="display:none">0</span></button></div></div>
+    <div class="topbar"><div class="title">八方来财销售开单版 V2.42</div><div class="right"><button class="icon-btn" onclick="openCart()">🛒<span id="cartBadge" class="cart-badge" style="display:none">0</span></button></div></div>
     <div class="toolbar">
       <div class="search">⌕<input id="saleSearch" placeholder="搜索款号/商品名称" oninput="UI.sale.render()"></div>
       <button class="small-btn btn-line" onclick="alert('扫码入口已预留，后期接小程序扫码')">扫码选款</button>
@@ -823,14 +926,14 @@ button:active,
 
 <script>
 /*
-  八方来财销售开单版 V2.41
+  八方来财销售开单版 V2.42
   清理稳定版原则：
   1. 只保留一个核心数据层 DataLayer
   2. 页面不得绕过 DataLayer 自己乱算
   3. 每个页面只保留一个 render 入口
   4. 销售单 qty 为正数，退货 qty 为负数；不再单独切换销售/退货模式
 */
-const VERSION = "V2.41";
+const VERSION = "V2.42";
 const STORAGE_KEY = "bafang_sales_v1";
 const $ = id => document.getElementById(id);
 const n = v => Number(v || 0) || 0;
@@ -1408,21 +1511,23 @@ const UI = {
           <div class="picker-colors">${colors.map(c => `<button class="color-chip ${c===color?'active':''}" onclick="setPickerColor('${esc(c)}')">${esc(c || "未设颜色")}</button>`).join("")}</div>
           <div class="picker-table">
             <div class="picker-row head"><div>规格</div><div>价格</div><div>已选</div><div>可售<br>库存</div><div></div><button class="picker-batch-op" onclick="batchPickerQty(-1)">−</button><button class="picker-batch-op" onclick="batchPickerQty(1)">＋</button></div>
-            ${sizes.map(size => {
-              const key = color+";"+size;
-              const q = n(pickerDraft.qty && pickerDraft.qty[key]);
-              const stock = DataLayer.stockOf(p,color,size);
-              const skuPrice = DataLayer.getSkuPrice(p,color,size);
-              return `<div class="picker-row">
-                <div>${esc(size)}</div>
-                <div class="price">${money(skuPrice)}</div>
-                <div>0/0</div>
-                <div class="picker-stock">${stock}</div>
-                <div class="picker-q ${q<0?'red':''}">${q}</div>
-                <button class="picker-op" onclick="changePickerQty('${esc(size)}',-1)">−</button>
-                <button class="picker-op" onclick="changePickerQty('${esc(size)}',1)">＋</button>
-              </div>`;
-            }).join("")}
+            <div class="picker-body">
+              ${sizes.map(size => {
+                const key = color+";"+size;
+                const q = n(pickerDraft.qty && pickerDraft.qty[key]);
+                const stock = DataLayer.stockOf(p,color,size);
+                const skuPrice = DataLayer.getSkuPrice(p,color,size);
+                return `<div class="picker-row">
+                  <div>${esc(size)}</div>
+                  <div class="price">${money(skuPrice)}</div>
+                  <div>0/0</div>
+                  <div class="picker-stock">${stock}</div>
+                  <div class="picker-q ${q<0?'red':''}">${q}</div>
+                  <button class="picker-op" onclick="changePickerQty('${esc(size)}',-1)">−</button>
+                  <button class="picker-op" onclick="changePickerQty('${esc(size)}',1)">＋</button>
+                </div>`;
+              }).join("")}
+            </div>
           </div>
         </div>
       `;
