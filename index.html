@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>八方来财销售开单版 V2.26</title>
+<title>八方来财销售开单版 V2.27</title>
 <style>
 :root{
   --blue:#2f6df6;
@@ -139,6 +139,7 @@ textarea{min-height:88px;resize:none}
 .trend-card{background:#fff;border:1px solid #e1e8f5;border-radius:12px;padding:12px;text-align:left}
 .trend-card.active{background:#eff6ff;border-color:#83aaff}
 .trend-card .num{font-size:20px;font-weight:900;color:#2167e8}.trend-card .txt{font-size:13px;color:#6b7280;margin-top:4px}
+.ba-card-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:0}.ba-stat-card{background:#fff;border:1px solid #d9e4f5;border-radius:12px;padding:14px 12px 12px;text-align:left}.ba-stat-card.active{background:#eef5ff;border-color:#7aa5ff}.ba-stat-card .big{font-size:22px;font-weight:900;color:#2167e8}.ba-stat-card .name{font-size:14px;color:#4b5563;margin-top:6px}.ba-stat-card .mini{font-size:13px;color:#6b7280;margin-top:12px;line-height:1.5}.ba-chart-title{font-size:16px;font-weight:800}.ba-mode-sheet .btn{border-radius:0;border-left:0;border-right:0}.ba-chip{height:44px;min-width:104px;padding:0 14px;border-radius:8px;border:1px solid #d8e3f6;background:#fff;color:#111827;font-size:16px}.ba-chip.active{background:#4f7df3;color:#fff;border-color:#4f7df3}.ba-ring.up{color:#16a34a}.ba-ring.down{color:#ef4444}.ba-ring.flat{color:#94a3b8}
 .col-page{position:fixed;inset:0;background:#fff;z-index:120;display:none}
 .col-page .header{height:64px;display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--line);font-size:20px;font-weight:800;position:relative}
 .col-page .header .left{position:absolute;left:14px;font-size:34px}
@@ -190,7 +191,7 @@ textarea{min-height:88px;resize:none}
 <body>
 <div id="app" class="app">
   <section id="page-sale" class="page active">
-    <div class="topbar"><div class="title">八方来财销售开单版 V2.26</div><div class="right"><button class="icon-btn" onclick="openCart()">🛒<span id="cartBadge" class="cart-badge" style="display:none">0</span></button></div></div>
+    <div class="topbar"><div class="title">八方来财销售开单版 V2.27</div><div class="right"><button class="icon-btn" onclick="openCart()">🛒<span id="cartBadge" class="cart-badge" style="display:none">0</span></button></div></div>
     <div class="toolbar">
       <div class="search">⌕<input id="saleSearch" placeholder="搜索款号/商品名称" oninput="UI.sale.render()"></div>
       <button class="small-btn btn-line" onclick="alert('扫码入口已预留，后期接小程序扫码')">扫码选款</button>
@@ -234,9 +235,24 @@ textarea{min-height:88px;resize:none}
   <section id="page-report" class="page">
     <div class="topbar"><div class="title">报表</div></div>
     <div class="report-filter"><select id="reportRange" onchange="UI.report.render()"><option value="today">今天</option><option value="7">近7天</option><option value="30">近30天</option><option value="all">全部</option></select></div>
-    <div class="card"><div class="row"><div class="title" style="margin:0">销售情况</div><button class="small-btn btn-light" onclick="openProductAnalysis()">查看详情 ›</button></div><div id="salesMetrics" class="metric-grid"></div><div style="margin-top:14px"><button class="small-btn btn-line" onclick="openProductAnalysis()">👕 商品分析</button></div></div>
+    <div class="card"><div class="row"><div class="title" style="margin:0">销售情况</div><button class="small-btn btn-light" onclick="openBusinessAnalysis()">查看详情 ›</button></div><div id="salesMetrics" class="metric-grid"></div><div style="margin-top:14px"><button class="small-btn btn-line" onclick="openProductAnalysis()">👕 商品分析</button></div></div>
     <div class="card"><div class="title">财务情况</div><div id="financeMetrics" class="metric-grid"></div></div>
     <div class="card"><div class="title">出入库情况</div><div id="stockMetrics" class="metric-grid"></div></div>
+  </section>
+
+  <section id="page-business-analysis" class="page">
+    <div class="pa-screen">
+      <div class="pa-topbar"><button class="left icon-btn" onclick="showPage('report')">‹</button><div class="title">经营分析</div><div class="right"><button onclick="showPage('report')">×</button></div></div>
+      <div class="pa-toolbar"><div class="pa-toolbar-row"><button id="baModeBtn" class="pa-mode-trigger" onclick="toggleBaModeMenu()">按天 ▾</button><div id="baChips" class="pa-chips"></div></div></div>
+      <div class="chart-card" style="margin-top:12px">
+        <div id="baMetricCards" class="ba-card-grid"></div>
+      </div>
+      <div class="chart-card">
+        <div class="row"><b id="baChartTitle" class="ba-chart-title">销售金额趋势图</b><span id="baRing" class="sub ba-ring">环比 --</span></div>
+        <svg id="baChart" class="svg-chart" viewBox="0 0 360 230"></svg>
+      </div>
+      <div id="baModeMask" class="overlay" onclick="toggleBaModeMenu()"><div class="sheet ba-mode-sheet" onclick="event.stopPropagation()" id="baModeSheet"></div></div>
+    </div>
   </section>
 
   <section id="page-product-analysis" class="page">
@@ -300,14 +316,14 @@ textarea{min-height:88px;resize:none}
 
 <script>
 /*
-  八方来财销售开单版 V2.26
+  八方来财销售开单版 V2.27
   清理稳定版原则：
   1. 只保留一个核心数据层 DataLayer
   2. 页面不得绕过 DataLayer 自己乱算
   3. 每个页面只保留一个 render 入口
   4. 销售单 qty 为正数，退货 qty 为负数；不再单独切换销售/退货模式
 */
-const VERSION = "V2.26";
+const VERSION = "V2.27";
 const STORAGE_KEY = "bafang_sales_v1";
 const $ = id => document.getElementById(id);
 const n = v => Number(v || 0) || 0;
@@ -735,6 +751,12 @@ let paState = {
   detailTab:"spec",
   trendMetric:"qty"
 };
+let baState = {
+  mode:"day",
+  anchor:today(),
+  metric:"amount",
+  custom:{start:today(),end:today()}
+};
 const paColumns = [
   ["qty","销量"],["amount","销售金额"],["refundQty","退货数"],["refundAmount","退货金额"],
   ["refundRate","退货率"],["margin","毛利率"],["profit","毛利"],["netQty","净销量"],
@@ -1110,6 +1132,176 @@ function renderPaHead(headId, first){
   const c = paState.columns;
   $(headId).innerHTML = `<th>${first}</th>` + c.map(k => `<th>${paColLabel(k)} <span style="color:#cbd5e1">◆</span></th>`).join("") + `<th><button class="pa-head-setting" onclick="openPaColumns()">☰</button></th>`;
 }
+function baModeLabel(mode){
+  const map = {day:"按天",week:"按周",month:"按月",7:"近7天",30:"近30天",custom:"自定义"};
+  return (map[mode] || "按天") + " ▾";
+}
+function monthKeyFromDate(day){
+  const d = new Date(day + "T00:00:00");
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0");
+}
+function shiftMonth(key, delta){
+  const [y,m] = String(key).split("-").map(Number);
+  const d = new Date(y, (m||1)-1 + delta, 1);
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0");
+}
+function monthRange(key){
+  const [y,m] = String(key).split("-").map(Number);
+  const start = new Date(y, (m||1)-1, 1);
+  const end = new Date(y, (m||1), 0);
+  const fmt = d => d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+  return {start:fmt(start), end:fmt(end)};
+}
+function baWeekRange(endDay){ return {start:shiftDay(endDay,-6), end:endDay}; }
+function baChipItems(){
+  const items = [];
+  if(baState.mode === "day" || baState.mode === "7" || baState.mode === "30"){
+    for(let i=5;i>=0;i--){
+      const day = shiftDay(today(), -i);
+      items.push({key:day, label:day===today()?"今天":md(day)});
+    }
+  }else if(baState.mode === "week"){
+    for(let i=5;i>=0;i--){
+      const end = shiftDay(today(), -i*7);
+      items.push({key:end, label:md(end)});
+    }
+  }else if(baState.mode === "month"){
+    const current = monthKeyFromDate(today());
+    for(let i=5;i>=0;i--){
+      const key = shiftMonth(current, -i);
+      items.push({key, label:key.slice(5).replace("-", ".")});
+    }
+  }else{
+    items.push({key:"custom", label:"自定义"});
+  }
+  return items;
+}
+function ensureBaAnchor(){
+  const items = baChipItems();
+  if(!items.some(x => String(x.key) === String(baState.anchor))) baState.anchor = items[items.length-1].key;
+  return items;
+}
+function renderBaChips(){
+  const box = $("baChips"); if(!box) return;
+  const items = ensureBaAnchor();
+  box.innerHTML = items.map(x => `<button class="ba-chip ${String(baState.anchor)===String(x.key)?'active':''}" onclick="selectBaAnchor('${esc(x.key)}')">${esc(x.label)}</button>`).join("");
+}
+function selectBaAnchor(key){ baState.anchor = key; renderBusinessAnalysis(); }
+function currentBaRange(){
+  if(baState.mode === "day") return {start:baState.anchor, end:baState.anchor};
+  if(baState.mode === "week") return baWeekRange(baState.anchor);
+  if(baState.mode === "month") return monthRange(baState.anchor);
+  if(baState.mode === "7") return {start:shiftDay(baState.anchor,-6), end:baState.anchor};
+  if(baState.mode === "30") return {start:shiftDay(baState.anchor,-29), end:baState.anchor};
+  return {start:baState.custom.start, end:baState.custom.end};
+}
+function salesDetailSummary(range){
+  const s = DataLayer.calcOrderSummary(DataLayer.getValidOrders(range));
+  return {amount:s.amount, refundAmount:s.refundAmount, profit:s.profit, qty:s.qty, refundQty:s.refundQty, orderCount:s.orderCount};
+}
+function buildBaSeries(){
+  const points = [];
+  if(baState.mode === "day"){
+    for(let i=8;i>=0;i--){
+      const day = shiftDay(baState.anchor, -i);
+      points.push({...salesDetailSummary({start:day,end:day}), label:md(day), day});
+    }
+  }else if(baState.mode === "week"){
+    for(let i=7;i>=0;i--){
+      const end = shiftDay(baState.anchor, -7*i);
+      points.push({...salesDetailSummary(baWeekRange(end)), label:md(end), day:end});
+    }
+  }else if(baState.mode === "month"){
+    for(let i=5;i>=0;i--){
+      const key = shiftMonth(baState.anchor, -i);
+      points.push({...salesDetailSummary(monthRange(key)), label:key.slice(5).replace("-", "."), day:key});
+    }
+  }else if(baState.mode === "7" || baState.mode === "30"){
+    const span = baState.mode === "7" ? 6 : 29;
+    for(let i=8;i>=0;i--){
+      const end = shiftDay(baState.anchor, -i);
+      points.push({...salesDetailSummary({start:shiftDay(end,-span), end}), label:md(end), day:end});
+    }
+  }else{
+    let cur = baState.custom.start;
+    while(cur <= baState.custom.end && points.length < 31){
+      points.push({...salesDetailSummary({start:cur,end:cur}), label:md(cur), day:cur});
+      cur = shiftDay(cur, 1);
+    }
+  }
+  return points;
+}
+function baRingText(current, prev){
+  if(!prev) return {text:"环比 --", cls:"sub ba-ring flat"};
+  const rate = (n(current)-n(prev))/Math.abs(n(prev))*100;
+  const val = (rate>0?"+":"") + rate.toFixed(2) + "%";
+  return {text:"环比 " + val, cls:"sub ba-ring " + (rate>0?"up":rate<0?"down":"flat")};
+}
+function renderBaChart(series, key, title){
+  const vals = series.map(s => n(s[key]));
+  const max = Math.max(1, ...vals.map(v => Math.abs(v)));
+  const pts = vals.map((v,i) => [28+i*(310/Math.max(1, vals.length-1)), 190-(n(v)/max)*150]);
+  const poly = pts.map(p => p.join(",")).join(" ");
+  $("baChart").innerHTML = `
+    <line x1="24" y1="190" x2="340" y2="190" stroke="#e5e7eb"/>
+    <line x1="24" y1="140" x2="340" y2="140" stroke="#e5e7eb"/>
+    <line x1="24" y1="90" x2="340" y2="90" stroke="#e5e7eb"/>
+    <line x1="24" y1="40" x2="340" y2="40" stroke="#e5e7eb"/>
+    <polyline points="${poly}" fill="none" stroke="#4f7df3" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    ${pts.map((p,i) => `<circle cx="${p[0]}" cy="${p[1]}" r="4" fill="#4f7df3"/><text x="${p[0]-14}" y="${Math.max(18,p[1]-10)}" font-size="11">${money(vals[i])}</text><text x="${p[0]-14}" y="214" font-size="11" fill="#6b7280">${esc(series[i].label)}</text>`).join("")}
+  `;
+  $("baChartTitle").innerText = title;
+  const ring = baRingText(vals[vals.length-1] || 0, vals.length > 1 ? vals[vals.length-2] : 0);
+  $("baRing").innerText = ring.text;
+  $("baRing").className = ring.cls;
+}
+function renderBusinessAnalysis(){
+  $("baModeBtn").innerText = baModeLabel(baState.mode);
+  renderBaChips();
+  const current = salesDetailSummary(currentBaRange());
+  const cards = [
+    {key:"amount", title:"销售金额", value:money(current.amount), mini:"销售数", miniVal:Math.round(n(current.qty))},
+    {key:"refundAmount", title:"退货金额", value:money(current.refundAmount), mini:"退货数", miniVal:Math.round(n(current.refundQty))},
+    {key:"profit", title:"毛利", value:money(current.profit), mini:"订单数", miniVal:Math.round(n(current.orderCount))}
+  ];
+  $("baMetricCards").innerHTML = cards.map(c => `<button class="ba-stat-card ${baState.metric===c.key?'active':''}" onclick="setBaMetric('${c.key}')"><div class="big">${esc(c.value)}</div><div class="name">${esc(c.title)}</div><div class="mini">${esc(c.mini)}<br><b style="font-size:18px;color:#111827">${esc(String(c.miniVal))}</b></div></button>`).join("");
+  const titleMap = {amount:"销售金额趋势图", refundAmount:"退货金额趋势图", profit:"毛利趋势图"};
+  renderBaChart(buildBaSeries(), baState.metric, titleMap[baState.metric] || "销售金额趋势图");
+}
+function setBaMetric(key){ baState.metric = key; renderBusinessAnalysis(); }
+function toggleBaModeMenu(){
+  const mask = $("baModeMask");
+  if(mask.style.display === "block"){ mask.style.display = "none"; return; }
+  $("baModeSheet").innerHTML = `<div class="actions" style="display:grid;grid-template-columns:1fr;gap:0">
+    <button class="btn btn-line" onclick="setBaMode('day')">按天</button>
+    <button class="btn btn-line" onclick="setBaMode('week')">按周</button>
+    <button class="btn btn-line" onclick="setBaMode('month')">按月</button>
+    <button class="btn btn-line" onclick="setBaMode('7')">近 7 天</button>
+    <button class="btn btn-line" onclick="setBaMode('30')">近 30 天</button>
+    <button class="btn btn-line" onclick="setBaMode('custom')">自定义</button>
+  </div>`;
+  mask.style.display = "block";
+}
+function setBaMode(mode){
+  $("baModeMask").style.display = "none";
+  baState.mode = mode;
+  if(mode === "day" || mode === "7" || mode === "30" || mode === "week") baState.anchor = today();
+  else if(mode === "month") baState.anchor = monthKeyFromDate(today());
+  else if(mode === "custom"){
+    const start = prompt("请输入开始日期（YYYY-MM-DD）", baState.custom.start || today());
+    if(!start) return;
+    const end = prompt("请输入结束日期（YYYY-MM-DD）", baState.custom.end || today());
+    if(!end) return;
+    baState.custom = {start, end};
+    baState.anchor = "custom";
+  }
+  renderBusinessAnalysis();
+}
+function openBusinessAnalysis(){
+  showPage("business-analysis");
+  renderBusinessAnalysis();
+}
+
 function openProductAnalysis(){
   showPage("product-analysis");
   renderProductAnalysis();
