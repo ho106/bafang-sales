@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>八方来财销售开单版 V2.46</title>
+<title>八方来财销售开单版 V2.47</title>
 <style>
 :root{
   --blue:#2f6df6;
@@ -873,15 +873,7 @@ body:has(#page-picker.active){
 }
 
 
-/* V2.46 开单明细页固定布局：去掉标题栏，搜索行固定，商品明细独立滚动，结算栏贴底 */
-html:has(#page-cart-review.active),
-body:has(#page-cart-review.active){
-  overflow:hidden;
-}
-.app:has(#page-cart-review.active){
-  padding-bottom:0;
-  background:#f3f5f9;
-}
+/* V2.47 开单明细页固定布局 + 左滑删除：去掉标题栏，搜索固定，明细独立滚动，结算栏贴底 */
 #page-cart-review{
   padding-bottom:0 !important;
   background:#f3f5f9;
@@ -890,37 +882,81 @@ body:has(#page-cart-review.active){
 #page-cart-review.active{
   display:flex !important;
   flex-direction:column;
-  height:100dvh;
-  min-height:100dvh;
-  max-height:100dvh;
+  position:fixed !important;
+  left:50% !important;
+  top:0 !important;
+  bottom:0 !important;
+  width:100% !important;
+  max-width:560px !important;
+  height:100dvh !important;
+  min-height:100dvh !important;
+  max-height:100dvh !important;
+  transform:translateX(-50%);
   overflow:hidden !important;
+  background:#f3f5f9;
+  z-index:120;
 }
 #page-cart-review .topbar{
   display:none !important;
 }
 #page-cart-review .toolbar{
   flex:0 0 auto;
-  position:relative;
-  top:auto;
-  z-index:40;
+  position:relative !important;
+  top:auto !important;
+  z-index:3;
   background:#fff;
   border-bottom:1px solid var(--line);
   padding:12px 16px;
 }
 .cart-review-list{
   flex:1 1 auto;
-  min-height:0;
-  overflow-y:auto;
-  overflow-x:hidden;
+  min-height:0 !important;
+  height:auto !important;
+  overflow-y:scroll !important;
+  overflow-x:hidden !important;
   -webkit-overflow-scrolling:touch;
   overscroll-behavior:contain;
-  padding:10px 0 104px;
+  touch-action:pan-y;
+  padding:10px 0 14px !important;
   background:#f3f5f9;
 }
-.cart-review-card{
-  background:#fff;
+.cart-review-list::after{
+  content:"";
+  display:block;
+  height:10px;
+}
+.cart-review-swipe{
+  position:relative;
+  overflow:hidden;
+  background:#f25555;
   margin:0 0 10px;
+}
+.cart-review-delete{
+  position:absolute;
+  right:0;
+  top:0;
+  bottom:0;
+  width:92px;
+  background:#f25555;
+  color:#fff;
+  font-size:19px;
+  font-weight:900;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:1;
+}
+.cart-review-card{
+  position:relative;
+  z-index:2;
+  background:#fff;
+  margin:0;
   padding:12px 12px 10px;
+  transform:translateX(0);
+  transition:transform .18s ease;
+}
+.cart-review-swipe.swiped .cart-review-card{
+  transform:translateX(-92px);
 }
 .cart-review-main{
   display:grid;
@@ -995,11 +1031,12 @@ body:has(#page-cart-review.active){
   color:#ef4444;
 }
 #page-cart-review .bottom-bar{
-  position:fixed !important;
-  left:0 !important;
-  right:0 !important;
-  bottom:0 !important;
-  z-index:80;
+  position:relative !important;
+  left:auto !important;
+  right:auto !important;
+  bottom:auto !important;
+  flex:0 0 auto;
+  z-index:4;
   background:#fff;
   border-top:1px solid var(--line);
   padding:10px 16px calc(10px + env(safe-area-inset-bottom));
@@ -1020,9 +1057,9 @@ body:has(#page-cart-review.active){
 }
 @supports not (height: 100dvh){
   #page-cart-review.active{
-    height:100vh;
-    min-height:100vh;
-    max-height:100vh;
+    height:100vh !important;
+    min-height:100vh !important;
+    max-height:100vh !important;
   }
 }
 
@@ -1031,7 +1068,7 @@ body:has(#page-cart-review.active){
 <body>
 <div id="app" class="app">
   <section id="page-sale" class="page active">
-    <div class="topbar"><div class="title">八方来财销售开单版 V2.46</div><div class="right"><button class="icon-btn" onclick="openCart()">🛒<span id="cartBadge" class="cart-badge" style="display:none">0</span></button></div></div>
+    <div class="topbar"><div class="title">八方来财销售开单版 V2.47</div><div class="right"><button class="icon-btn" onclick="openCart()">🛒<span id="cartBadge" class="cart-badge" style="display:none">0</span></button></div></div>
     <div class="toolbar">
       <div class="search">⌕<input id="saleSearch" placeholder="搜索款号/商品名称" oninput="UI.sale.render()"></div>
       <button class="small-btn btn-line" onclick="alert('扫码入口已预留，后期接小程序扫码')">扫码选款</button>
@@ -1170,14 +1207,14 @@ body:has(#page-cart-review.active){
 
 <script>
 /*
-  八方来财销售开单版 V2.46
+  八方来财销售开单版 V2.47
   清理稳定版原则：
   1. 只保留一个核心数据层 DataLayer
   2. 页面不得绕过 DataLayer 自己乱算
   3. 每个页面只保留一个 render 入口
   4. 销售单 qty 为正数，退货 qty 为负数；不再单独切换销售/退货模式
 */
-const VERSION = "V2.46";
+const VERSION = "V2.47";
 const STORAGE_KEY = "bafang_sales_v1";
 const $ = id => document.getElementById(id);
 const n = v => Number(v || 0) || 0;
@@ -2087,30 +2124,88 @@ function renderCartReview(){
       }).join("");
       return `<div class="cart-review-row"><div class="first">${esc(c || "未设颜色")}</div>${cols}</div>`;
     }).join("");
-    return `<div class="cart-review-card" onclick="openProductPicker('${esc(code)}')">
-      <div class="cart-review-main">
-        <img class="cart-review-img" src="${esc(p.image || placeholderImg(p.code,p.name))}">
-        <div>
-          <div class="cart-review-title">${esc(p.code)}${esc(p.name)}</div>
-          <div class="cart-review-cat">${esc(p.category || "")}</div>
-          <div class="cart-review-price">${money(price)} ›</div>
+    return `<div class="cart-review-swipe" data-code="${esc(code)}">
+      <button class="cart-review-delete" type="button">删除</button>
+      <div class="cart-review-card" data-code="${esc(code)}">
+        <div class="cart-review-main">
+          <img class="cart-review-img" src="${esc(p.image || placeholderImg(p.code,p.name))}">
+          <div>
+            <div class="cart-review-title">${esc(p.code)}${esc(p.name)}</div>
+            <div class="cart-review-cat">${esc(p.category || "")}</div>
+            <div class="cart-review-price">${money(price)} ›</div>
+          </div>
+          <div>
+            <div class="cart-review-num">${netQtyText}</div>
+            <div class="cart-review-amount">${money(netAmount)}</div>
+          </div>
         </div>
-        <div>
-          <div class="cart-review-num">${netQtyText}</div>
-          <div class="cart-review-amount">${money(netAmount)}</div>
-        </div>
-      </div>
-      <div class="cart-review-sku">
-        <div class="cart-review-grid">
-          <div class="cart-review-row head"><div class="first">规格</div>${sizes.map(s=>`<div>${esc(s)}</div>`).join("")}</div>
-          ${colorRows}
+        <div class="cart-review-sku">
+          <div class="cart-review-grid">
+            <div class="cart-review-row head"><div class="first">规格</div>${sizes.map(s=>`<div>${esc(s)}</div>`).join("")}</div>
+            ${colorRows}
+          </div>
         </div>
       </div>
     </div>`;
   }).join("");
   box.innerHTML = htmlRows || `<div class="pa-empty">暂无选款</div>`;
   total.innerHTML = cartSummaryText(calcCartSummary());
+  initCartReviewSwipe();
 }
+function deleteCartReviewProduct(code){
+  code = String(code || "");
+  if(!code) return;
+  data.cart = (data.cart || []).filter(i => String(i.code) !== code);
+  DataLayer.save();
+  renderCartBadge();
+  renderCartReview();
+}
+function initCartReviewSwipe(){
+  const rows = Array.from(document.querySelectorAll("#cartReviewList .cart-review-swipe[data-code]"));
+  rows.forEach(row => {
+    const card = row.querySelector(".cart-review-card");
+    const del = row.querySelector(".cart-review-delete");
+    let sx = 0, sy = 0, dx = 0, dy = 0, moved = false;
+    row.addEventListener("touchstart", e => {
+      const t = e.touches && e.touches[0];
+      if(!t) return;
+      sx = t.clientX; sy = t.clientY; dx = 0; dy = 0; moved = false;
+    }, {passive:true});
+    row.addEventListener("touchmove", e => {
+      const t = e.touches && e.touches[0];
+      if(!t) return;
+      dx = t.clientX - sx; dy = t.clientY - sy;
+      if(Math.abs(dx) > 24 && Math.abs(dx) > Math.abs(dy) * 1.2) moved = true;
+    }, {passive:true});
+    row.addEventListener("touchend", () => {
+      if(!moved) return;
+      rows.forEach(r => { if(r !== row) r.classList.remove("swiped"); });
+      if(dx < -38) row.classList.add("swiped");
+      if(dx > 28) row.classList.remove("swiped");
+      row.dataset.justSwiped = String(Date.now());
+    }, {passive:true});
+    if(card){
+      card.onclick = e => {
+        const just = Date.now() - n(row.dataset.justSwiped);
+        if(row.classList.contains("swiped") || just < 260){
+          e.preventDefault();
+          e.stopPropagation();
+          row.classList.remove("swiped");
+          return;
+        }
+        openProductPicker(row.dataset.code || "");
+      };
+    }
+    if(del){
+      del.onclick = e => {
+        e.preventDefault();
+        e.stopPropagation();
+        deleteCartReviewProduct(row.dataset.code || "");
+      };
+    }
+  });
+}
+
 function openCheckout(){
   mergePickerToCart();
   if(!data.cart.length){ alert("请先选择商品数量"); return; }
