@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>八方来财销售开单版 V2.35</title>
+<title>八方来财销售开单版 V2.36</title>
 <style>
 :root{
   --blue:#2f6df6;
@@ -612,7 +612,7 @@ button:active,
 <body>
 <div id="app" class="app">
   <section id="page-sale" class="page active">
-    <div class="topbar"><div class="title">八方来财销售开单版 V2.35</div><div class="right"><button class="icon-btn" onclick="openCart()">🛒<span id="cartBadge" class="cart-badge" style="display:none">0</span></button></div></div>
+    <div class="topbar"><div class="title">八方来财销售开单版 V2.36</div><div class="right"><button class="icon-btn" onclick="openCart()">🛒<span id="cartBadge" class="cart-badge" style="display:none">0</span></button></div></div>
     <div class="toolbar">
       <div class="search">⌕<input id="saleSearch" placeholder="搜索款号/商品名称" oninput="UI.sale.render()"></div>
       <button class="small-btn btn-line" onclick="alert('扫码入口已预留，后期接小程序扫码')">扫码选款</button>
@@ -742,14 +742,14 @@ button:active,
 
 <script>
 /*
-  八方来财销售开单版 V2.35
+  八方来财销售开单版 V2.36
   清理稳定版原则：
   1. 只保留一个核心数据层 DataLayer
   2. 页面不得绕过 DataLayer 自己乱算
   3. 每个页面只保留一个 render 入口
   4. 销售单 qty 为正数，退货 qty 为负数；不再单独切换销售/退货模式
 */
-const VERSION = "V2.35";
+const VERSION = "V2.36";
 const STORAGE_KEY = "bafang_sales_v1";
 const $ = id => document.getElementById(id);
 const n = v => Number(v || 0) || 0;
@@ -920,7 +920,37 @@ const DataLayer = {
       return this.defaultData();
     }
   },
-  save(){ data.version = VERSION; localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); },
+  _lastSaveNote:"",
+  save(){
+    this._lastSaveNote = "";
+    data.version = VERSION;
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      return true;
+    }catch(e1){
+      // 手机浏览器本地空间不足时，优先保住商品资料和订单资料。
+      // 如果图片过大，自动把过大的本地图片换成占位图，避免“保存了但刷新后商品消失”。
+      let stripped = 0;
+      (data.products || []).forEach(p => {
+        const img = String(p.image || "");
+        if(img.startsWith("data:image") && !img.includes("svg+xml") && img.length > 12000){
+          p.image = placeholderImg(p.code, p.name);
+          stripped++;
+        }
+      });
+      try{
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        if(stripped){
+          this._lastSaveNote = "保存成功。手机本地空间不足，部分过大的图片已改为占位图，商品资料已保留。";
+        }
+        return true;
+      }catch(e2){
+        console.error("DataLayer.save failed", e1, e2);
+        alert("本地存储空间不足，保存失败。请先导出备份，或删除部分过大的图片后再保存。");
+        return false;
+      }
+    }
+  },
   getProduct(code){ return data.products.find(p => String(p.code) === String(code)); },
   stockOf(p,color,size){ return n(p && p.stock && p.stock[color] && p.stock[color][size]); },
   setStock(p,color,size,qty){
@@ -1261,7 +1291,7 @@ const UI = {
 
       list = list.filter(p => (p.code+" "+p.name+" "+p.category).toLowerCase().includes(kw));
       $("saleProductList").innerHTML = list.map(p => `
-        <div class="product-card" data-code="${esc(p.code)}" onclick="openProductPickerFromCard(this)">
+        <div class="product-card" data-code="${esc(p.code)}">
           <img class="thumb" src="${esc(p.image)}">
           <div><div class="product-name">${esc(p.code)}${esc(p.name)}</div><div class="sub">${esc(p.category)}</div></div>
           <div class="price">${money(p.price)}</div>
@@ -1458,7 +1488,7 @@ function renderOrderItem(i){
 function copyText(t){ navigator.clipboard && navigator.clipboard.writeText(t); alert("已复制"); }
 function saveOrderNote(){
   const o = data.orders.find(o => o.id === currentOrderId);
-  if(o){ o.note = $("detailNote").value; DataLayer.save(); alert("备注已保存"); }
+  if(o){ o.note = $("detailNote").value; if(DataLayer.save()) alert("备注已保存"); }
 }
 function showPage(name){
   document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
@@ -1480,7 +1510,12 @@ function showPage(name){
 }
 function setSaleTab(tab){
   saleState.tab = tab || "hot";
-  UI.sale.render();
+  try{
+    UI.sale.render();
+  }catch(e){
+    console.error("sale tab render failed", e);
+    alert("开单页面刷新异常，请先检查商品资料是否完整");
+  }
 }
 function renderCartBadge(){
   const el = $("cartBadge");
@@ -1492,14 +1527,22 @@ function renderCartBadge(){
 function openProductPickerFromCard(el){
   openProductPicker(el && el.dataset ? el.dataset.code : "");
 }
+document.addEventListener("click", function(e){
+  const card = e.target && e.target.closest ? e.target.closest("#saleProductList .product-card[data-code]") : null;
+  if(card){
+    e.preventDefault();
+    openProductPicker(card.dataset.code);
+  }
+});
 function openProductPicker(code){
-  pickerCode = code;
-  const p = DataLayer.getProduct(code);
-  if(!p){ alert("商品不存在，请先到商品管理检查资料"); return; }
+  try{
+    pickerCode = code;
+    const p = DataLayer.getProduct(code);
+    if(!p){ alert("商品不存在，请先到商品管理检查资料"); return; }
 
-  const colors = Array.isArray(p.colors) && p.colors.length ? p.colors : [""];
-  const sizes = Array.isArray(p.sizes) && p.sizes.length ? p.sizes : ["均码"];
-  pickerDraft = {color:colors[0], qty:{}};
+    const colors = Array.isArray(p.colors) && p.colors.length ? p.colors : [""];
+    const sizes = Array.isArray(p.sizes) && p.sizes.length ? p.sizes : ["均码"];
+    pickerDraft = {color:colors[0], qty:{}};
 
   // V2.35：从购物车进入或重复点击同款时，把该商品已选 SKU 带回选择页，方便继续修改数量。
   // 注意：这里只做内存临时移出，不立即 DataLayer.save()，避免点击商品时因本地存储过大导致脚本中断。
@@ -1516,8 +1559,12 @@ function openProductPicker(code){
   data.cart = remain;
   renderCartBadge();
 
-  showPage("picker");
-  UI.picker.render();
+    showPage("picker");
+    UI.picker.render();
+  }catch(e){
+    console.error("openProductPicker failed", e);
+    alert("商品选择页打开失败，请检查该商品的颜色、尺码、价格和库存资料");
+  }
 }
 function closePicker(){
   mergePickerToCart();
@@ -2300,7 +2347,10 @@ function saveProductEdit(){
   syncDraftBasicFields();
   if(!productDraft.code || !productDraft.name){ alert('款号和名称不能为空'); return; }
   ensureProductDraftStockAndPrices();
+
+  const productsBackup = JSON.stringify(data.products);
   let p = editProductCode ? DataLayer.getProduct(editProductCode) : null;
+
   if(!p){
     if(DataLayer.getProduct(productDraft.code)){ alert('该款号已存在'); return; }
     p = {code:productDraft.code};
@@ -2308,15 +2358,26 @@ function saveProductEdit(){
   }else if(editProductCode !== productDraft.code && DataLayer.getProduct(productDraft.code)){
     alert('修改后的款号已存在'); return;
   }
+
   Object.assign(p, JSON.parse(JSON.stringify(productDraft)));
   if(!p.createdTs) p.createdTs = Date.now();
   if(!p.image) p.image = placeholderImg(p.code,p.name);
   syncProductPresets(p);
+
   if(!p.multiPrice){
     Object.keys(p.skuPrices || {}).forEach(k => { p.skuPrices[k] = {price:n(p.price), cost:n(p.cost)}; });
   }
-  DataLayer.save();
-  alert('保存成功');
+
+  const ok = DataLayer.save();
+  if(!ok){
+    try{ data.products = JSON.parse(productsBackup); }catch(e){}
+    renderProductEdit();
+    return;
+  }
+
+  const msg = DataLayer._lastSaveNote || '保存成功';
+  DataLayer._lastSaveNote = "";
+  alert(msg);
   showPage('me');
 }
 function openImagePreview(e,src){ e && e.stopPropagation(); $("imageModalImg").src = src; $("imageModal").style.display = "flex"; }
