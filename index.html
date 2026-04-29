@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>八方来财销售开单版 V2.36</title>
+<title>八方来财销售开单版 V2.38</title>
 <style>
 :root{
   --blue:#2f6df6;
@@ -612,7 +612,7 @@ button:active,
 <body>
 <div id="app" class="app">
   <section id="page-sale" class="page active">
-    <div class="topbar"><div class="title">八方来财销售开单版 V2.36</div><div class="right"><button class="icon-btn" onclick="openCart()">🛒<span id="cartBadge" class="cart-badge" style="display:none">0</span></button></div></div>
+    <div class="topbar"><div class="title">八方来财销售开单版 V2.38</div><div class="right"><button class="icon-btn" onclick="openCart()">🛒<span id="cartBadge" class="cart-badge" style="display:none">0</span></button></div></div>
     <div class="toolbar">
       <div class="search">⌕<input id="saleSearch" placeholder="搜索款号/商品名称" oninput="UI.sale.render()"></div>
       <button class="small-btn btn-line" onclick="alert('扫码入口已预留，后期接小程序扫码')">扫码选款</button>
@@ -643,7 +643,7 @@ button:active,
   </section>
 
   <section id="page-pay-success" class="page">
-    <div class="topbar"><div class="left"><button class="icon-btn" onclick="showPage('sale')">‹</button></div><div class="title" id="paySuccessTopTitle">支付成功</div><div class="right"><button class="icon-btn" onclick="UI.orders.openDetail(currentOrderId)">↗</button></div></div>
+    <div class="topbar"><div class="left"><button class="icon-btn" onclick="resetCheckoutFormForNextOrder();showPage('sale')">‹</button></div><div class="title" id="paySuccessTopTitle">支付成功</div><div class="right"><button class="icon-btn" onclick="UI.orders.openDetail(currentOrderId)">↗</button></div></div>
     <div id="paySuccessBox"></div>
   </section>
 
@@ -742,14 +742,14 @@ button:active,
 
 <script>
 /*
-  八方来财销售开单版 V2.36
+  八方来财销售开单版 V2.38
   清理稳定版原则：
   1. 只保留一个核心数据层 DataLayer
   2. 页面不得绕过 DataLayer 自己乱算
   3. 每个页面只保留一个 render 入口
   4. 销售单 qty 为正数，退货 qty 为负数；不再单独切换销售/退货模式
 */
-const VERSION = "V2.36";
+const VERSION = "V2.38";
 const STORAGE_KEY = "bafang_sales_v1";
 const $ = id => document.getElementById(id);
 const n = v => Number(v || 0) || 0;
@@ -933,7 +933,7 @@ const DataLayer = {
       let stripped = 0;
       (data.products || []).forEach(p => {
         const img = String(p.image || "");
-        if(img.startsWith("data:image") && !img.includes("svg+xml") && img.length > 12000){
+        if(img.startsWith("data:image") && !img.includes("svg+xml") && img.length > 15000){
           p.image = placeholderImg(p.code, p.name);
           stripped++;
         }
@@ -941,7 +941,7 @@ const DataLayer = {
       try{
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
         if(stripped){
-          this._lastSaveNote = "保存成功。手机本地空间不足，部分过大的图片已改为占位图，商品资料已保留。";
+          this._lastSaveNote = "保存成功。检测到旧图片过大，已自动改为占位图；以后新上传图片会自动压缩。";
         }
         return true;
       }catch(e2){
@@ -1626,6 +1626,16 @@ function openCheckout(){
   showPage("checkout");
   UI.checkout.render();
 }
+function resetCheckoutFormForNextOrder(){
+  const round = $("roundOff");
+  if(round) round.value = "";
+  const note = $("orderNote");
+  if(note) note.value = "";
+  const pay = $("payMethod");
+  if(pay) pay.value = "微信支付";
+  const btn = $("checkoutConfirmBtn");
+  if(btn) btn.innerText = "立即收款";
+}
 function calcCartSummary(){
   const s = {saleQty:0,refundQty:0,absQty:0,amount:0,refundAmount:0,netAmount:0};
   data.cart.forEach(i => {
@@ -1675,6 +1685,7 @@ function confirmOrder(){
   const order = DataLayer.createOrder(data.cart, {salesman:$("salesman").value, paymentMethod:$("payMethod").value, note:$("orderNote").value, roundOff:Math.abs(n($("roundOff").value))});
   if(!order) return;
   currentOrderId = order.id;
+  resetCheckoutFormForNextOrder();
   renderPaySuccess(order.id);
   showPage("pay-success");
 }
@@ -1701,7 +1712,7 @@ function renderPaySuccess(id){
       </div>
       <div class="pay-success-actions">
         <button class="btn btn-line" onclick="UI.orders.openDetail('${esc(o.id)}')">查看详情</button>
-        <button class="btn btn-line blue" onclick="showPage('sale')">继续开单</button>
+        <button class="btn btn-line blue" onclick="resetCheckoutFormForNextOrder();showPage('sale')">继续开单</button>
       </div>
     </div>
   `;
@@ -2090,7 +2101,7 @@ function renderProductEdit(){
       <div class="pe-topbar"><div class="left"><button class="icon-btn" onclick="showPage('me')">‹</button></div><div class="title">${title}</div><div style="width:36px"></div></div>
       <div class="pe-body">
         <div class="pe-upload-card">
-          <div class="pe-upload-title">上传图片 <span>（最多1张）</span></div>
+          <div class="pe-upload-title">上传图片 <span>（最多1张，自动压缩）</span></div>
           <div class="pe-upload-box" onclick="changeProductImage()">${productDraft.image ? `<img src="${esc(productDraft.image)}">` : '+'}</div>
         </div>
         <div class="pe-gap"></div>
@@ -2128,48 +2139,70 @@ function handleProductImageUpload(event){
   if(!file || !productDraft) return;
   if(!/^image\//.test(file.type || "")){ alert("请选择图片文件"); return; }
 
-  const fallbackReader = new FileReader();
-  const useFallback = () => {
-    fallbackReader.onload = function(){
-      productDraft.image = fallbackReader.result;
-      renderProductEdit();
-    };
-    fallbackReader.readAsDataURL(file);
-  };
-
+  // V2.37：上传图片自动压缩版
+  // 关键点：绝不再直接保存原图 Base64，避免 localStorage 空间爆掉，导致商品保存失败或商品消失。
   const objectUrl = URL.createObjectURL(file);
   const img = new Image();
+
   img.onload = function(){
     try{
-      const maxW = 400;
-      const scale = Math.min(1, maxW / Math.max(1, img.width));
+      const maxEdge = 260;       // 商品页只显示缩略图，260px 足够清晰，体积更稳
+      const targetLen = 9000;    // 目标控制在约 9KB 以内，适合手机 localStorage
+      const maxSide = Math.max(1, img.width, img.height);
+      const scale = Math.min(1, maxEdge / maxSide);
       const w = Math.max(1, Math.round(img.width * scale));
       const h = Math.max(1, Math.round(img.height * scale));
+
       const canvas = document.createElement("canvas");
       canvas.width = w;
       canvas.height = h;
-      const ctx = canvas.getContext("2d");
+      const ctx = canvas.getContext("2d", {alpha:false});
       ctx.fillStyle = "#fff";
       ctx.fillRect(0,0,w,h);
       ctx.drawImage(img,0,0,w,h);
-      let quality = 0.7;
+
+      let quality = 0.62;
       let dataUrl = canvas.toDataURL("image/jpeg", quality);
-      while(dataUrl.length > 18000 && quality > 0.35){
-        quality -= 0.1;
+
+      // 如果仍偏大，逐步降低质量
+      while(dataUrl.length > targetLen && quality > 0.32){
+        quality = Math.max(0.32, quality - 0.08);
         dataUrl = canvas.toDataURL("image/jpeg", quality);
       }
+
+      // 如果还偏大，继续降低尺寸再压一次
+      if(dataUrl.length > targetLen){
+        const smallCanvas = document.createElement("canvas");
+        const smallScale = 200 / Math.max(w,h);
+        smallCanvas.width = Math.max(1, Math.round(w * smallScale));
+        smallCanvas.height = Math.max(1, Math.round(h * smallScale));
+        const sctx = smallCanvas.getContext("2d", {alpha:false});
+        sctx.fillStyle = "#fff";
+        sctx.fillRect(0,0,smallCanvas.width,smallCanvas.height);
+        sctx.drawImage(canvas,0,0,smallCanvas.width,smallCanvas.height);
+        dataUrl = smallCanvas.toDataURL("image/jpeg", 0.36);
+      }
+
       URL.revokeObjectURL(objectUrl);
       productDraft.image = dataUrl;
       renderProductEdit();
     }catch(e){
       URL.revokeObjectURL(objectUrl);
-      useFallback();
+      console.error("图片压缩失败", e);
+      // 压缩失败也不保存原图，避免再次引发本地空间不足
+      productDraft.image = placeholderImg(productDraft.code || "商品", productDraft.name || "商品");
+      renderProductEdit();
+      alert("图片压缩失败，已使用占位图，商品资料可以正常保存。");
     }
   };
+
   img.onerror = function(){
     URL.revokeObjectURL(objectUrl);
-    useFallback();
+    productDraft.image = placeholderImg(productDraft.code || "商品", productDraft.name || "商品");
+    renderProductEdit();
+    alert("图片读取失败，已使用占位图。");
   };
+
   img.src = objectUrl;
 }
 function syncDraftBasicFields(){
