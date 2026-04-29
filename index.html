@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>八方来财销售开单版 V2.22</title>
+<title>八方来财销售开单版 V2.26</title>
 <style>
 :root{
   --blue:#2f6df6;
@@ -190,7 +190,7 @@ textarea{min-height:88px;resize:none}
 <body>
 <div id="app" class="app">
   <section id="page-sale" class="page active">
-    <div class="topbar"><div class="title">八方来财销售开单版 V2.22</div><div class="right"><button class="icon-btn" onclick="openCart()">🛒<span id="cartBadge" class="cart-badge" style="display:none">0</span></button></div></div>
+    <div class="topbar"><div class="title">八方来财销售开单版 V2.26</div><div class="right"><button class="icon-btn" onclick="openCart()">🛒<span id="cartBadge" class="cart-badge" style="display:none">0</span></button></div></div>
     <div class="toolbar">
       <div class="search">⌕<input id="saleSearch" placeholder="搜索款号/商品名称" oninput="UI.sale.render()"></div>
       <button class="small-btn btn-line" onclick="alert('扫码入口已预留，后期接小程序扫码')">扫码选款</button>
@@ -210,7 +210,7 @@ textarea{min-height:88px;resize:none}
     <div class="card">
       <div class="title">订单结算</div>
       <div class="checkout-line"><span>数量 / 金额</span><b id="checkoutQtyAmount">0件 / 0</b></div>
-      <div class="checkout-line"><span>抹零金额</span><input id="roundOff" type="number" value="0" oninput="UI.checkout.render()" style="text-align:right"></div>
+      <div class="checkout-line"><span>抹零金额</span><input id="roundOff" type="number" value="" placeholder="请输入" oninput="UI.checkout.render()" style="text-align:right"></div>
       <div class="checkout-line"><span id="payLabel">应收金额</span><strong id="receivable" class="red">0</strong></div>
       <div class="checkout-line"><span>支付方式</span><select id="payMethod"><option>微信支付</option><option>支付宝</option><option>现金支付</option><option>银行卡</option></select></div>
       <div class="checkout-line"><span>业务员</span><input id="salesman" value="李飞"></div>
@@ -300,18 +300,19 @@ textarea{min-height:88px;resize:none}
 
 <script>
 /*
-  八方来财销售开单版 V2.22
+  八方来财销售开单版 V2.26
   清理稳定版原则：
   1. 只保留一个核心数据层 DataLayer
   2. 页面不得绕过 DataLayer 自己乱算
   3. 每个页面只保留一个 render 入口
   4. 销售单 qty 为正数，退货 qty 为负数；不再单独切换销售/退货模式
 */
-const VERSION = "V2.22";
+const VERSION = "V2.26";
 const STORAGE_KEY = "bafang_sales_v1";
 const $ = id => document.getElementById(id);
 const n = v => Number(v || 0) || 0;
 const money = v => String(Math.round(n(v)));
+const numInputValue = v => n(v) === 0 ? "" : String(n(v));
 const pct = v => String(Math.round(n(v))) + "%";
 const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
@@ -405,7 +406,7 @@ const DataLayer = {
     d.settings = d.settings || {};
     d.settings.storeName = d.settings.storeName || "NN童装";
     d.settings.salesman = d.settings.salesman || "李飞";
-    d.settings.colorPresets = Array.isArray(d.settings.colorPresets) && d.settings.colorPresets.length ? d.settings.colorPresets.map(String) : ["红色","粉色","紫色","绿色","白色","黄色","蓝色","黑色"];
+    d.settings.colorPresets = Array.isArray(d.settings.colorPresets) && d.settings.colorPresets.length ? d.settings.colorPresets.map(String).filter(x => x.trim() !== "默认") : ["红色","粉色","紫色","绿色","白色","黄色","蓝色","黑色"];
     d.settings.sizePresets = Array.isArray(d.settings.sizePresets) && d.settings.sizePresets.length ? d.settings.sizePresets.map(String) : ["90、100、110、120、130、140","100、110、120、130、140、150","150、140、130、120、110、100、90","XS、S、M、L、XL、XXL","均码"];
     d.products.forEach(p => {
       p.code = String(p.code || "");
@@ -413,7 +414,7 @@ const DataLayer = {
       p.category = p.category || "";
       p.price = n(p.price);
       p.cost = n(p.cost);
-      p.colors = Array.isArray(p.colors) && p.colors.length ? p.colors.map(String) : ["默认"];
+      p.colors = Array.isArray(p.colors) ? p.colors.map(String).filter(x => x.trim() && x.trim() !== "默认") : [];
       p.sizes = Array.isArray(p.sizes) && p.sizes.length ? p.sizes.map(String) : ["均码"];
       p.stock = p.stock || {};
       p.colors.forEach(c => { p.stock[c] = p.stock[c] || {}; p.sizes.forEach(s => { p.stock[c][s] = n(p.stock[c][s]); }); });
@@ -1212,7 +1213,7 @@ function renderPaTrend(p){
 function renderPaStock(p){
   const rows = [];
   (p.colors || []).forEach(c => (p.sizes || []).forEach(z => rows.push({label:c+";"+z,stock:DataLayer.stockOf(p,c,z)})));
-  $("paDetailContent").innerHTML = `<div class="detail-card"><div class="title">库存</div>${rows.map(r => `<div class="stock-line"><b>${esc(r.label)}</b><input type="number" value="${r.stock}" onchange="setPaStock('${esc(p.code)}','${esc(r.label)}',this.value)"></div>`).join("")}</div>`;
+  $("paDetailContent").innerHTML = `<div class="detail-card"><div class="title">库存</div>${rows.map(r => `<div class="stock-line"><b>${esc(r.label)}</b><input type="number" value="${numInputValue(r.stock)}" onchange="setPaStock('${esc(p.code)}','${esc(r.label)}',this.value)"></div>`).join("")}</div>`;
 }
 function setPaStock(code,label,value){
   const p = DataLayer.getProduct(code);
@@ -1224,8 +1225,8 @@ function setPaStock(code,label,value){
 
 function ensureProductDraftStockAndPrices(){
   if(!productDraft) return;
-  productDraft.colors = Array.isArray(productDraft.colors) && productDraft.colors.length ? productDraft.colors : ["默认"];
-  productDraft.sizes = Array.isArray(productDraft.sizes) && productDraft.sizes.length ? productDraft.sizes : ["均码"];
+  productDraft.colors = Array.isArray(productDraft.colors) ? productDraft.colors.map(String).map(x => x.trim()).filter(x => x && x !== "默认") : [];
+  productDraft.sizes = Array.isArray(productDraft.sizes) && productDraft.sizes.length ? productDraft.sizes.map(String).map(x => x.trim()).filter(Boolean) : ["均码"];
   productDraft.stock = productDraft.stock || {};
   productDraft.skuPrices = productDraft.skuPrices || {};
   const stock = {};
@@ -1280,8 +1281,8 @@ function renderProductEdit(){
         <div class="pe-gap"></div>
         <div class="pe-form">
           <div class="pe-row"><span class="k">多规格多价格</span><span></span><span class="switch ${productDraft.multiPrice?'on':''}" onclick="toggleDraftMultiPrice(event)"></span></div>
-          <div class="pe-row"><span class="k">销售价<span class="req">*</span></span><input id="editPrice" type="number" value="${n(productDraft.price)}" placeholder="¥请输入" ${productDraft.multiPrice?'disabled':''}></div>
-          <div class="pe-row"><span class="k">成本价</span><input id="editCost" type="number" value="${n(productDraft.cost)}" placeholder="¥请输入" ${productDraft.multiPrice?'disabled':''}></div>
+          <div class="pe-row"><span class="k">销售价<span class="req">*</span></span><input id="editPrice" type="number" value="${numInputValue(productDraft.price)}" placeholder="¥请输入" ${productDraft.multiPrice?'disabled':''}></div>
+          <div class="pe-row"><span class="k">成本价</span><input id="editCost" type="number" value="${numInputValue(productDraft.cost)}" placeholder="¥请输入" ${productDraft.multiPrice?'disabled':''}></div>
           <div class="pe-row" ${productDraft.multiPrice?'onclick="openProductPricePage()"':''}><span class="k">价格设置</span><span class="v ${productDraft.multiPrice?'':'placeholder'}">${esc(productDraft.multiPrice ? priceText : '关闭后按统一销售价 / 成本价')}</span><span class="arrow">${productDraft.multiPrice?'›':''}</span></div>
         </div>
         <div class="pe-gap"></div>
@@ -1378,7 +1379,7 @@ function optionPresetList(type){ return type === 'color' ? (data.settings.colorP
 function renderProductOptionPage(){
   const type = productOptionState.type;
   const title = type === 'color' ? '颜色' : '尺码';
-  const presets = optionPresetList(type);
+  const presets = optionPresetList(type).filter(x => !(type === "color" && String(x).trim() === "默认"));
   const keyword = (productOptionState.keyword || '').trim().toLowerCase();
   const filtered = presets.filter(x => String(x).toLowerCase().includes(keyword));
   const body = type === 'color'
@@ -1439,7 +1440,7 @@ function openProductPricePage(){
       <table class="matrix-table"><thead><tr><th>规格</th><th>销售价</th><th>成本价</th></tr></thead><tbody>${rows.map(r => {
         const one = productDraft.skuPrices[r.key] || {};
         const label = productDraft.colors.length > 1 && productDraft.sizes.length > 1 ? `${r.color}/${r.size}` : (productDraft.colors.length > 1 ? r.color : r.size);
-        return `<tr><td>${esc(label)}</td><td><input type="number" value="${n(one.price || productDraft.price)}" onchange="setDraftSkuPrice('${r.key}','price',this.value)"></td><td><input type="number" value="${n(one.cost || productDraft.cost)}" onchange="setDraftSkuPrice('${r.key}','cost',this.value)"></td></tr>`;
+        return `<tr><td>${esc(label)}</td><td><input type="number" value="${numInputValue(one.price || productDraft.price)}" onchange="setDraftSkuPrice('${r.key}','price',this.value)"></td><td><input type="number" value="${numInputValue(one.cost || productDraft.cost)}" onchange="setDraftSkuPrice('${r.key}','cost',this.value)"></td></tr>`;
       }).join('')}</tbody></table>
       <div class="matrix-foot"><button class="btn btn-blue" onclick="saveProductPricePage()">保存</button></div>
     </div>`;
@@ -1451,9 +1452,9 @@ function setDraftSkuPrice(key, field, value){
   productDraft.skuPrices[key][field] = n(value);
 }
 function batchFillSkuPrices(){
-  const sale = prompt('批量设置销售价', String(n(productDraft.price)));
+  const sale = prompt('批量设置销售价', '');
   if(sale === null) return;
-  const cost = prompt('批量设置成本价', String(n(productDraft.cost)));
+  const cost = prompt('批量设置成本价', '');
   if(cost === null) return;
   productDraft.price = n(sale);
   productDraft.cost = n(cost);
@@ -1479,7 +1480,7 @@ function openProductStockPage(){
       <table class="matrix-table"><thead><tr><th>规格</th><th>库存</th></tr></thead><tbody>${rows.map(r => {
         const label = productDraft.colors.length > 1 && productDraft.sizes.length > 1 ? `${r.color}/${r.size}` : (productDraft.colors.length > 1 ? r.color : r.size);
         const val = n(productDraft.stock && productDraft.stock[r.color] && productDraft.stock[r.color][r.size]);
-        return `<tr><td>${esc(label)}</td><td><input type="number" value="${val}" oninput="setDraftStock('${r.color}','${r.size}',this.value)" onchange="setDraftStock('${r.color}','${r.size}',this.value)"></td></tr>`;
+        return `<tr><td>${esc(label)}</td><td><input type="number" value="${numInputValue(val)}" oninput="setDraftStock('${r.color}','${r.size}',this.value)" onchange="setDraftStock('${r.color}','${r.size}',this.value)"></td></tr>`;
       }).join('')}</tbody></table>
       <div class="matrix-foot"><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><button class="btn btn-light" onclick="batchSetDraftStock()">批量设置</button><button class="btn btn-blue" onclick="saveProductStockPage()">确认</button></div><button class="small-btn btn-line" style="margin-top:10px;width:100%" onclick="backFromProductStock()">取消本次库存修改</button></div>
     </div>`;
@@ -1494,7 +1495,7 @@ function setDraftStock(color,size,value){
 }
 function batchSetDraftStock(){
   if(!productDraft) return;
-  const val = prompt("请输入要批量设置的库存数量", "100");
+  const val = prompt("请输入要批量设置的库存数量", "");
   if(val === null) return;
   const qty = Math.max(0, n(val));
   ensureProductDraftStockAndPrices();
