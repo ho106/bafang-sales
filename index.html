@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>八方来财销售开单版 V2.17</title>
+<title>八方来财销售开单版 V2.18</title>
 <style>
 :root{
   --blue:#2f6df6;
@@ -175,6 +175,11 @@ textarea{min-height:88px;resize:none}
 .pm-value-label{font-size:13px;color:#64748b;margin-top:3px}
 .pm-empty{padding:36px 16px;text-align:center;color:#94a3b8;background:#fff}
 .pm-tools-card{margin-top:12px}
+
+.switch{position:relative;display:inline-flex;width:58px;height:32px;background:#dbe1ea;border-radius:999px;vertical-align:middle;cursor:pointer;transition:.2s}
+.switch:before{content:"";position:absolute;left:3px;top:3px;width:26px;height:26px;background:#fff;border-radius:50%;box-shadow:0 1px 3px rgba(15,23,42,.18);transition:.2s}
+.switch.on{background:#4f46e5}.switch.on:before{left:29px}
+.pe-wrap{padding-bottom:90px}.pe-topbar,.picker-topbar{height:64px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 16px;position:sticky;top:0;z-index:20}.pe-topbar .title,.picker-topbar .title{font-size:18px;font-weight:900}.picker-topbar .right{display:flex;gap:16px;color:#4f46e5;font-size:16px}.pe-body{background:#f3f5f9;min-height:calc(100vh - 64px)}.pe-upload-card{background:#fff;padding:18px 16px}.pe-upload-title{font-size:16px;font-weight:700;margin-bottom:12px}.pe-upload-title span{color:#94a3b8;font-weight:600;margin-left:6px}.pe-upload-box{width:120px;height:120px;border:1px dashed #d7dde7;border-radius:8px;background:#f8fafc;display:flex;align-items:center;justify-content:center;color:#a8b1c2;font-size:50px}.pe-upload-box img{width:100%;height:100%;object-fit:cover;border-radius:8px}.pe-form{margin-top:10px;background:#fff}.pe-row{min-height:58px;padding:0 16px;display:grid;grid-template-columns:96px 1fr auto;align-items:center;border-bottom:1px solid var(--line);column-gap:10px}.pe-row .k{font-size:16px}.pe-row .req{color:#ef4444;margin-left:2px}.pe-row input,.pe-row textarea{border:0;outline:0;background:transparent;width:100%;font-size:16px;padding:16px 0;color:#111827}.pe-row .v{font-size:16px;color:#111827;text-align:left}.pe-row .v.placeholder{color:#a8b1c2}.pe-row .arrow{color:#a8b1c2;font-size:22px}.pe-gap{height:10px;background:#f3f5f9}.pe-submit{padding:16px;background:#f3f5f9}.pe-submit .btn{height:52px;font-size:18px}.option-body{background:#f3f5f9;min-height:calc(100vh - 64px);padding-bottom:88px}.option-tools{padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:12px;background:#fff;border-bottom:1px solid var(--line)}.option-search,.option-add{height:44px;border-radius:8px;background:#f6f8fc;display:flex;align-items:center;justify-content:center;color:#a5afc1;font-size:16px;padding:0 14px}.option-search input{flex:1;border:0;background:transparent;outline:0;color:#111827;font-size:16px}.option-list{background:#fff}.option-item{min-height:56px;display:grid;grid-template-columns:1fr auto;align-items:center;padding:0 16px;border-bottom:1px solid var(--line);font-size:16px}.option-item .circle{width:28px;height:28px;border:2px solid #d5dbe6;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#4f46e5;font-weight:900}.option-item .circle.checked{border-color:#4f46e5;background:#eef2ff}.option-bottom{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding:12px 16px;display:grid;grid-template-columns:1fr 1fr;gap:12px;z-index:25}.option-bottom.one{grid-template-columns:1fr}.matrix-wrap{background:#f3f5f9;min-height:calc(100vh - 64px);padding-bottom:88px}.matrix-table{width:100%;border-collapse:collapse;background:#fff}.matrix-table th,.matrix-table td{border:1px solid #e5eaf2;padding:12px 10px;text-align:left;font-size:15px;vertical-align:middle}.matrix-table th{font-size:16px;background:#fff}.matrix-table input{width:100%;height:40px;border:1px solid #d9e1ec;border-radius:4px;padding:0 10px;font-size:16px}.matrix-foot{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding:12px 16px;z-index:25}.matrix-head-action{color:#4f46e5;font-size:16px}.stock-total-tip{padding:10px 16px;color:#64748b;font-size:14px;background:#fff;border-bottom:1px solid var(--line)}
 @media(max-width:430px){
   .pa-table th:first-child,.pa-table td:first-child{width:178px;min-width:178px}
   .pa-table th,.pa-table td{width:72px;min-width:72px}
@@ -185,7 +190,7 @@ textarea{min-height:88px;resize:none}
 <body>
 <div id="app" class="app">
   <section id="page-sale" class="page active">
-    <div class="topbar"><div class="title">八方来财销售开单版 V2.17</div><div class="right"><button class="icon-btn" onclick="openCart()">🛒<span id="cartBadge" class="cart-badge" style="display:none">0</span></button></div></div>
+    <div class="topbar"><div class="title">八方来财销售开单版 V2.18</div><div class="right"><button class="icon-btn" onclick="openCart()">🛒<span id="cartBadge" class="cart-badge" style="display:none">0</span></button></div></div>
     <div class="toolbar">
       <div class="search">⌕<input id="saleSearch" placeholder="搜索款号/商品名称" oninput="UI.sale.render()"></div>
       <button class="small-btn btn-line" onclick="alert('扫码入口已预留，后期接小程序扫码')">扫码选款</button>
@@ -261,7 +266,7 @@ textarea{min-height:88px;resize:none}
       <div class="pm-toolbar">
         <div class="pm-search-row">
           <select id="pmSearchMode" onchange="UI.me.render()"><option value="fuzzy">模糊</option><option value="code">款号</option><option value="name">名称</option></select>
-          <input id="pmSearch" placeholder="搜索款号、商品名称、商品编码" oninput="UI.me.render()">
+          <input id="pmSearch" placeholder="搜索款号、商品名称、商品分类" oninput="UI.me.render()">
           <button class="pm-search-icon" onclick="UI.me.render()">⌕</button>
         </div>
       </div>
@@ -275,10 +280,13 @@ textarea{min-height:88px;resize:none}
     </div>
   </section>
 
-  <section id="page-product-edit" class="page">
-    <div class="topbar"><div class="left"><button class="icon-btn" onclick="showPage('me')">‹</button></div><div class="title">商品详情</div></div>
-    <div id="productEditBox"></div>
-  </section>
+  <section id="page-product-edit" class="page"><div id="productEditBox"></div></section>
+
+  <section id="page-product-options" class="page"><div id="productOptionBox"></div></section>
+
+  <section id="page-product-price" class="page"><div id="productPriceBox"></div></section>
+
+  <section id="page-product-stock" class="page"><div id="productStockBox"></div></section>
 </div>
 
 <div class="nav"><div class="nav-inner">
@@ -291,14 +299,14 @@ textarea{min-height:88px;resize:none}
 
 <script>
 /*
-  八方来财销售开单版 V2.17
+  八方来财销售开单版 V2.18
   清理稳定版原则：
   1. 只保留一个核心数据层 DataLayer
   2. 页面不得绕过 DataLayer 自己乱算
   3. 每个页面只保留一个 render 入口
   4. 销售单 qty 为正数，退货 qty 为负数；不再单独切换销售/退货模式
 */
-const VERSION = "V2.17";
+const VERSION = "V2.18";
 const STORAGE_KEY = "bafang_sales_v1";
 const $ = id => document.getElementById(id);
 const n = v => Number(v || 0) || 0;
@@ -386,7 +394,7 @@ const DataLayer = {
       stock[c] = {};
       sizes.forEach((s,i) => stock[c][s] = 100 + (i === 1 ? 2 : 0));
     });
-    return {code,name,category,price,cost,colors,sizes,stock,image:placeholderImg(code,name),multiPrice:false,skuPrices:{}};
+    return {code,name,category,price,cost,colors,sizes,stock,image:placeholderImg(code,name),multiPrice:false,skuPrices:{},otherPrice:0};
   },
   normalizeData(raw){
     const d = raw && typeof raw === "object" ? raw : this.defaultData();
@@ -396,6 +404,8 @@ const DataLayer = {
     d.settings = d.settings || {};
     d.settings.storeName = d.settings.storeName || "NN童装";
     d.settings.salesman = d.settings.salesman || "李飞";
+    d.settings.colorPresets = Array.isArray(d.settings.colorPresets) && d.settings.colorPresets.length ? d.settings.colorPresets.map(String) : ["红色","粉色","紫色","绿色","白色","黄色","蓝色","黑色"];
+    d.settings.sizePresets = Array.isArray(d.settings.sizePresets) && d.settings.sizePresets.length ? d.settings.sizePresets.map(String) : ["90、100、110、120、130、140","100、110、120、130、140、150","150、140、130、120、110、100、90","XS、S、M、L、XL、XXL","均码"];
     d.products.forEach(p => {
       p.code = String(p.code || "");
       p.name = p.name || "";
@@ -409,6 +419,11 @@ const DataLayer = {
       p.image = p.image || placeholderImg(p.code,p.name);
       p.multiPrice = !!p.multiPrice;
       p.skuPrices = p.skuPrices || {};
+      p.otherPrice = n(p.otherPrice);
+      Object.keys(p.skuPrices).forEach(k => {
+        const one = p.skuPrices[k] || {};
+        p.skuPrices[k] = {price:n(one.price), cost:n(one.cost)};
+      });
     });
     d.orders.forEach((o,idx) => {
       o.id = o.id || uid("O");
@@ -473,6 +488,24 @@ const DataLayer = {
     let s = 0;
     (p.colors || []).forEach(c => (p.sizes || []).forEach(z => s += this.stockOf(p,c,z)));
     return s;
+  },
+  skuKey(color,size){ return String(color || "默认") + ";" + String(size || "均码"); },
+  getSkuInfo(p,color,size){
+    const key = this.skuKey(color,size);
+    const one = p && p.skuPrices ? (p.skuPrices[key] || {}) : {};
+    return {price: n(one.price || (p && p.price) || 0), cost: n(one.cost || (p && p.cost) || 0)};
+  },
+  getSkuPrice(p,color,size){ return this.getSkuInfo(p,color,size).price; },
+  getSkuCost(p,color,size){ return this.getSkuInfo(p,color,size).cost; },
+  productStockAmounts(p){
+    const out = {stock:0,cost:0,retail:0};
+    (p.colors || []).forEach(c => (p.sizes || []).forEach(z => {
+      const qty = this.stockOf(p,c,z);
+      out.stock += qty;
+      out.cost += qty * this.getSkuCost(p,c,z);
+      out.retail += qty * this.getSkuPrice(p,c,z);
+    }));
+    return out;
   },
   isRefundLine(item){ return n(item.qty) < 0 || item.lineType === "refund"; },
   isSaleLine(item){ return n(item.qty) > 0 && item.lineType !== "refund"; },
@@ -687,6 +720,8 @@ let pickerCode = "";
 let pickerDraft = {};
 let currentOrderId = "";
 let editProductCode = "";
+let productDraft = null;
+let productOptionState = {type:"color", keyword:"", selectedSizePreset:""};
 let paState = {
   mode:"day",
   anchor:today(),
@@ -706,10 +741,10 @@ const paColumns = [
 function productManageStats(list){
   const stats = {stock:0,cost:0,retail:0};
   (list || []).forEach(p => {
-    const stock = DataLayer.totalStock(p);
-    stats.stock += stock;
-    stats.cost += stock * n(p.cost);
-    stats.retail += stock * n(p.price);
+    const one = DataLayer.productStockAmounts(p);
+    stats.stock += one.stock;
+    stats.cost += one.cost;
+    stats.retail += one.retail;
   });
   return stats;
 }
@@ -760,7 +795,8 @@ const UI = {
               const key = color+";"+size;
               const q = n(pickerDraft.qty && pickerDraft.qty[key]);
               const stock = DataLayer.stockOf(p,color,size);
-              return `<tr><td>${esc(size)}</td><td class="price">${money(p.price)}</td><td style="font-weight:900;color:#f97316">${stock}</td><td><div class="qty-step"><button onclick="changePickerQty('${esc(size)}',-1)">−</button><span class="num ${q<0?'red':''}">${q}</span><button onclick="changePickerQty('${esc(size)}',1)">＋</button></div></td></tr>`;
+              const skuPrice = DataLayer.getSkuPrice(p,color,size);
+              return `<tr><td>${esc(size)}</td><td class="price">${money(skuPrice)}</td><td style="font-weight:900;color:#f97316">${stock}</td><td><div class="qty-step"><button onclick="changePickerQty('${esc(size)}',-1)">−</button><span class="num ${q<0?'red':''}">${q}</span><button onclick="changePickerQty('${esc(size)}',1)">＋</button></div></td></tr>`;
             }).join("")}</tbody>
           </table>
           <div class="sub" style="margin-top:10px">说明：＋是销售，−是退货；退货会自动加库存。</div>
@@ -860,9 +896,10 @@ const UI = {
         return;
       }
       $("productManageList").innerHTML = list.map(p => {
-        const stock = DataLayer.totalStock(p);
-        const costAmount = stock * n(p.cost);
-        const retailAmount = stock * n(p.price);
+        const stockData = DataLayer.productStockAmounts(p);
+        const stock = stockData.stock;
+        const costAmount = stockData.cost;
+        const retailAmount = stockData.retail;
         return `<div class="pm-item" onclick="openProductEdit('${esc(p.code)}')">
           <div class="pm-main">
             <img src="${esc(p.image)}">
@@ -941,8 +978,10 @@ function mergePickerToCart(){
     if(!q) return;
     const [color,size] = key.split(";");
     const old = data.cart.find(i => i.code === p.code && i.color === color && i.size === size && (n(i.qty)>0) === (q>0));
+    const skuPrice = DataLayer.getSkuPrice(p,color,size);
+    const skuCost = DataLayer.getSkuCost(p,color,size);
     if(old) old.qty += q;
-    else data.cart.push({code:p.code,color,size,qty:q,price:p.price,cost:p.cost,lineType:q<0?"refund":"sale"});
+    else data.cart.push({code:p.code,color,size,qty:q,price:skuPrice,cost:skuCost,lineType:q<0?"refund":"sale"});
   });
   DataLayer.save();
   renderCartBadge();
@@ -1145,42 +1184,235 @@ function setPaStock(code,label,value){
   DataLayer.save();
 }
 
-function openProductEdit(code){
-  editProductCode = code;
-  const p = code ? DataLayer.getProduct(code) : {code:"",name:"",category:"",price:0,cost:0,colors:["默认"],sizes:["均码"],stock:{默认:{均码:0}},image:""};
-  $("productEditBox").innerHTML = `<div class="card product-edit-list">
-    <div style="display:flex;gap:14px;margin-bottom:14px"><img class="thumb" src="${esc(p.image || placeholderImg(p.code,p.name))}"><button class="btn btn-gray" onclick="changeProductImage()">上传图片</button></div>
-    <div class="line"><span class="k">款号*</span><input id="editCode" value="${esc(p.code)}"></div>
-    <div class="line"><span class="k">名称*</span><input id="editName" value="${esc(p.name)}"></div>
-    <div class="line"><span class="k">商品分类</span><input id="editCategory" value="${esc(p.category)}"></div>
-    <div class="line"><span class="k">颜色</span><input id="editColors" value="${esc((p.colors||[]).join('、'))}"></div>
-    <div class="line"><span class="k">尺码</span><input id="editSizes" value="${esc((p.sizes||[]).join('、'))}"></div>
-    <div class="line"><span class="k">销售价*</span><input id="editPrice" type="number" value="${n(p.price)}"></div>
-    <div class="line"><span class="k">成本价</span><input id="editCost" type="number" value="${n(p.cost)}"></div>
-    <div class="line"><span class="k">库存批量</span><input id="editStock" type="number" placeholder="输入后保存，批量设置所有规格"></div>
-    <button class="btn btn-blue" style="width:100%;margin-top:18px" onclick="saveProductEdit()">保存更改</button>
-  </div>`;
-  showPage("product-edit");
-}
-function changeProductImage(){ alert("单HTML稳定版暂用占位图；后期小程序版再接正式图片上传"); }
-function saveProductEdit(){
-  const code = $("editCode").value.trim();
-  if(!code || !$("editName").value.trim()){ alert("款号和名称不能为空"); return; }
-  let p = editProductCode ? DataLayer.getProduct(editProductCode) : null;
-  if(!p){ p = {code,stock:{},image:placeholderImg(code,$("editName").value.trim())}; data.products.push(p); }
-  p.code = code; p.name = $("editName").value.trim(); p.category = $("editCategory").value.trim();
-  p.price = n($("editPrice").value); p.cost = n($("editCost").value);
-  p.colors = $("editColors").value.split(/[、,，\s]+/).map(x => x.trim()).filter(Boolean);
-  p.sizes = $("editSizes").value.split(/[、,，\s]+/).map(x => x.trim()).filter(Boolean);
-  if(!p.colors.length) p.colors = ["默认"]; if(!p.sizes.length) p.sizes = ["均码"];
-  p.stock = p.stock || {};
-  const batch = $("editStock").value === "" ? null : n($("editStock").value);
-  p.colors.forEach(c => { p.stock[c] = p.stock[c] || {}; p.sizes.forEach(z => { if(batch !== null) p.stock[c][z] = batch; else p.stock[c][z] = n(p.stock[c][z]); }); });
-  p.image = p.image || placeholderImg(code,p.name);
-  DataLayer.save();
-  showPage("me");
-}
 
+function ensureProductDraftStockAndPrices(){
+  if(!productDraft) return;
+  productDraft.colors = Array.isArray(productDraft.colors) && productDraft.colors.length ? productDraft.colors : ["默认"];
+  productDraft.sizes = Array.isArray(productDraft.sizes) && productDraft.sizes.length ? productDraft.sizes : ["均码"];
+  productDraft.stock = productDraft.stock || {};
+  productDraft.skuPrices = productDraft.skuPrices || {};
+  const stock = {};
+  const skuPrices = {};
+  productDraft.colors.forEach(c => {
+    stock[c] = stock[c] || {};
+    productDraft.sizes.forEach(s => {
+      stock[c][s] = n(productDraft.stock && productDraft.stock[c] && productDraft.stock[c][s]);
+      const key = DataLayer.skuKey(c,s);
+      const old = productDraft.skuPrices[key] || {};
+      skuPrices[key] = {price:n(old.price || productDraft.price), cost:n(old.cost || productDraft.cost)};
+    });
+  });
+  productDraft.stock = stock;
+  productDraft.skuPrices = skuPrices;
+}
+function sizesToPresetText(arr){ return (arr || []).join('、'); }
+function parsePresetSizes(text){ return String(text || '').split(/[、,，\s]+/).map(x => x.trim()).filter(Boolean); }
+function draftTotalStock(){ ensureProductDraftStockAndPrices(); return DataLayer.totalStock(productDraft || {colors:[],sizes:[],stock:{}}); }
+function openProductEdit(code){
+  editProductCode = code || "";
+  const p = code ? DataLayer.getProduct(code) : null;
+  productDraft = p ? JSON.parse(JSON.stringify(p)) : {code:"",name:"",category:"",price:0,cost:0,otherPrice:0,colors:[],sizes:[],stock:{},image:"",multiPrice:false,skuPrices:{}};
+  if(!productDraft.image) productDraft.image = placeholderImg(productDraft.code, productDraft.name || '商品');
+  ensureProductDraftStockAndPrices();
+  renderProductEdit();
+  showPage('product-edit');
+}
+function renderProductEdit(){
+  if(!productDraft) return;
+  const isNew = !editProductCode;
+  const title = isNew ? '新增商品' : '编辑商品';
+  const colorText = productDraft.colors && productDraft.colors.length ? productDraft.colors.join('、') : '请选择';
+  const sizeText = productDraft.sizes && productDraft.sizes.length ? productDraft.sizes.join('、') : '请选择';
+  const priceText = productDraft.multiPrice ? '已设置' : '¥' + money(productDraft.price);
+  $("productEditBox").innerHTML = `
+    <div class="pe-wrap">
+      <div class="pe-topbar"><div class="left"><button class="icon-btn" onclick="showPage('me')">‹</button></div><div class="title">${title}</div><div style="width:36px"></div></div>
+      <div class="pe-body">
+        <div class="pe-upload-card">
+          <div class="pe-upload-title">上传图片 <span>（最多10张）</span></div>
+          <div class="pe-upload-box" onclick="changeProductImage()">${productDraft.image ? `<img src="${esc(productDraft.image)}">` : '+'}</div>
+        </div>
+        <div class="pe-gap"></div>
+        <div class="pe-form">
+          <div class="pe-row"><span class="k">款号<span class="req">*</span></span><input id="editCode" value="${esc(productDraft.code)}" placeholder="请输入"></div>
+          <div class="pe-row"><span class="k">名称<span class="req">*</span></span><input id="editName" value="${esc(productDraft.name)}" placeholder="请输入"></div>
+          <div class="pe-row" onclick="openProductOptionPage('color')"><span class="k">颜色</span><span class="v ${!productDraft.colors.length?'placeholder':''}">${esc(colorText)}</span><span class="arrow">›</span></div>
+          <div class="pe-row" onclick="openProductOptionPage('size')"><span class="k">尺码</span><span class="v ${!productDraft.sizes.length?'placeholder':''}">${esc(sizeText)}</span><span class="arrow">›</span></div>
+          <div class="pe-row"><span class="k">商品分类</span><input id="editCategory" value="${esc(productDraft.category)}" placeholder="请输入"></div>
+        </div>
+        <div class="pe-gap"></div>
+        <div class="pe-form">
+          <div class="pe-row"><span class="k">多规格多价格</span><span></span><span class="switch ${productDraft.multiPrice?'on':''}" onclick="toggleDraftMultiPrice(event)"></span></div>
+          <div class="pe-row"><span class="k">销售价<span class="req">*</span></span><input id="editPrice" type="number" value="${n(productDraft.price)}" placeholder="¥请输入" ${productDraft.multiPrice?'disabled':''}></div>
+          <div class="pe-row"><span class="k">成本价</span><input id="editCost" type="number" value="${n(productDraft.cost)}" placeholder="¥请输入" ${productDraft.multiPrice?'disabled':''}></div>
+          <div class="pe-row" ${productDraft.multiPrice?'onclick="openProductPricePage()"':''}><span class="k">价格设置</span><span class="v ${productDraft.multiPrice?'':'placeholder'}">${esc(productDraft.multiPrice ? priceText : '关闭后按统一销售价 / 成本价')}</span><span class="arrow">${productDraft.multiPrice?'›':''}</span></div>
+        </div>
+        <div class="pe-gap"></div>
+        <div class="pe-form">
+          <div class="pe-row" onclick="openProductStockPage()"><span class="k">库存</span><span class="v">${draftTotalStock()}</span><span class="arrow">›</span></div>
+        </div>
+        <div class="pe-submit"><button class="btn btn-blue" onclick="saveProductEdit()">${isNew ? '发布商品' : '保存商品'}</button></div>
+      </div>
+    </div>`;
+}
+function changeProductImage(){
+  if(!productDraft) return;
+  productDraft.image = placeholderImg($("editCode") ? $("editCode").value.trim() : productDraft.code, $("editName") ? $("editName").value.trim() : productDraft.name || '商品');
+  renderProductEdit();
+}
+function syncDraftBasicFields(){
+  if(!productDraft) return;
+  productDraft.code = $("editCode") ? $("editCode").value.trim() : productDraft.code;
+  productDraft.name = $("editName") ? $("editName").value.trim() : productDraft.name;
+  productDraft.category = $("editCategory") ? $("editCategory").value.trim() : productDraft.category;
+  if(!productDraft.multiPrice){
+    productDraft.price = $("editPrice") ? n($("editPrice").value) : productDraft.price;
+    productDraft.cost = $("editCost") ? n($("editCost").value) : productDraft.cost;
+  }
+  ensureProductDraftStockAndPrices();
+}
+function toggleDraftMultiPrice(e){
+  e && e.stopPropagation();
+  syncDraftBasicFields();
+  productDraft.multiPrice = !productDraft.multiPrice;
+  ensureProductDraftStockAndPrices();
+  renderProductEdit();
+}
+function openProductOptionPage(type){
+  syncDraftBasicFields();
+  productOptionState.type = type;
+  productOptionState.keyword = '';
+  productOptionState.selectedSizePreset = type === 'size' ? sizesToPresetText(productDraft.sizes) : '';
+  renderProductOptionPage();
+  showPage('product-options');
+}
+function optionPresetList(type){ return type === 'color' ? (data.settings.colorPresets || []) : (data.settings.sizePresets || []); }
+function renderProductOptionPage(){
+  const type = productOptionState.type;
+  const title = type === 'color' ? '颜色' : '尺码';
+  const presets = optionPresetList(type);
+  const keyword = (productOptionState.keyword || '').trim().toLowerCase();
+  const filtered = presets.filter(x => String(x).toLowerCase().includes(keyword));
+  const body = type === 'color'
+    ? `<div class="option-tools"><div class="option-search">⌕ <input id="optionSearchInput" placeholder="搜索颜色" value="${esc(productOptionState.keyword)}" oninput="productOptionState.keyword=this.value;renderProductOptionPage()"></div><button class="option-add" onclick="addProductOptionPreset('color')">＋ 新增颜色</button></div>
+       <div class="option-list">${filtered.map(one => {
+         const checked = (productDraft.colors || []).includes(one);
+         return `<div class="option-item" onclick="toggleColorDraft('${esc(one)}')"><span>${esc(one)}</span><span class="circle ${checked?'checked':''}">${checked?'✓':''}</span></div>`;
+       }).join('') || `<div class="pm-empty">暂无颜色</div>`}</div>
+       <div class="option-bottom"><button class="btn btn-light" onclick="closeProductOptionPage()">取消</button><button class="btn btn-blue" onclick="confirmProductOptionPage()">确定</button></div>`
+    : `<div class="option-list">${filtered.map(one => {
+         const checked = productOptionState.selectedSizePreset === one;
+         return `<div class="option-item" onclick="selectSizePreset('${esc(one)}')"><span>${esc(one)}</span><span class="circle ${checked?'checked':''}">${checked?'✓':''}</span></div>`;
+       }).join('') || `<div class="pm-empty">暂无尺码方案</div>`}</div>
+       <div class="option-bottom one"><button class="btn btn-blue" onclick="confirmProductOptionPage()">确定</button></div>`;
+  $("productOptionBox").innerHTML = `<div class="picker-topbar"><div class="left"><button class="icon-btn" onclick="closeProductOptionPage()">‹</button></div><div class="title">${title}</div><div class="right"><span onclick="addProductOptionPreset('${type}')">＋</span></div></div><div class="option-body">${body}</div>`;
+}
+function toggleColorDraft(name){
+  const list = new Set(productDraft.colors || []);
+  if(list.has(name)) list.delete(name); else list.add(name);
+  productDraft.colors = Array.from(list);
+  renderProductOptionPage();
+}
+function selectSizePreset(text){ productOptionState.selectedSizePreset = text; renderProductOptionPage(); }
+function addProductOptionPreset(type){
+  const title = type === 'color' ? '请输入新增颜色' : '请输入尺码方案，使用 顿号、逗号 分隔';
+  const val = prompt(title, type === 'color' ? '' : '90、100、110、120');
+  if(!val) return;
+  const clean = val.trim();
+  const key = type === 'color' ? 'colorPresets' : 'sizePresets';
+  data.settings[key] = data.settings[key] || [];
+  if(!data.settings[key].includes(clean)) data.settings[key].unshift(clean);
+  DataLayer.save();
+  renderProductOptionPage();
+}
+function closeProductOptionPage(){ renderProductEdit(); showPage('product-edit'); }
+function confirmProductOptionPage(){
+  if(productOptionState.type === 'size'){
+    const text = productOptionState.selectedSizePreset || optionPresetList('size')[0] || '均码';
+    productDraft.sizes = parsePresetSizes(text);
+  }
+  ensureProductDraftStockAndPrices();
+  closeProductOptionPage();
+}
+function openProductPricePage(){
+  syncDraftBasicFields();
+  ensureProductDraftStockAndPrices();
+  const rows = [];
+  productDraft.colors.forEach(c => productDraft.sizes.forEach(s => rows.push({color:c,size:s,key:DataLayer.skuKey(c,s)})));
+  $("productPriceBox").innerHTML = `<div class="picker-topbar"><div class="left"><button class="icon-btn" onclick="backFromProductPrice()">‹</button></div><div class="title">价格</div><div class="right"><span class="matrix-head-action" onclick="batchFillSkuPrices()">批量</span></div></div>
+    <div class="matrix-wrap">
+      <table class="matrix-table"><thead><tr><th>规格</th><th>销售价</th><th>成本价</th></tr></thead><tbody>${rows.map(r => {
+        const one = productDraft.skuPrices[r.key] || {};
+        const label = productDraft.colors.length > 1 && productDraft.sizes.length > 1 ? `${r.color}/${r.size}` : (productDraft.colors.length > 1 ? r.color : r.size);
+        return `<tr><td>${esc(label)}</td><td><input type="number" value="${n(one.price || productDraft.price)}" onchange="setDraftSkuPrice('${r.key}','price',this.value)"></td><td><input type="number" value="${n(one.cost || productDraft.cost)}" onchange="setDraftSkuPrice('${r.key}','cost',this.value)"></td></tr>`;
+      }).join('')}</tbody></table>
+      <div class="matrix-foot"><button class="btn btn-blue" onclick="saveProductPricePage()">保存</button></div>
+    </div>`;
+  showPage('product-price');
+}
+function backFromProductPrice(){ renderProductEdit(); showPage('product-edit'); }
+function setDraftSkuPrice(key, field, value){
+  productDraft.skuPrices[key] = productDraft.skuPrices[key] || {price:n(productDraft.price), cost:n(productDraft.cost)};
+  productDraft.skuPrices[key][field] = n(value);
+}
+function batchFillSkuPrices(){
+  const sale = prompt('批量设置销售价', String(n(productDraft.price)));
+  if(sale === null) return;
+  const cost = prompt('批量设置成本价', String(n(productDraft.cost)));
+  if(cost === null) return;
+  productDraft.price = n(sale);
+  productDraft.cost = n(cost);
+  ensureProductDraftStockAndPrices();
+  Object.keys(productDraft.skuPrices || {}).forEach(k => {
+    productDraft.skuPrices[k].price = n(sale);
+    productDraft.skuPrices[k].cost = n(cost);
+  });
+  openProductPricePage();
+}
+function saveProductPricePage(){ renderProductEdit(); showPage('product-edit'); }
+function openProductStockPage(){
+  syncDraftBasicFields();
+  ensureProductDraftStockAndPrices();
+  const rows = [];
+  productDraft.colors.forEach(c => productDraft.sizes.forEach(s => rows.push({color:c,size:s,key:DataLayer.skuKey(c,s)})));
+  $("productStockBox").innerHTML = `<div class="picker-topbar"><div class="left"><button class="icon-btn" onclick="backFromProductStock()">‹</button></div><div class="title">库存</div><div style="width:36px"></div></div>
+    <div class="matrix-wrap"><div class="stock-total-tip">当前库存总数：${draftTotalStock()}</div>
+      <table class="matrix-table"><thead><tr><th>规格</th><th>库存</th></tr></thead><tbody>${rows.map(r => {
+        const label = productDraft.colors.length > 1 && productDraft.sizes.length > 1 ? `${r.color}/${r.size}` : (productDraft.colors.length > 1 ? r.color : r.size);
+        const val = n(productDraft.stock && productDraft.stock[r.color] && productDraft.stock[r.color][r.size]);
+        return `<tr><td>${esc(label)}</td><td><input type="number" value="${val}" onchange="setDraftStock('${r.color}','${r.size}',this.value)"></td></tr>`;
+      }).join('')}</tbody></table>
+      <div class="matrix-foot"><button class="btn btn-blue" onclick="saveProductStockPage()">保存</button></div>
+    </div>`;
+  showPage('product-stock');
+}
+function setDraftStock(color,size,value){
+  productDraft.stock = productDraft.stock || {};
+  productDraft.stock[color] = productDraft.stock[color] || {};
+  productDraft.stock[color][size] = Math.max(0, n(value));
+}
+function backFromProductStock(){ renderProductEdit(); showPage('product-edit'); }
+function saveProductStockPage(){ renderProductEdit(); showPage('product-edit'); }
+function saveProductEdit(){
+  syncDraftBasicFields();
+  if(!productDraft.code || !productDraft.name){ alert('款号和名称不能为空'); return; }
+  ensureProductDraftStockAndPrices();
+  let p = editProductCode ? DataLayer.getProduct(editProductCode) : null;
+  if(!p){
+    if(DataLayer.getProduct(productDraft.code)){ alert('该款号已存在'); return; }
+    p = {code:productDraft.code};
+    data.products.unshift(p);
+  }else if(editProductCode !== productDraft.code && DataLayer.getProduct(productDraft.code)){
+    alert('修改后的款号已存在'); return;
+  }
+  Object.assign(p, JSON.parse(JSON.stringify(productDraft)));
+  if(!p.image) p.image = placeholderImg(p.code,p.name);
+  if(!p.multiPrice){
+    Object.keys(p.skuPrices || {}).forEach(k => { p.skuPrices[k] = {price:n(p.price), cost:n(p.cost)}; });
+  }
+  DataLayer.save();
+  showPage('me');
+}
 function openImagePreview(e,src){ e && e.stopPropagation(); $("imageModalImg").src = src; $("imageModal").style.display = "flex"; }
 function closeImagePreview(){ $("imageModal").style.display = "none"; }
 
