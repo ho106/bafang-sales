@@ -1,9 +1,33 @@
 <!DOCTYPE html>
+<!--
+  八方来财销售开单版 V2.58 改动清单
+
+  基准版本：V2.57 SKU 规格表格真正修复版
+  本次目标：统一检查 5 个核心页面，排查 CSS 清理后误伤布局的问题
+
+  CSS模块：
+  - 04 开单首页：代码层检查，未发现需要改动的业务布局
+  - 06 SKU选择页：保留 V2.57 已恢复的 picker-row grid 横向布局
+  - 07 开单明细确认页：检查搜索固定、中间滚动、底部结算固定
+  - 08 结算页：检查返回明细、结算卡片、支付输入结构
+  - 11 商品分析页：检查标题/日期/表头固定、中间滚动、总计底部固定
+
+  JS函数：
+  - 未新增业务函数
+  - 未修改 DataLayer / 订单 / 库存 / 报表逻辑
+
+  删除旧代码：
+  - 本版不做大规模 CSS 删除，避免再次误伤 SKU / 固定底部布局
+  - 只更新版本号、补充发版检查说明和保留现有稳定布局
+
+  业务逻辑影响：
+  - 无
+-->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>八方来财销售开单版 V2.56</title>
+<title>八方来财销售开单版 V2.58</title>
 <style>
 :root{
   --blue:#2f6df6;
@@ -187,7 +211,7 @@ textarea{min-height:88px;resize:none}
   .metric-grid{grid-template-columns:repeat(3,1fr)}
 }
 
-/* V2.54 选择商品页最终固定布局：合并历史叠加样式，避免重复覆盖 */
+/* 05/06 商品选择页 / SKU选择页最终固定布局：V2.58复核，禁止再叠加同类规则 */
 html:has(#page-picker.active),
 body:has(#page-picker.active){
   overflow:hidden;
@@ -305,7 +329,7 @@ body:has(#page-picker.active){
   }
 }
 
-/* V2.54 开单明细页最终布局：搜索固定、中间商品明细独立滑动、底部结算固定、左滑只删除 */
+/* 07 开单明细页最终布局：V2.58复核，搜索固定、中间滚动、底部结算固定、左滑只删除 */
 #page-cart-review{
   padding-bottom:0 !important;
   background:#f3f5f9;
@@ -823,7 +847,13 @@ button:active,
   border-bottom:1px solid var(--line);
 }
 .picker-row{
+  display:grid;
+  width:100%;
+  box-sizing:border-box;
   grid-template-columns:58px 66px 62px 76px 36px 42px 42px;
+  align-items:center;
+  justify-items:center;
+  column-gap:0;
   min-height:57px;
   padding:0 14px;
   border-bottom:0;
@@ -831,6 +861,10 @@ button:active,
   font-size:17px;
   font-weight:400;
 }
+.picker-row > *{min-width:0}
+.picker-row > div,
+.picker-row > button{text-align:center}
+.picker-row > :first-child{text-align:left;justify-self:start}
 .picker-row.head{
   min-height:50px;
   background:#f7f8fb;
@@ -856,7 +890,11 @@ button:active,
 .picker-q.red{color:var(--red)}
 .picker-op,
 .picker-batch-op{
+  width:42px;
   height:50px;
+  border:0;
+  padding:0;
+  background:transparent;
   color:#778194;
   font-size:40px;
   font-weight:500;
@@ -1132,7 +1170,7 @@ button:active,
   #page-picker .picker-head{grid-template-columns:94px 1fr 36px;padding:11px 14px 10px !important}
   #page-picker .picker-head .picker-img{width:94px;height:94px}
   .picker-title{font-size:20px}
-  .picker-row{grid-template-columns:48px 62px 54px 68px 32px 38px 38px;padding:0 12px;font-size:16px}
+  .picker-row{display:grid;width:100%;box-sizing:border-box;grid-template-columns:48px 62px 54px 68px 32px 38px 38px;align-items:center;justify-items:center;padding:0 12px;font-size:16px}
   .picker-row.head{font-size:14px}
   #page-picker .bottom-inner,
   #page-picker .picker-bottom-inner{grid-template-columns:1fr 108px 114px !important;gap:8px}
@@ -1163,7 +1201,7 @@ html,body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica 
 .btn,.small-btn,.scan-btn,.pa-chip,.pa-mode-trigger{box-shadow:none!important}
 .num,.price,.amount,.pa-value,.pa-total-cell{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;letter-spacing:-.25px}
 
-/* 商品分析页：用绝对定位替代 fixed，避免 iOS Safari 内层 fixed 偶尔被地址栏/工具栏吞掉 */
+/* 11 商品分析页最终布局：V2.58复核，标题/日期/表头固定，中间滚动，总计底部固定 */
 #page-product-analysis.page{padding-bottom:0!important;overflow:hidden!important;background:#fff!important}
 #page-product-analysis.page.active{display:block!important;position:fixed!important;left:50%!important;top:0!important;bottom:0!important;width:100%!important;max-width:560px!important;height:100dvh!important;min-height:100dvh!important;max-height:100dvh!important;transform:translateX(-50%)!important;overflow:hidden!important;background:#fff!important;z-index:150!important}
 #page-product-analysis .pa-screen{position:relative!important;height:100dvh!important;min-height:100dvh!important;max-height:100dvh!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;background:#fff!important;contain:layout paint style}
@@ -1205,7 +1243,7 @@ html,body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica 
 <body>
 <div id="app" class="app">
   <section id="page-sale" class="page active">
-    <div class="topbar"><div class="title">八方来财销售开单版 V2.56</div><div class="right"><button class="icon-btn" onclick="openCart()">🛒<span id="cartBadge" class="cart-badge" style="display:none">0</span></button></div></div>
+    <div class="topbar"><div class="title">八方来财销售开单版 V2.58</div><div class="right"><button class="icon-btn" onclick="openCart()">🛒<span id="cartBadge" class="cart-badge" style="display:none">0</span></button></div></div>
     <div class="toolbar">
       <div class="search">⌕<input id="saleSearch" placeholder="搜索款号/商品名称" oninput="UI.sale.render()"></div>
       <button class="small-btn btn-line" onclick="alert('扫码入口已预留，后期接小程序扫码')">扫码选款</button>
@@ -1344,14 +1382,14 @@ html,body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica 
 
 <script>
 /*
-  八方来财销售开单版 V2.56
+  八方来财销售开单版 V2.58
   清理稳定版原则：
   1. 只保留一个核心数据层 DataLayer
   2. 页面不得绕过 DataLayer 自己乱算
   3. 每个页面只保留一个 render 入口
   4. 销售单 qty 为正数，退货 qty 为负数；不再单独切换销售/退货模式
 */
-const VERSION = "V2.56";
+const VERSION = "V2.58";
 const STORAGE_KEY = "bafang_sales_v1";
 const $ = id => document.getElementById(id);
 const n = v => Number(v || 0) || 0;
