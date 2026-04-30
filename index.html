@@ -1,24 +1,24 @@
 <!DOCTYPE html>
 <!--
-  八方来财销售开单版 V2.58 改动清单
+  八方来财销售开单版 V2.59 改动清单
 
-  基准版本：V2.57 SKU 规格表格真正修复版
-  本次目标：统一检查 5 个核心页面，排查 CSS 清理后误伤布局的问题
+  基准版本：V2.59 五个核心页面布局体检版
+  本次目标：按参考软件调整 SKU 选款、开单明细和收款页面布局，不改业务逻辑
 
   CSS模块：
-  - 04 开单首页：代码层检查，未发现需要改动的业务布局
-  - 06 SKU选择页：保留 V2.57 已恢复的 picker-row grid 横向布局
-  - 07 开单明细确认页：检查搜索固定、中间滚动、底部结算固定
-  - 08 结算页：检查返回明细、结算卡片、支付输入结构
-  - 11 商品分析页：检查标题/日期/表头固定、中间滚动、总计底部固定
+  - 04 开单首页：保持现有商品列表与底部导航结构
+  - 06 SKU选择页：把规格/价格/库存/加减号改成满屏自适应布局，减少左右晃动和内部挤压
+  - 07 开单明细确认页：尺码规格表取消横向拖动，尽量在屏幕内完整显示
+  - 08 结算页：优化收款卡片、金额、支付方式和底部按钮间距
+  - 11 商品分析页：保持 V2.59 已稳定的标题/日期/表头/总计固定结构
 
   JS函数：
   - 未新增业务函数
   - 未修改 DataLayer / 订单 / 库存 / 报表逻辑
 
   删除旧代码：
-  - 本版不做大规模 CSS 删除，避免再次误伤 SKU / 固定底部布局
-  - 只更新版本号、补充发版检查说明和保留现有稳定布局
+  - 不做大规模 CSS 删除，避免再次误伤 SKU / 固定底部布局
+  - 替换 SKU、开单明细、结算页对应原 CSS 规则；仅微调 renderCartReview 的展示列样式
 
   业务逻辑影响：
   - 无
@@ -27,7 +27,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>八方来财销售开单版 V2.58</title>
+<title>八方来财销售开单版 V2.59</title>
 <style>
 :root{
   --blue:#2f6df6;
@@ -211,7 +211,7 @@ textarea{min-height:88px;resize:none}
   .metric-grid{grid-template-columns:repeat(3,1fr)}
 }
 
-/* 05/06 商品选择页 / SKU选择页最终固定布局：V2.58复核，禁止再叠加同类规则 */
+/* 05/06 商品选择页 / SKU选择页最终固定布局：V2.59复核，禁止再叠加同类规则 */
 html:has(#page-picker.active),
 body:has(#page-picker.active){
   overflow:hidden;
@@ -268,6 +268,8 @@ body:has(#page-picker.active){
 #page-picker .picker-table{
   flex:1 1 auto;
   min-height:0 !important;
+  width:100%;
+  max-width:100%;
   display:flex;
   flex-direction:column;
   overflow:hidden !important;
@@ -283,6 +285,8 @@ body:has(#page-picker.active){
 #page-picker .picker-body{
   flex:1 1 auto;
   min-height:0 !important;
+  width:100%;
+  max-width:100%;
   overflow-y:scroll !important;
   overflow-x:hidden !important;
   -webkit-overflow-scrolling:touch;
@@ -329,7 +333,7 @@ body:has(#page-picker.active){
   }
 }
 
-/* 07 开单明细页最终布局：V2.58复核，搜索固定、中间滚动、底部结算固定、左滑只删除 */
+/* 07 开单明细页最终布局：V2.59复核，搜索固定、中间滚动、底部结算固定、左滑只删除 */
 #page-cart-review{
   padding-bottom:0 !important;
   background:#f3f5f9;
@@ -476,19 +480,18 @@ body:has(#page-picker.active){
 }
 .cart-review-sku{
   margin-top:10px;
-  overflow-x:auto;
-  overflow-y:hidden;
-  -webkit-overflow-scrolling:touch;
+  overflow:hidden;
 }
 .cart-review-grid{
-  min-width:600px;
+  width:100%;
+  min-width:0;
 }
 .cart-review-row{
   display:grid;
-  grid-template-columns:80px repeat(6,1fr);
   align-items:center;
-  min-height:30px;
-  font-size:15px;
+  min-height:32px;
+  column-gap:2px;
+  font-size:14px;
   text-align:center;
 }
 .cart-review-row.head{
@@ -823,10 +826,14 @@ button:active,
 }
 .picker-title{
   color:#252b36;
-  font-size:21px;
+  font-size:20px;
   line-height:1.18;
   font-weight:700;
   letter-spacing:-.2px;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
 }
 .picker-cat{
   color:var(--muted);
@@ -850,21 +857,21 @@ button:active,
   display:grid;
   width:100%;
   box-sizing:border-box;
-  grid-template-columns:58px 66px 62px 76px 36px 42px 42px;
+  grid-template-columns:minmax(56px,1.28fr) minmax(50px,.95fr) minmax(44px,.82fr) minmax(58px,1.05fr) minmax(32px,.62fr) 46px 46px;
   align-items:center;
   justify-items:center;
-  column-gap:0;
-  min-height:57px;
-  padding:0 14px;
+  column-gap:2px;
+  min-height:58px;
+  padding:0 8px;
   border-bottom:0;
   color:#252b36;
-  font-size:17px;
+  font-size:16px;
   font-weight:400;
 }
 .picker-row > *{min-width:0}
 .picker-row > div,
-.picker-row > button{text-align:center}
-.picker-row > :first-child{text-align:left;justify-self:start}
+.picker-row > button{text-align:center;white-space:nowrap}
+.picker-row > :first-child{text-align:left;justify-self:stretch;overflow:hidden;text-overflow:ellipsis}
 .picker-row.head{
   min-height:50px;
   background:#f7f8fb;
@@ -890,13 +897,13 @@ button:active,
 .picker-q.red{color:var(--red)}
 .picker-op,
 .picker-batch-op{
-  width:42px;
-  height:50px;
+  width:46px;
+  height:52px;
   border:0;
   padding:0;
   background:transparent;
   color:#778194;
-  font-size:40px;
+  font-size:38px;
   font-weight:500;
   line-height:1;
   display:flex;
@@ -962,12 +969,12 @@ button:active,
   box-shadow:none;
 }
 .cart-review-main{
-  grid-template-columns:68px 1fr 78px;
-  gap:12px;
+  grid-template-columns:62px 1fr 70px;
+  gap:10px;
 }
 .cart-review-img{
-  width:68px;
-  height:68px;
+  width:62px;
+  height:62px;
   border-radius:6px;
   background:#eef2f7;
 }
@@ -1023,15 +1030,32 @@ button:active,
 }
 
 /* 结算、单据、报表 */
+#page-checkout .card{
+  margin:12px 12px;
+  padding:16px 14px;
+  border-radius:12px;
+}
+#page-checkout .card>.title{
+  font-size:20px;
+  margin-bottom:8px;
+}
 .checkout-line{
-  min-height:51px;
-  grid-template-columns:108px 1fr;
+  min-height:52px;
+  grid-template-columns:92px 1fr;
+  gap:10px;
   border-bottom:1px solid var(--line);
   font-size:16px;
 }
 .checkout-line span:first-child{color:#7f8795;font-weight:400}
-.checkout-line b,.checkout-line strong{font-size:18px;font-weight:650}
-.pay-list .checkout-line{grid-template-columns:118px 1fr}
+.checkout-line b,.checkout-line strong{font-size:20px;font-weight:700;text-align:right}
+.checkout-line input,.checkout-line select{min-height:42px;border:0;background:transparent;text-align:right;padding-right:0}
+.pay-list .checkout-line{grid-template-columns:98px 1fr}
+#page-checkout textarea{
+  margin-top:8px;
+  min-height:76px;
+  border-radius:10px;
+  background:#f7f8fb;
+}
 .order-card{
   margin:10px 14px;
   padding:15px 16px;
@@ -1150,13 +1174,15 @@ button:active,
 .matrix-table th,.matrix-table td{font-size:15px;border-color:#e5eaf2}
 
 /* 收款成功 */
-.pay-success-wrap{background:#fff}
-.pay-success-card{background:#f8fafc;border-radius:10px}
+.pay-success-wrap{background:#fff;padding:14px 12px calc(18px + env(safe-area-inset-bottom))}
+.pay-success-card{background:#f8fafc;border-radius:12px;padding:20px 16px 18px}
 .pay-check{font-weight:650}
-.pay-success-title{font-size:22px;font-weight:650}
-.pay-success-lines{font-size:16px}
+.pay-success-title{font-size:24px;font-weight:720;text-align:center;margin:8px 0 18px}
+.pay-success-lines{font-size:15px;grid-template-columns:112px 1fr;row-gap:12px}
 .pay-success-lines .k{color:#8a8f9e}
-.pay-success-actions .btn{border-radius:7px;font-weight:650}
+.pay-success-lines .v{text-align:right;color:#1f2937;word-break:break-all}
+.pay-success-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.pay-success-actions .btn{border-radius:8px;font-weight:650;height:50px}
 
 @media(max-width:430px){
   .topbar{height:56px}.topbar .left,.topbar .right{height:56px}
@@ -1170,7 +1196,7 @@ button:active,
   #page-picker .picker-head{grid-template-columns:94px 1fr 36px;padding:11px 14px 10px !important}
   #page-picker .picker-head .picker-img{width:94px;height:94px}
   .picker-title{font-size:20px}
-  .picker-row{display:grid;width:100%;box-sizing:border-box;grid-template-columns:48px 62px 54px 68px 32px 38px 38px;align-items:center;justify-items:center;padding:0 12px;font-size:16px}
+  .picker-row{display:grid;width:100%;box-sizing:border-box;grid-template-columns:minmax(52px,1.22fr) minmax(46px,.92fr) minmax(40px,.8fr) minmax(52px,1fr) minmax(28px,.55fr) 42px 42px;align-items:center;justify-items:center;column-gap:1px;padding:0 6px;font-size:15px}
   .picker-row.head{font-size:14px}
   #page-picker .bottom-inner,
   #page-picker .picker-bottom-inner{grid-template-columns:1fr 108px 114px !important;gap:8px}
@@ -1178,8 +1204,8 @@ button:active,
   #page-picker .picker-bottom-inner .btn{font-size:17px}
   #page-cart-review .bottom-inner{grid-template-columns:1fr 154px;gap:10px}
   #page-cart-review .bottom-inner .btn{font-size:19px}
-  .cart-review-main{grid-template-columns:66px 1fr 74px;gap:11px}
-  .cart-review-img{width:66px;height:66px}
+  .cart-review-main{grid-template-columns:60px 1fr 66px;gap:9px}
+  .cart-review-img{width:60px;height:60px}
 }
 
 
@@ -1201,7 +1227,7 @@ html,body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica 
 .btn,.small-btn,.scan-btn,.pa-chip,.pa-mode-trigger{box-shadow:none!important}
 .num,.price,.amount,.pa-value,.pa-total-cell{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;letter-spacing:-.25px}
 
-/* 11 商品分析页最终布局：V2.58复核，标题/日期/表头固定，中间滚动，总计底部固定 */
+/* 11 商品分析页最终布局：V2.59复核，标题/日期/表头固定，中间滚动，总计底部固定 */
 #page-product-analysis.page{padding-bottom:0!important;overflow:hidden!important;background:#fff!important}
 #page-product-analysis.page.active{display:block!important;position:fixed!important;left:50%!important;top:0!important;bottom:0!important;width:100%!important;max-width:560px!important;height:100dvh!important;min-height:100dvh!important;max-height:100dvh!important;transform:translateX(-50%)!important;overflow:hidden!important;background:#fff!important;z-index:150!important}
 #page-product-analysis .pa-screen{position:relative!important;height:100dvh!important;min-height:100dvh!important;max-height:100dvh!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;background:#fff!important;contain:layout paint style}
@@ -1243,7 +1269,7 @@ html,body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica 
 <body>
 <div id="app" class="app">
   <section id="page-sale" class="page active">
-    <div class="topbar"><div class="title">八方来财销售开单版 V2.58</div><div class="right"><button class="icon-btn" onclick="openCart()">🛒<span id="cartBadge" class="cart-badge" style="display:none">0</span></button></div></div>
+    <div class="topbar"><div class="title">八方来财销售开单版 V2.59</div><div class="right"><button class="icon-btn" onclick="openCart()">🛒<span id="cartBadge" class="cart-badge" style="display:none">0</span></button></div></div>
     <div class="toolbar">
       <div class="search">⌕<input id="saleSearch" placeholder="搜索款号/商品名称" oninput="UI.sale.render()"></div>
       <button class="small-btn btn-line" onclick="alert('扫码入口已预留，后期接小程序扫码')">扫码选款</button>
@@ -1382,14 +1408,14 @@ html,body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica 
 
 <script>
 /*
-  八方来财销售开单版 V2.58
+  八方来财销售开单版 V2.59
   清理稳定版原则：
   1. 只保留一个核心数据层 DataLayer
   2. 页面不得绕过 DataLayer 自己乱算
   3. 每个页面只保留一个 render 入口
   4. 销售单 qty 为正数，退货 qty 为负数；不再单独切换销售/退货模式
 */
-const VERSION = "V2.58";
+const VERSION = "V2.59";
 const STORAGE_KEY = "bafang_sales_v1";
 const $ = id => document.getElementById(id);
 const n = v => Number(v || 0) || 0;
@@ -2287,6 +2313,8 @@ function renderCartReview(){
     const p = DataLayer.getProduct(code) || {code, name:"", category:"", image:placeholderImg(code,"商品"), sizes:[]};
     const items = grouped[code];
     const sizes = (p.sizes && p.sizes.length ? p.sizes : Array.from(new Set(items.map(i => i.size)))).slice(0,6);
+    const sizeCount = Math.max(1, sizes.length);
+    const reviewGridStyle = `grid-template-columns:minmax(50px,.9fr) repeat(${sizeCount},minmax(30px,1fr))`;
     const colors = Array.from(new Set(items.map(i => i.color || "")));
     const saleQty = items.reduce((s,i) => s + Math.max(0,n(i.qty)),0);
     const refundQty = items.reduce((s,i) => s + Math.max(0,-n(i.qty)),0);
@@ -2298,7 +2326,7 @@ function renderCartReview(){
         const q = items.filter(i => String(i.color||"") === String(c) && String(i.size||"") === String(sz)).reduce((s,i)=>s+n(i.qty),0);
         return `<div class="${q<0?'red':''}">${q || 0}</div>`;
       }).join("");
-      return `<div class="cart-review-row"><div class="first">${esc(c || "未设颜色")}</div>${cols}</div>`;
+      return `<div class="cart-review-row" style="${reviewGridStyle}"><div class="first">${esc(c || "未设颜色")}</div>${cols}</div>`;
     }).join("");
     return `<div class="cart-review-swipe" data-code="${esc(code)}">
       <button class="cart-review-delete" type="button">删除</button>
@@ -2317,7 +2345,7 @@ function renderCartReview(){
         </div>
         <div class="cart-review-sku">
           <div class="cart-review-grid">
-            <div class="cart-review-row head"><div class="first">规格</div>${sizes.map(s=>`<div>${esc(s)}</div>`).join("")}</div>
+            <div class="cart-review-row head" style="${reviewGridStyle}"><div class="first">规格</div>${sizes.map(s=>`<div>${esc(s)}</div>`).join("")}</div>
             ${colorRows}
           </div>
         </div>
