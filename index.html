@@ -1,33 +1,36 @@
 <!DOCTYPE html>
 <!--
-  八方来财销售开单版 V2.59 改动清单
+  八方来财销售开单版 V2.60 改动清单
 
-  基准版本：V2.59 五个核心页面布局体检版
-  本次目标：按参考软件调整 SKU 选款、开单明细和收款页面布局，不改业务逻辑
+  基准版本：V2.59 选款/结算/收款布局优化版
+  本次目标：修复 SKU 选款页“规格以上区域没有固定”的问题，不改业务逻辑
 
   CSS模块：
-  - 04 开单首页：保持现有商品列表与底部导航结构
-  - 06 SKU选择页：把规格/价格/库存/加减号改成满屏自适应布局，减少左右晃动和内部挤压
-  - 07 开单明细确认页：尺码规格表取消横向拖动，尽量在屏幕内完整显示
-  - 08 结算页：优化收款卡片、金额、支付方式和底部按钮间距
-  - 11 商品分析页：保持 V2.59 已稳定的标题/日期/表头/总计固定结构
+  - 06 SKU选择页：将 #page-picker 激活态改为固定页面容器，锁住商品头部、颜色栏、规格表头，只允许 SKU 明细行滚动
+  - 06 SKU选择页：补强 picker-head / picker-colors / picker-row.head 的固定层级和背景，避免 iPhone Safari 下被整体页面滚动带走
 
   JS函数：
-  - 未新增业务函数
+  - 无新增
   - 未修改 DataLayer / 订单 / 库存 / 报表逻辑
 
   删除旧代码：
-  - 不做大规模 CSS 删除，避免再次误伤 SKU / 固定底部布局
-  - 替换 SKU、开单明细、结算页对应原 CSS 规则；仅微调 renderCartReview 的展示列样式
+  - 无大规模删除
+  - 仅替换 SKU 选择页原有固定布局 CSS 规则，不在末尾叠加补丁
 
   业务逻辑影响：
   - 无
+
+  必测页面：
+  - SKU选择页
+  - 开单明细页
+  - 结算页
+  - 商品分析页
 -->
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>八方来财销售开单版 V2.59</title>
+<title>八方来财销售开单版 V2.60</title>
 <style>
 :root{
   --blue:#2f6df6;
@@ -224,10 +227,18 @@ body:has(#page-picker.active){
 #page-picker.picker-page.active{
   display:flex !important;
   flex-direction:column;
+  position:fixed !important;
+  left:50% !important;
+  top:0 !important;
+  bottom:0 !important;
+  transform:translateX(-50%) !important;
+  width:100% !important;
+  max-width:560px !important;
   height:100dvh;
   max-height:100dvh;
   min-height:100dvh;
   overflow:hidden !important;
+  overscroll-behavior:none;
   background:#fff;
 }
 #page-picker.picker-page .topbar{
@@ -242,6 +253,7 @@ body:has(#page-picker.active){
   display:flex;
   flex-direction:column;
   background:#fff;
+  overscroll-behavior:none;
 }
 #page-picker .picker-wrap{
   flex:1 1 auto;
@@ -256,14 +268,20 @@ body:has(#page-picker.active){
 }
 #page-picker .picker-head{
   flex:0 0 auto;
+  position:relative;
+  z-index:42;
   padding-top:10px !important;
+  background:#fff;
 }
 #page-picker .picker-colors{
   flex:0 0 auto;
+  position:relative;
+  z-index:41;
   max-height:58px;
   overflow-x:auto;
   overflow-y:hidden;
   -webkit-overflow-scrolling:touch;
+  background:#fff;
 }
 #page-picker .picker-table{
   flex:1 1 auto;
@@ -279,7 +297,8 @@ body:has(#page-picker.active){
   flex:0 0 52px;
   position:relative !important;
   top:auto !important;
-  z-index:30;
+  z-index:40;
+  background:#f7f8fb;
   box-shadow:0 1px 0 #f0f2f6;
 }
 #page-picker .picker-body{
@@ -287,13 +306,14 @@ body:has(#page-picker.active){
   min-height:0 !important;
   width:100%;
   max-width:100%;
-  overflow-y:scroll !important;
+  overflow-y:auto !important;
   overflow-x:hidden !important;
   -webkit-overflow-scrolling:touch;
   overscroll-behavior:contain;
   background:#fff;
   touch-action:pan-y;
   padding-bottom:18px;
+  transform:translateZ(0);
 }
 #page-picker .picker-body::after{
   content:"";
@@ -1415,7 +1435,7 @@ html,body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica 
   3. 每个页面只保留一个 render 入口
   4. 销售单 qty 为正数，退货 qty 为负数；不再单独切换销售/退货模式
 */
-const VERSION = "V2.59";
+const VERSION = "V2.60";
 const STORAGE_KEY = "bafang_sales_v1";
 const $ = id => document.getElementById(id);
 const n = v => Number(v || 0) || 0;
