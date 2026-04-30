@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>八方来财销售开单版 V2.52</title>
+<title>八方来财销售开单版 V2.53</title>
 <style>
 :root{
   --blue:#2f6df6;
@@ -610,7 +610,7 @@ button:active,
 
 
 
-/* V2.51 选择商品页最终固定布局：合并历史叠加样式，避免重复覆盖 */
+/* V2.53 选择商品页最终固定布局：合并历史叠加样式，避免重复覆盖 */
 html:has(#page-picker.active),
 body:has(#page-picker.active){
   overflow:hidden;
@@ -724,7 +724,7 @@ body:has(#page-picker.active){
   }
 }
 
-/* V2.51 开单明细页最终布局：搜索固定、中间商品明细独立滑动、底部结算固定、左滑只删除 */
+/* V2.53 开单明细页最终布局：搜索固定、中间商品明细独立滑动、底部结算固定、左滑只删除 */
 #page-cart-review{
   padding-bottom:0 !important;
   background:#f3f5f9;
@@ -934,7 +934,7 @@ body:has(#page-picker.active){
   }
 }
 
-/* V2.51 全局精细视觉版：只做 CSS 美化，不改 JS / DataLayer / 业务逻辑
+/* V2.53 全局精细视觉版：只做 CSS 美化，不改 JS / DataLayer / 业务逻辑
    方向：苹方字体 + 克制配色 + 去重阴影 + 收紧留白 + 清晰文字层级 */
 :root{
   --blue:#4f6fdf;
@@ -1552,7 +1552,7 @@ button:active,
 }
 
 
-/* V2.52 商品分析页滚动与表格布局优化 */
+/* V2.53 商品分析页滚动与表格布局优化 */
 #page-product-analysis .pa-screen{display:flex;flex-direction:column;height:100vh;min-height:100vh}
 #page-product-analysis .pa-toolbar{padding:8px 10px}
 #page-product-analysis .pa-toolbar-row{gap:6px;align-items:center}
@@ -1586,12 +1586,297 @@ button:active,
 #paModeMask .sheet .pa-mode-item:last-child{border-bottom:0}
 #paModeMask .sheet .pa-mode-item.active{color:#ef6a55}
 
+
+/* V2.53 商品分析页：版本同步、今日日期默认可见、总计固定底部、字体再细化 */
+#page-product-analysis .pa-screen{
+  display:flex;
+  flex-direction:column;
+  height:100vh;
+  min-height:100vh;
+  overflow:hidden;
+  background:#fff;
+}
+#page-product-analysis .pa-topbar{
+  flex:0 0 58px;
+  height:58px;
+  min-height:58px;
+  border-bottom:1px solid #edf0f5;
+}
+#page-product-analysis .pa-topbar .title{
+  font-size:20px !important;
+  font-weight:650 !important;
+  letter-spacing:-.2px;
+  color:#1f2937;
+}
+#page-product-analysis .pa-topbar .right button{
+  font-size:16px;
+  font-weight:500;
+  color:#4b5563;
+}
+#page-product-analysis .pa-toolbar{
+  flex:0 0 50px;
+  top:auto !important;
+  position:relative !important;
+  padding:7px 9px;
+  background:#fff;
+  border-bottom:1px solid #edf0f5;
+  z-index:20;
+}
+#page-product-analysis .pa-toolbar-row{
+  height:36px;
+  gap:6px;
+  align-items:center;
+}
+#page-product-analysis .pa-mode-trigger{
+  flex:0 0 76px;
+  min-width:76px;
+  height:34px;
+  padding:0 8px;
+  border-radius:7px;
+  border:1px solid #dde3ee;
+  background:#fff;
+  color:#1f2937;
+  font-size:13px;
+  font-weight:550;
+  letter-spacing:-.15px;
+}
+#page-product-analysis .pa-chips{
+  flex:1;
+  min-width:0;
+  display:flex;
+  gap:6px;
+  overflow-x:auto;
+  overflow-y:hidden;
+  white-space:nowrap;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+}
+#page-product-analysis .pa-chips::-webkit-scrollbar{display:none}
+#page-product-analysis .pa-chip{
+  flex:0 0 auto;
+  min-width:56px;
+  height:34px;
+  padding:0 9px;
+  border-radius:7px;
+  border:1px solid #dde3ee;
+  background:#fff;
+  color:#1f2937;
+  font-size:13px;
+  font-weight:520;
+  letter-spacing:-.15px;
+}
+#page-product-analysis .pa-chip.active,
+#page-product-analysis .pa-chip.today.active{
+  background:#f45f50;
+  border-color:#f45f50;
+  color:#fff;
+  box-shadow:none;
+}
+#page-product-analysis .pa-chip.today:not(.active){
+  border-color:#cfd9ea;
+  color:#3b6df0;
+}
+#page-product-analysis .pa-grid{
+  flex:1 1 auto;
+  min-height:0;
+  overflow:auto;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  background:#fff;
+  padding-bottom:0;
+}
+#page-product-analysis .pa-table{
+  width:max-content;
+  min-width:100%;
+  table-layout:fixed;
+  border-collapse:separate;
+  border-spacing:0;
+  background:#fff;
+}
+#page-product-analysis .pa-table th,
+#page-product-analysis .pa-table td{
+  width:68px;
+  min-width:68px;
+  padding:9px 4px;
+  border-bottom:1px solid #edf0f5;
+  text-align:center;
+  white-space:nowrap;
+}
+#page-product-analysis .pa-table th{
+  position:sticky;
+  top:0;
+  height:46px;
+  background:#f7f8fb;
+  color:#778196;
+  font-size:13px;
+  font-weight:600;
+  letter-spacing:-.15px;
+  z-index:5;
+}
+#page-product-analysis .pa-table th:first-child,
+#page-product-analysis .pa-table td:first-child{
+  width:118px;
+  min-width:118px;
+  position:sticky;
+  left:0;
+  background:#fff;
+  z-index:6;
+  text-align:left;
+  box-shadow:1px 0 0 #edf0f5;
+}
+#page-product-analysis .pa-table th:first-child{
+  background:#f7f8fb;
+  z-index:8;
+}
+#page-product-analysis .pa-table th:last-child,
+#page-product-analysis .pa-table td:last-child{
+  width:30px;
+  min-width:30px;
+}
+#page-product-analysis .pa-prod-wrap{
+  min-height:80px;
+  padding:7px 10px 7px 0;
+}
+#page-product-analysis .pa-prod-title{
+  color:#ee6452;
+  font-size:12.8px;
+  line-height:1.25;
+  font-weight:650;
+  letter-spacing:-.2px;
+  white-space:normal;
+  word-break:break-all;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+#page-product-analysis .pa-prod-bottom{
+  margin-top:6px;
+  display:flex;
+  gap:6px;
+  align-items:flex-start;
+}
+#page-product-analysis .pa-prod-bottom img{
+  width:38px;
+  height:38px;
+  border-radius:5px;
+  object-fit:cover;
+  background:#eef2ff;
+  flex:0 0 38px;
+}
+#page-product-analysis .pa-prod-cat{
+  font-size:11px;
+  line-height:1.2;
+  color:#9aa3b2;
+  font-weight:400;
+  padding-top:1px;
+  white-space:normal;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+#page-product-analysis .pa-arrow-btn{
+  right:1px;
+  font-size:11px;
+  color:#aeb7c7;
+}
+#page-product-analysis .pa-value{
+  color:#1f2937;
+  font-size:14.5px;
+  font-weight:610;
+  letter-spacing:-.25px;
+  font-feature-settings:"tnum";
+}
+#page-product-analysis .pa-total-fixed{
+  flex:0 0 48px;
+  height:48px;
+  overflow-x:auto;
+  overflow-y:hidden;
+  background:#fff;
+  border-top:1px solid #e5eaf2;
+  box-shadow:0 -1px 0 rgba(15,23,42,.03);
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+  z-index:30;
+}
+#page-product-analysis .pa-total-fixed::-webkit-scrollbar{display:none}
+#page-product-analysis .pa-total-inner{
+  min-width:100%;
+  height:48px;
+  display:grid;
+  align-items:center;
+  background:#fff;
+}
+#page-product-analysis .pa-total-cell{
+  height:48px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-right:0;
+  color:#1f2937;
+  font-size:15px;
+  font-weight:700;
+  letter-spacing:-.2px;
+  font-feature-settings:"tnum";
+  border-bottom:0;
+}
+#page-product-analysis .pa-total-cell.first{
+  justify-content:flex-start;
+  padding-left:8px;
+  position:sticky;
+  left:0;
+  z-index:2;
+  background:#fff;
+  box-shadow:1px 0 0 #edf0f5;
+  font-size:15px;
+  font-weight:750;
+}
+#page-product-analysis .pa-total-cell.last{
+  color:transparent;
+}
+#page-product-analysis .pa-empty{
+  padding:28px 16px 90px;
+  color:#9aa3b2;
+  font-size:14px;
+}
+#paModeMask{
+  display:none;
+  background:transparent;
+}
+#paModeMask .sheet{
+  position:absolute;
+  top:104px;
+  left:12px;
+  width:116px;
+  padding:0;
+  background:#fff;
+  border:1px solid #edf0f5;
+  border-radius:10px;
+  box-shadow:0 8px 24px rgba(15,23,42,.08);
+  overflow:hidden;
+}
+#paModeMask .sheet .pa-mode-item{
+  width:100%;
+  height:58px;
+  border:0;
+  border-bottom:1px solid #f1f3f7;
+  background:#fff;
+  color:#1f2937;
+  font-size:15px;
+  font-weight:500;
+  text-align:left;
+  padding:0 18px;
+}
+#paModeMask .sheet .pa-mode-item:last-child{border-bottom:0}
+#paModeMask .sheet .pa-mode-item.active{color:#ef6a55;font-weight:560}
+
 </style>
 </head>
 <body>
 <div id="app" class="app">
   <section id="page-sale" class="page active">
-    <div class="topbar"><div class="title">八方来财销售开单版 V2.51</div><div class="right"><button class="icon-btn" onclick="openCart()">🛒<span id="cartBadge" class="cart-badge" style="display:none">0</span></button></div></div>
+    <div class="topbar"><div class="title">八方来财销售开单版 V2.53</div><div class="right"><button class="icon-btn" onclick="openCart()">🛒<span id="cartBadge" class="cart-badge" style="display:none">0</span></button></div></div>
     <div class="toolbar">
       <div class="search">⌕<input id="saleSearch" placeholder="搜索款号/商品名称" oninput="UI.sale.render()"></div>
       <button class="small-btn btn-line" onclick="alert('扫码入口已预留，后期接小程序扫码')">扫码选款</button>
@@ -1673,7 +1958,7 @@ button:active,
     <div class="pa-screen pa-product-screen">
       <div class="pa-topbar"><button class="left icon-btn" onclick="showPage('report')">‹</button><div class="title">商品分析</div><div class="right"><button onclick="togglePaFilter()">筛选 ▾</button><button onclick="showPage('report')">×</button></div></div>
       <div class="pa-toolbar"><div class="pa-toolbar-row"><button id="paModeBtn" class="pa-mode-trigger" onclick="togglePaModeMenu()">按天 ▾</button><div id="paChips" class="pa-chips"></div></div></div>
-      <div class="pa-grid"><table class="pa-table"><thead><tr id="paTableHead"></tr></thead><tbody id="productAnalysisRows"></tbody><tfoot><tr id="paTotalRow"></tr></tfoot></table><div id="paEmpty" class="pa-empty" style="display:none">暂无销售数据</div></div>
+      <div class="pa-grid" id="paGrid"><table class="pa-table"><thead><tr id="paTableHead"></tr></thead><tbody id="productAnalysisRows"></tbody></table><div id="paEmpty" class="pa-empty" style="display:none">暂无销售数据</div></div><div id="paTotalFixed" class="pa-total-fixed"></div>
       <div id="paModeMask" class="overlay" onclick="togglePaModeMenu()"><div class="sheet" onclick="event.stopPropagation()" id="paModeSheet"></div></div>
       <div id="paFilterMask" class="overlay"><div class="sheet"><div class="field"><div>商品</div><input id="paKeyword" placeholder="输入商品款号/名称"></div><div class="actions"><button class="btn btn-line" onclick="resetPaFilter()">重置</button><button class="btn btn-orange" onclick="applyPaFilter()">确定</button></div></div></div>
       <div id="paColumnsPage" class="col-page"><div class="header"><button class="left" onclick="closePaColumns()">‹</button>商品表格展示与排序</div><div class="tip">取消勾选则不展示相关数据；当前稳定版先固定顺序</div><div id="paColumnsList"></div><div class="col-save"><button onclick="closePaColumns()">保存</button></div></div>
@@ -1730,14 +2015,14 @@ button:active,
 
 <script>
 /*
-  八方来财销售开单版 V2.51
+  八方来财销售开单版 V2.53
   清理稳定版原则：
   1. 只保留一个核心数据层 DataLayer
   2. 页面不得绕过 DataLayer 自己乱算
   3. 每个页面只保留一个 render 入口
   4. 销售单 qty 为正数，退货 qty 为负数；不再单独切换销售/退货模式
 */
-const VERSION = "V2.52";
+const VERSION = "V2.53";
 const STORAGE_KEY = "bafang_sales_v1";
 const $ = id => document.getElementById(id);
 const n = v => Number(v || 0) || 0;
@@ -2886,6 +3171,11 @@ function renderPaChips(boxId){
   const box = $(boxId); if(!box) return;
   const items = ensurePaAnchor();
   box.innerHTML = items.map(x => `<button class="pa-chip ${String(paState.anchor)===String(x.key)?'active':''} ${x.label==='今天'?'today':''}" onclick="selectPaChip('${esc(x.key)}')">${esc(x.label)}</button>`).join("");
+  requestAnimationFrame(() => {
+    if(paState.mode === "day" || paState.mode === "7" || paState.mode === "30" || paState.mode === "week" || paState.mode === "month"){
+      box.scrollLeft = box.scrollWidth;
+    }
+  });
 }
 function selectPaChip(key){
   paState.anchor = key;
@@ -3109,24 +3399,41 @@ function renderProductAnalysis(){
   renderPaHead("paTableHead","商品款号");
   const rows = DataLayer.calcProductStats(rangeOrdersFromPa(), paState.keyword);
   const body = $("productAnalysisRows");
-  const totalRow = $("paTotalRow");
+  const totalBox = $("paTotalFixed");
   $("paEmpty").style.display = rows.length ? "none" : "block";
   body.innerHTML = rows.map(r => {
     const p = DataLayer.getProduct(r.code) || {};
     return `<tr><td><div class="pa-prod-wrap"><div class="pa-prod-title">${esc(r.code)}${esc(p.name || "")}</div><div class="pa-prod-bottom"><img src="${esc(p.image || "")}" onclick="openImagePreview(event,this.src)"><div class="pa-prod-cat">${esc(p.category || "")}</div></div><button class="pa-arrow-btn" onclick="openPaDetail('${esc(r.code)}')">▶</button></div></td>${paState.columns.map(k => `<td><span class="pa-value">${paFmt(k,r)}</span></td>`).join("")}<td></td></tr>`;
   }).join("");
-  if(rows.length){
-    const total = DataLayer.finishStats(rows.reduce((s,r) => {
-      ["qty","amount","cost","refundQty","refundAmount","refundCost","stock","available"].forEach(k => s[k] = n(s[k]) + n(r[k]));
-      return s;
-    },{}));
-    totalRow.className = "pa-total-row";
-    totalRow.innerHTML = `<td>总计</td>${paState.columns.map(k => `<td>${paFmt(k,total)}</td>`).join("")}<td></td>`;
-  }else{
-    totalRow.className = "pa-total-row";
-    totalRow.innerHTML = `<td>总计</td>${paState.columns.map(() => `<td>0</td>`).join("")}<td></td>`;
-  }
+  const total = rows.length ? DataLayer.finishStats(rows.reduce((s,r) => {
+    ["qty","amount","cost","refundQty","refundAmount","refundCost","stock","available"].forEach(k => s[k] = n(s[k]) + n(r[k]));
+    return s;
+  },{})) : DataLayer.finishStats({});
+  const cols = `118px repeat(${paState.columns.length}, 68px) 30px`;
+  totalBox.innerHTML = `<div class="pa-total-inner" style="grid-template-columns:${cols}"><div class="pa-total-cell first">总计</div>${paState.columns.map(k => `<div class="pa-total-cell">${paFmt(k,total)}</div>`).join("")}<div class="pa-total-cell last"></div></div>`;
+  syncPaTotalScroll();
 }
+
+function syncPaTotalScroll(){
+  const grid = $("paGrid");
+  const total = $("paTotalFixed");
+  if(!grid || !total || grid.dataset.syncTotal === "1") return;
+  let locking = false;
+  grid.addEventListener("scroll", () => {
+    if(locking) return;
+    locking = true;
+    total.scrollLeft = grid.scrollLeft;
+    requestAnimationFrame(() => locking = false);
+  }, {passive:true});
+  total.addEventListener("scroll", () => {
+    if(locking) return;
+    locking = true;
+    grid.scrollLeft = total.scrollLeft;
+    requestAnimationFrame(() => locking = false);
+  }, {passive:true});
+  grid.dataset.syncTotal = "1";
+}
+
 function togglePaFilter(){ $("paKeyword").value = paState.keyword || ""; $("paFilterMask").style.display = "block"; }
 function resetPaFilter(){ paState.keyword = ""; $("paKeyword").value = ""; $("paFilterMask").style.display = "none"; renderProductAnalysis(); }
 function applyPaFilter(){ paState.keyword = $("paKeyword").value.trim(); $("paFilterMask").style.display = "none"; renderProductAnalysis(); }
