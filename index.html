@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>八方来财销售开单版 V2.49</title>
+<title>八方来财销售开单版 V2.51</title>
 <style>
 :root{
   --blue:#2f6df6;
@@ -610,7 +610,7 @@ button:active,
 
 
 
-/* V2.49 选择商品页最终固定布局：合并历史叠加样式，避免重复覆盖 */
+/* V2.51 选择商品页最终固定布局：合并历史叠加样式，避免重复覆盖 */
 html:has(#page-picker.active),
 body:has(#page-picker.active){
   overflow:hidden;
@@ -724,7 +724,7 @@ body:has(#page-picker.active){
   }
 }
 
-/* V2.49 开单明细页最终布局：搜索固定、中间商品明细独立滑动、底部结算固定、左滑只删除 */
+/* V2.51 开单明细页最终布局：搜索固定、中间商品明细独立滑动、底部结算固定、左滑只删除 */
 #page-cart-review{
   padding-bottom:0 !important;
   background:#f3f5f9;
@@ -933,12 +933,630 @@ body:has(#page-picker.active){
     max-height:100vh !important;
   }
 }
+
+/* V2.51 全局精细视觉版：只做 CSS 美化，不改 JS / DataLayer / 业务逻辑
+   方向：苹方字体 + 克制配色 + 去重阴影 + 收紧留白 + 清晰文字层级 */
+:root{
+  --blue:#4f6fdf;
+  --red:#f05a5a;
+  --orange:#ff8a00;
+  --green:#14a66b;
+  --text:#252b36;
+  --muted:#8a8f9e;
+  --line:#edf0f5;
+  --bg:#f4f6f9;
+  --card:#fff;
+  --soft:#f7f8fb;
+  --shadow:none;
+  --radius:12px;
+  --radius-sm:8px;
+  --num-font:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Helvetica Neue",Arial,sans-serif;
+}
+*{
+  -webkit-tap-highlight-color:transparent;
+}
+html,body{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","PingFang SC","Helvetica Neue","Microsoft YaHei",Arial,sans-serif;
+  font-size:16px;
+  line-height:1.34;
+  letter-spacing:0;
+  color:var(--text);
+  background:var(--bg);
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+body{font-weight:400}
+button,input,select,textarea{
+  font:inherit;
+  color:var(--text);
+}
+button{font-weight:500;cursor:pointer}
+.app,.page,.pa-screen,.pe-body,.option-body,.matrix-wrap{background:var(--bg)}
+
+/* 数字与金额：更接近原生进销存软件的整齐感 */
+.price,
+.metric .num,
+.checkout-line b,
+.checkout-line strong,
+.order-main b,
+.pm-summary-num,
+.pm-value-num,
+.picker-price,
+.picker-row .price,
+.picker-stock,
+.picker-q,
+.picker-total b,
+.cart-review-price,
+.cart-review-num,
+.cart-review-amount,
+.ba-stat-card .big,
+.pay-success-lines .v,
+.pay-success-title,
+.pay-success-lines,
+.pa-value{
+  font-family:var(--num-font);
+  font-variant-numeric:tabular-nums;
+  font-feature-settings:"tnum" 1,"lnum" 1;
+  letter-spacing:-.35px;
+}
+
+/* 顶部、底部基础 */
+.topbar,
+.pa-topbar,
+.pe-topbar,
+.picker-topbar{
+  background:#fff;
+  border-bottom:1px solid var(--line);
+  box-shadow:none;
+}
+.topbar{height:58px}
+.topbar .left,.topbar .right{height:58px}
+.topbar .title,
+.pa-topbar .title,
+.pe-topbar .title,
+.picker-topbar .title{
+  margin:0;
+  color:var(--text);
+  font-size:19px !important;
+  font-weight:600 !important;
+  letter-spacing:.01em;
+}
+.icon-btn{
+  min-width:36px;
+  height:36px;
+  border-radius:9px;
+  font-size:24px;
+  font-weight:400;
+  color:#687284;
+}
+.nav{
+  background:rgba(255,255,255,.98);
+  border-top:1px solid #dfe4ec;
+  box-shadow:none;
+}
+.nav-inner{height:70px}
+.nav-item{
+  gap:3px;
+  color:#9aa2af;
+  font-size:13px;
+  font-weight:500;
+}
+.nav-item.active{color:#1887f2;font-weight:600}
+.nav-item .ico{font-size:25px;line-height:1}
+
+/* 表单、按钮 */
+input,select,textarea{
+  min-height:44px;
+  border:1px solid #e1e6ef;
+  border-radius:8px;
+  background:#fff;
+}
+input::placeholder,textarea::placeholder,.toolbar .search input::placeholder{color:#a6adba}
+input:focus,select:focus,textarea:focus{
+  outline:none;
+  border-color:#b8c9fb;
+  box-shadow:0 0 0 3px rgba(79,111,223,.10);
+}
+.btn{
+  height:50px;
+  border-radius:8px;
+  padding:0 16px;
+  font-size:17px;
+  font-weight:650;
+  letter-spacing:0;
+  box-shadow:none;
+}
+.btn-blue{background:var(--blue);color:#fff}
+.btn-light{background:#eef3ff;color:#3867d9}
+.btn-gray{background:#f0f2f6;color:#303746}
+.btn-line{background:#fff;border:1px solid #d7dde8;color:#303746}
+.btn-red{background:var(--red);color:#fff}
+.btn-orange{background:var(--orange);color:#fff}
+.small-btn{
+  height:38px;
+  border-radius:8px;
+  padding:0 12px;
+  font-size:15px;
+  font-weight:600;
+}
+button:active,
+.pm-item:active,
+.product-card:active,
+.color-chip:active,
+.option-item:active,
+.pe-upload-box:active{opacity:.72;transition:opacity .08s ease}
+
+/* 卡片：弱阴影、浅描边、圆角克制 */
+.card,
+.chart-card,
+.detail-card,
+.order-card,
+.ba-stat-card,
+.trend-card,
+.spec-chart{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  box-shadow:none;
+}
+.card{margin:12px 16px;padding:16px 17px}
+.chart-card{margin:12px 16px;padding:16px 17px}
+.detail-card{margin:12px 16px;padding:16px 17px}
+.title{
+  color:var(--text);
+  font-size:21px;
+  font-weight:650;
+  letter-spacing:0;
+}
+.sub{color:var(--muted);font-size:13px;font-weight:400}
+.red{color:var(--red)}.green{color:var(--green)}.blue{color:var(--blue)}
+
+/* 开单首页 */
+.toolbar{
+  gap:12px;
+  padding:12px 16px;
+  background:#fff;
+  border-bottom:1px solid var(--line);
+}
+.toolbar .search{
+  height:46px;
+  border-radius:11px;
+  border:1px solid #e5e9f1;
+  background:#f7f8fb;
+  color:#8c94a4;
+  font-size:17px;
+}
+.toolbar .search input{font-size:17px;color:var(--text)}
+.tabs{background:#fff;border-bottom:1px solid var(--line)}
+.tabs button{
+  height:48px;
+  color:#303746;
+  font-size:17px;
+  font-weight:500;
+}
+.tabs button.active{
+  color:var(--blue);
+  border-bottom:3px solid var(--blue);
+  font-weight:650;
+}
+.product-list{
+  padding:8px 14px 112px;
+  background:var(--bg);
+}
+.product-card{
+  grid-template-columns:64px 1fr auto;
+  gap:12px;
+  min-height:88px;
+  margin:6px 0;
+  padding:12px 14px;
+  border-radius:10px;
+  border:1px solid #edf0f5;
+  background:#fff;
+  box-shadow:none;
+}
+.thumb{
+  width:64px;
+  height:64px;
+  border-radius:6px;
+  background:#eef2f7;
+}
+.product-name{
+  color:#252b36;
+  font-size:19px;
+  line-height:1.2;
+  font-weight:700;
+  letter-spacing:-.1px;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+.price{
+  color:#2f3542;
+  font-size:16px;
+  font-weight:500;
+}
+.cart-badge{font-size:11px;font-weight:700}
+.color-chip{
+  min-width:58px;
+  height:36px;
+  border-radius:6px;
+  border:1px solid #d9e0ec;
+  background:#fff;
+  color:#3d4656;
+  font-size:15px;
+  font-weight:500;
+}
+.color-chip.active{
+  color:var(--blue);
+  background:#eef3ff;
+  border-color:#9db0f1;
+}
+
+/* 选择 SKU 页：保持原固定滚动结构，只调视觉 */
+#page-picker.picker-page,
+#page-picker.picker-page.active,
+#page-picker #pickerBox,
+#page-picker .picker-wrap,
+#page-picker .picker-table,
+#page-picker .picker-body{background:#fff}
+#page-picker .picker-head{
+  grid-template-columns:98px 1fr 38px;
+  gap:14px;
+  padding:12px 16px 10px !important;
+  border-bottom:1px solid var(--line);
+}
+#page-picker .picker-head .picker-img{
+  width:98px;
+  height:98px;
+  border-radius:7px;
+  background:#eef2f7;
+}
+.picker-title{
+  color:#252b36;
+  font-size:21px;
+  line-height:1.18;
+  font-weight:700;
+  letter-spacing:-.2px;
+}
+.picker-cat{
+  color:var(--muted);
+  font-size:16px;
+  font-weight:400;
+  margin-top:4px;
+}
+.picker-price{
+  color:var(--red);
+  font-size:18px;
+  font-weight:500;
+  margin-top:7px;
+}
+.picker-close{font-size:34px;color:#a8afbc;font-weight:300}
+.picker-colors{
+  padding:12px 16px;
+  gap:9px;
+  border-bottom:1px solid var(--line);
+}
+.picker-row{
+  grid-template-columns:58px 66px 62px 76px 36px 42px 42px;
+  min-height:57px;
+  padding:0 14px;
+  border-bottom:0;
+  color:#252b36;
+  font-size:17px;
+  font-weight:400;
+}
+.picker-row.head{
+  min-height:50px;
+  background:#f7f8fb;
+  color:#5f6878;
+  font-size:15px;
+  font-weight:500;
+}
+.picker-row .price{
+  color:#ff8a00;
+  font-size:17px;
+  font-weight:500;
+}
+.picker-stock{
+  color:#ff8a00;
+  font-size:17px;
+  font-weight:600;
+}
+.picker-q{
+  color:#a0a8b8;
+  font-size:18px;
+  font-weight:500;
+}
+.picker-q.red{color:var(--red)}
+.picker-op{
+  height:50px;
+  color:#778194;
+  font-size:40px;
+  font-weight:500;
+  line-height:1;
+}
+#page-picker .bottom-bar{
+  background:#fff;
+  border-top:1px solid #dfe4ec;
+  padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+}
+#page-picker .bottom-inner{gap:12px}
+#page-picker .bottom-inner .btn{
+  height:52px;
+  border-radius:7px;
+  font-size:18px;
+  font-weight:650;
+}
+.picker-total{
+  color:#252b36;
+  font-size:16px;
+  font-weight:500;
+}
+.picker-total b{
+  color:var(--blue);
+  font-size:22px;
+  font-weight:700;
+}
+
+/* 开单明细确认页：搜索固定、中间滚动、底部固定的结构不变，只调视觉 */
+#page-cart-review,
+#page-cart-review.active,
+#page-cart-review .cart-review-list{background:var(--bg)}
+#page-cart-review .toolbar{
+  background:#fff;
+  border-bottom:1px solid var(--line);
+  padding:11px 16px;
+}
+#page-cart-review .toolbar .search{
+  height:46px;
+  border-radius:11px;
+  font-size:17px;
+  background:#f7f8fb;
+}
+#page-cart-review .cart-review-list{padding-top:8px !important}
+.cart-review-swipe{
+  margin:0 0 8px;
+  background:var(--red);
+}
+.cart-review-delete{
+  width:90px;
+  background:var(--red);
+  font-size:18px;
+  font-weight:650;
+}
+.cart-review-swipe.swiped .cart-review-card{transform:translateX(-90px)}
+.cart-review-card{
+  background:#fff;
+  padding:12px 14px 11px;
+  border-radius:0;
+  box-shadow:none;
+}
+.cart-review-main{
+  grid-template-columns:68px 1fr 78px;
+  gap:12px;
+}
+.cart-review-img{
+  width:68px;
+  height:68px;
+  border-radius:6px;
+  background:#eef2f7;
+}
+.cart-review-title{
+  color:#4f7fe8;
+  font-size:18px;
+  line-height:1.22;
+  font-weight:600;
+  letter-spacing:-.1px;
+}
+.cart-review-cat{
+  color:var(--muted);
+  font-size:15px;
+  font-weight:400;
+}
+.cart-review-price{
+  color:#2f3542;
+  font-size:16px;
+  font-weight:400;
+}
+.cart-review-num{
+  color:#1f2530;
+  font-size:30px;
+  font-weight:700;
+}
+.cart-review-amount{
+  color:#303746;
+  font-size:15px;
+  font-weight:400;
+}
+.cart-review-row{
+  min-height:30px;
+  color:#252b36;
+  font-size:15px;
+}
+.cart-review-row.head{
+  background:#f7f8fb;
+  color:#5f6878;
+  font-size:14px;
+  font-weight:500;
+}
+#page-cart-review .bottom-bar{
+  background:#fff;
+  border-top:1px solid #dfe4ec;
+  padding:11px 16px calc(11px + env(safe-area-inset-bottom));
+}
+#page-cart-review .bottom-inner{grid-template-columns:1fr 164px;gap:12px}
+#page-cart-review .bottom-inner .btn{
+  height:52px;
+  border-radius:7px;
+  font-size:20px;
+  font-weight:650;
+}
+
+/* 结算、单据、报表 */
+.checkout-line{
+  min-height:51px;
+  grid-template-columns:108px 1fr;
+  border-bottom:1px solid var(--line);
+  font-size:16px;
+}
+.checkout-line span:first-child{color:#7f8795;font-weight:400}
+.checkout-line b,.checkout-line strong{font-size:18px;font-weight:650}
+.pay-list .checkout-line{grid-template-columns:118px 1fr}
+.order-card{
+  margin:10px 14px;
+  padding:15px 16px;
+  border-radius:10px;
+}
+.order-top{color:#98a0ae;font-size:13px;font-weight:400}
+.order-main b{font-size:20px;font-weight:650}
+.tag{
+  height:26px;
+  border-radius:13px;
+  font-size:12px;
+  font-weight:650;
+}
+.detail-line{min-height:45px;font-size:15px}
+.item-box{padding:12px 0;grid-template-columns:56px 1fr auto}
+.item-box .thumb.sm{width:56px;height:56px;border-radius:6px}
+.size-row{
+  background:#f7f8fb;
+  border-radius:5px;
+  color:#252b36;
+}
+.report-filter{
+  padding:12px 16px;
+  background:#fff;
+  border-bottom:1px solid var(--line);
+}
+.report-filter select{
+  height:42px;
+  min-height:42px;
+  border:0;
+  background:#fff;
+  color:var(--blue);
+  font-weight:500;
+}
+#page-report .topbar{height:62px;border-bottom:0;background:#fff}
+#page-report .topbar .title{font-size:20px !important;font-weight:500 !important}
+#page-report .card{
+  margin:10px 16px 12px;
+  padding:18px 18px 20px;
+  border-radius:10px;
+  border-color:#eef1f6;
+}
+#page-report .card .title{font-size:20px;font-weight:650;margin-bottom:18px}
+#page-report .small-btn{background:transparent;border:0;color:#7d8594;font-size:14px;font-weight:500}
+.metric-grid{gap:8px}
+.metric .label{color:#434b5a;font-size:14px;font-weight:450;margin-bottom:7px}
+.metric .num{color:#252b36;font-size:24px;font-weight:650;line-height:1.12}
+
+/* 商品分析 / 经营分析 */
+.pa-topbar{height:60px}
+.pa-topbar .title{font-size:20px !important;font-weight:550 !important}
+.pa-topbar .right button{font-size:16px;color:#4b5563;font-weight:500}
+.pa-toolbar{
+  top:60px;
+  padding:10px 14px;
+  background:#fff;
+  border-bottom:1px solid var(--line);
+}
+.pa-mode-trigger,.pa-chip,.ba-chip{
+  height:42px;
+  border-radius:7px;
+  font-size:15px;
+  font-weight:500;
+}
+.pa-chip.active,.ba-chip.active{background:var(--blue);border-color:var(--blue)}
+.pa-table th{
+  height:52px;
+  background:#f7f8fb;
+  color:#687082;
+  font-size:14px;
+  font-weight:600;
+}
+.pa-table th,.pa-table td{padding:10px 6px;border-bottom:1px solid var(--line)}
+.pa-prod-title{color:#ee654f;font-size:15px;font-weight:650;line-height:1.22}
+.pa-prod-cat{color:#98a0ae;font-size:12px}
+.pa-value{font-size:15px;font-weight:600}
+.ba-stat-card{padding:13px 12px;border-radius:10px;border-color:#e1e8f5}
+.ba-stat-card .big{font-size:22px;font-weight:650}
+.ba-stat-card .name{font-size:13px;color:#434b5a;font-weight:500}
+.ba-stat-card .mini{font-size:12px;color:#7f8795}
+.ba-chart-title{font-size:16px;font-weight:650}
+.trend-card{padding:12px;border-radius:10px}
+.trend-card .num{font-size:20px;font-weight:650}
+.trend-card .txt{font-size:12px;color:#7f8795}
+
+/* 商品管理 / 编辑 */
+.pm-toolbar{top:58px;padding:10px 14px;background:#fff}
+.pm-search-row{grid-template-columns:86px 1fr 40px;gap:8px}
+.pm-search-row select,.pm-search-row input{
+  height:42px;
+  min-height:42px;
+  border-radius:8px;
+  background:#f7f8fb;
+  font-size:15px;
+}
+.pm-search-icon{width:40px;height:40px;border-radius:8px}
+.pm-summary{background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.pm-summary-item{padding:12px 10px}
+.pm-summary-num{font-size:17px;font-weight:650;color:#252b36}
+.pm-summary-label{font-size:12px;font-weight:500;color:#7f8795}
+.pm-item{background:#fff;border-bottom:1px solid var(--line)}
+.pm-main{grid-template-columns:70px 1fr auto;gap:12px;padding:12px 16px 8px}
+.pm-main img{width:58px;height:58px;border-radius:6px;background:#eef2f7}
+.pm-title{color:#252b36;font-size:17px;font-weight:650;line-height:1.22}
+.pm-sub,.pm-price{color:var(--muted);font-size:13px;font-weight:400}
+.pm-values{padding:0 16px 12px}
+.pm-value-num{font-size:16px;font-weight:650;color:#252b36}
+.pm-value-label{font-size:12px;color:#7f8795}
+.pe-upload-card,.pe-form,.option-list{background:#fff}
+.pe-topbar,.picker-topbar{height:60px}
+.pe-row{min-height:56px;grid-template-columns:92px 1fr auto}
+.pe-row .k,.pe-row .v,.pe-row input,.pe-row textarea{font-size:16px;font-weight:400}
+.option-tools{background:#fff;border-bottom:1px solid var(--line)}
+.option-item{min-height:54px;font-size:16px}
+.matrix-table th{background:#f8fafc;font-weight:600}
+.matrix-table th,.matrix-table td{font-size:15px;border-color:#e5eaf2}
+
+/* 收款成功 */
+.pay-success-wrap{background:#fff}
+.pay-success-card{background:#f8fafc;border-radius:10px}
+.pay-check{font-weight:650}
+.pay-success-title{font-size:22px;font-weight:650}
+.pay-success-lines{font-size:16px}
+.pay-success-lines .k{color:#8a8f9e}
+.pay-success-actions .btn{border-radius:7px;font-weight:650}
+
+@media(max-width:430px){
+  .topbar{height:56px}.topbar .left,.topbar .right{height:56px}
+  .topbar .title{font-size:18px !important}
+  .toolbar{padding-left:14px;padding-right:14px}
+  .product-list{padding-left:12px;padding-right:12px}
+  .product-card{grid-template-columns:62px 1fr auto;min-height:86px;padding:11px 12px}
+  .thumb{width:62px;height:62px}
+  .product-name{font-size:18px}
+  .card,.chart-card,.detail-card{margin-left:14px;margin-right:14px;padding:16px}
+  #page-picker .picker-head{grid-template-columns:94px 1fr 36px;padding:11px 14px 10px !important}
+  #page-picker .picker-head .picker-img{width:94px;height:94px}
+  .picker-title{font-size:20px}
+  .picker-row{grid-template-columns:48px 62px 54px 68px 32px 38px 38px;padding:0 12px;font-size:16px}
+  .picker-row.head{font-size:14px}
+  #page-picker .bottom-inner{grid-template-columns:1fr 108px 114px !important;gap:8px}
+  #page-picker .bottom-inner .btn{font-size:17px}
+  #page-cart-review .bottom-inner{grid-template-columns:1fr 154px;gap:10px}
+  #page-cart-review .bottom-inner .btn{font-size:19px}
+  .cart-review-main{grid-template-columns:66px 1fr 74px;gap:11px}
+  .cart-review-img{width:66px;height:66px}
+}
+
 </style>
 </head>
 <body>
 <div id="app" class="app">
   <section id="page-sale" class="page active">
-    <div class="topbar"><div class="title">八方来财销售开单版 V2.49</div><div class="right"><button class="icon-btn" onclick="openCart()">🛒<span id="cartBadge" class="cart-badge" style="display:none">0</span></button></div></div>
+    <div class="topbar"><div class="title">八方来财销售开单版 V2.51</div><div class="right"><button class="icon-btn" onclick="openCart()">🛒<span id="cartBadge" class="cart-badge" style="display:none">0</span></button></div></div>
     <div class="toolbar">
       <div class="search">⌕<input id="saleSearch" placeholder="搜索款号/商品名称" oninput="UI.sale.render()"></div>
       <button class="small-btn btn-line" onclick="alert('扫码入口已预留，后期接小程序扫码')">扫码选款</button>
@@ -1077,14 +1695,14 @@ body:has(#page-picker.active){
 
 <script>
 /*
-  八方来财销售开单版 V2.49
+  八方来财销售开单版 V2.51
   清理稳定版原则：
   1. 只保留一个核心数据层 DataLayer
   2. 页面不得绕过 DataLayer 自己乱算
   3. 每个页面只保留一个 render 入口
   4. 销售单 qty 为正数，退货 qty 为负数；不再单独切换销售/退货模式
 */
-const VERSION = "V2.49";
+const VERSION = "V2.51";
 const STORAGE_KEY = "bafang_sales_v1";
 const $ = id => document.getElementById(id);
 const n = v => Number(v || 0) || 0;
