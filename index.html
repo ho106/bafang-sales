@@ -1,24 +1,35 @@
 <!DOCTYPE html>
 <!--
-  八方来财销售开单版 V2.62 改动清单
+  八方来财销售开单版 V2.63 改动清单
 
-  基准版本：V2.61 开单主页底部搜索 + 默认数字键盘版
-  本次目标：修复开单主页自定义数字键盘位置与底部导航显示，防止点击输入框导致键盘上移，不改业务逻辑
+  基准版本：V2.62 开单主页数字键盘底部定位 + 底部导航恢复版
+  本次目标：稳定性真 Bug 修复，不新增业务功能，不重做界面
+
+  修复范围：
+  - 开单主页：数字键盘快速连续点击不丢字，只防抖刷新商品列表
+  - 开单明细页：左滑删除增加方向锁定，纵向滚动不误触删除
+  - 订单金额：退货 + 抹零统一净额口径，避免销售退货相等时金额被算偏
+  - 商品分析页：底部总计栏横向滚动同步优化
+  - 小屏适配：补充窄屏 SKU / 明细 / 按钮局部适配
+  - 商品图片：上传压缩失败时优先保留原图，不静默丢图
 
   CSS模块：
-  - 04 开单首页：顶部标题与分类固定，中间商品列表独立滚动，底部搜索框与数字键盘固定
-  - 04 开单首页：数字键盘默认显示；商品列表滚动后隐藏，点击搜索框可再次显示
+  - 06 SKU选择页：窄屏列宽局部适配
+  - 07 开单明细确认页：窄屏卡片与底部栏局部适配
+  - 11 商品分析页：总计栏同步性能保持
 
   JS函数：
-  - 新增 showSaleKeyboard / hideSaleKeyboard / toggleSaleKeyboard / saleKey / saleBackspace / saleClearKeyword / hideSaleKeyboardOnScroll
-  - 未修改 DataLayer / 订单 / 库存 / 报表逻辑
-
-  删除旧代码：
-  - 无大规模删除
-  - 仅替换开单首页原有搜索栏与商品列表布局规则，不在末尾叠加补丁
+  - 替换 saleApplyKeyword / saleKey / saleBackspace / saleClearKeyword
+  - 替换 initCartReviewSwipe
+  - 优化 DataLayer.netAfterRound / adjustedLineAmount / calcOrderSummary 的抹零边界
+  - 优化 syncPaTotalScroll
+  - 优化 handleProductImageUpload 失败兜底
 
   业务逻辑影响：
-  - 无
+  - 不新增业务功能
+  - 不改变销售用加号、退货用减号的核心规则
+  - 不改变库存扣减/恢复规则
+  - 只修复退货与抹零同时存在时的金额一致性边界
 
   必测页面：
   - 开单首页
@@ -31,7 +42,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>八方来财销售开单版 V2.62</title>
+<title>八方来财销售开单版 V2.63</title>
 <style>
 :root{
   --blue:#2f6df6;
@@ -1323,6 +1334,19 @@ body:has(#page-sale.active) .app{
   .cart-review-img{width:60px;height:60px}
 }
 
+@media(max-width:380px){
+  .picker-row{grid-template-columns:minmax(48px,1.12fr) minmax(42px,.86fr) minmax(36px,.72fr) minmax(46px,.92fr) minmax(24px,.48fr) 38px 38px!important;padding:0 5px!important;font-size:14px!important;column-gap:1px!important}
+  .picker-row.head{font-size:13px!important}
+  .picker-op,.picker-batch-op{width:38px!important;height:48px!important;font-size:36px!important}
+  #page-picker .bottom-inner,#page-picker .picker-bottom-inner{grid-template-columns:1fr 98px 104px!important;gap:7px!important}
+  #page-picker .bottom-inner .btn,#page-picker .picker-bottom-inner .btn{font-size:16px!important;padding:0 10px!important}
+  .cart-review-main{grid-template-columns:58px 1fr 62px!important;gap:8px!important}
+  .cart-review-img{width:58px!important;height:58px!important}
+  #page-cart-review .bottom-inner{grid-template-columns:1fr 146px!important;gap:8px!important}
+  #page-cart-review .bottom-inner .btn{font-size:18px!important;padding:0 12px!important}
+  .btn{padding-left:12px;padding-right:12px;font-size:16px}
+}
+
 
 /* V2.56 CSS 精简健壮版：清理历史补丁后保留最终稳定布局；商品分析总计栏强固定 + 滑动减负 */
 :root{
@@ -1384,7 +1408,7 @@ html,body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica 
 <body>
 <div id="app" class="app">
   <section id="page-sale" class="page active sale-keyboard-visible">
-    <div class="topbar"><div class="title">八方来财销售开单版 V2.62</div><div class="right"><button class="icon-btn" onclick="openCart()">🛒<span id="cartBadge" class="cart-badge" style="display:none">0</span></button></div></div>
+    <div class="topbar"><div class="title">八方来财销售开单版 V2.63</div><div class="right"><button class="icon-btn" onclick="openCart()">🛒<span id="cartBadge" class="cart-badge" style="display:none">0</span></button></div></div>
     <div class="tabs" id="saleTabs"><button id="saleTab-hot" class="active" onclick="setSaleTab('hot')">热卖</button><button id="saleTab-new" onclick="setSaleTab('new')">新款</button><button id="saleTab-bought" onclick="setSaleTab('bought')">买过</button></div>
     <div id="saleProductList" class="product-list" onscroll="hideSaleKeyboardOnScroll()"></div>
     <div class="toolbar sale-bottom-search">
@@ -1531,14 +1555,14 @@ html,body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica 
 
 <script>
 /*
-  八方来财销售开单版 V2.62
+  八方来财销售开单版 V2.63
   清理稳定版原则：
   1. 只保留一个核心数据层 DataLayer
   2. 页面不得绕过 DataLayer 自己乱算
   3. 每个页面只保留一个 render 入口
   4. 销售单 qty 为正数，退货 qty 为负数；不再单独切换销售/退货模式
 */
-const VERSION = "V2.62";
+const VERSION = "V2.63";
 const STORAGE_KEY = "bafang_sales_v1";
 const $ = id => document.getElementById(id);
 const n = v => Number(v || 0) || 0;
@@ -1730,7 +1754,7 @@ const DataLayer = {
       try{
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
         if(stripped){
-          this._lastSaveNote = "保存成功。检测到旧图片过大，已自动改为占位图；以后新上传图片会自动压缩。";
+          this._lastSaveNote = "保存成功。检测到旧图片占用空间过大，已自动压缩兜底为占位图；建议重新上传更小图片。";
         }
         return true;
       }catch(e2){
@@ -1778,9 +1802,10 @@ const DataLayer = {
   netAfterRound(netAmount, roundOff){
     const r = Math.abs(n(roundOff));
     const v = n(netAmount);
-    if(!r) return v;
+    if(!r || v === 0) return v;
     // 销售单：应收 78，抹零 8，实收 70
     // 退货单：应退 -78，抹零 8，实退 -70
+    // 销售与退货净额为 0 时，不再继续抹零，避免金额被算成正负偏差。
     return v >= 0 ? Math.max(0, v - r) : Math.min(0, v + r);
   },
   orderBases(order){
@@ -1805,13 +1830,16 @@ const DataLayer = {
     const round = this.orderRoundOff(order);
     if(!round || !raw) return raw;
     const b = this.orderBases(order);
-    // 抹零按订单实际方向分摊：
-    // 销售为主的单，分摊到销售行；退货为主的单，分摊到退货行。
-    if(this.isRefundLine(item) && b.refundAmount > b.saleAmount && b.refundAmount > 0){
-      return Math.max(0, raw - round * raw / b.refundAmount);
+    const grossNet = b.saleAmount - b.refundAmount;
+    const appliedRound = Math.min(round, Math.abs(grossNet));
+    if(!appliedRound || grossNet === 0) return raw;
+    // 抹零只作用在订单最终净额方向：
+    // 销售为主，分摊到销售行；退货为主，分摊到退货行；净额为 0 不分摊。
+    if(this.isSaleLine(item) && grossNet > 0 && b.saleAmount > 0){
+      return Math.max(0, raw - appliedRound * raw / b.saleAmount);
     }
-    if(this.isSaleLine(item) && b.saleAmount >= b.refundAmount && b.saleAmount > 0){
-      return Math.max(0, raw - round * raw / b.saleAmount);
+    if(this.isRefundLine(item) && grossNet < 0 && b.refundAmount > 0){
+      return Math.max(0, raw - appliedRound * raw / b.refundAmount);
     }
     return raw;
   },
@@ -1839,14 +1867,13 @@ const DataLayer = {
     (orders || []).forEach(o => {
       const b = this.orderBases(o);
       const round = this.orderRoundOff(o);
-      const applyToRefund = b.refundAmount > b.saleAmount;
+      const grossNet = b.saleAmount - b.refundAmount;
+      const appliedRound = Math.min(round, Math.abs(grossNet));
 
       let saleAmount = b.saleAmount;
       let refundAmount = b.refundAmount;
-      if(round){
-        if(applyToRefund && refundAmount > 0) refundAmount = Math.max(0, refundAmount - round);
-        else if(saleAmount > 0) saleAmount = Math.max(0, saleAmount - round);
-      }
+      if(appliedRound && grossNet > 0) saleAmount = Math.max(0, saleAmount - appliedRound);
+      if(appliedRound && grossNet < 0) refundAmount = Math.max(0, refundAmount - appliedRound);
 
       s.qty += b.saleQty;
       s.refundQty += b.refundQty;
@@ -1856,7 +1883,7 @@ const DataLayer = {
       s.refundAmount += refundAmount;
       s.cost += b.saleCost;
       s.refundCost += b.refundCost;
-      s.roundOff += round;
+      s.roundOff += appliedRound;
 
       if(b.saleQty > 0) s.saleOrderCount++;
       if(b.refundQty > 0) s.refundOrderCount++;
@@ -2081,11 +2108,15 @@ function toggleSaleKeyboard(){
   if(page.classList.contains("sale-keyboard-visible")) hideSaleKeyboard();
   else showSaleKeyboard();
 }
+let saleSearchDebounceTimer = null;
 function saleApplyKeyword(value){
   const input = saleSearchInput();
   if(!input) return;
   input.value = value;
-  UI.sale.render();
+  clearTimeout(saleSearchDebounceTimer);
+  saleSearchDebounceTimer = setTimeout(() => {
+    if($("page-sale") && $("page-sale").classList.contains("active")) UI.sale.render();
+  }, 100);
 }
 function saleKey(v){
   const input = saleSearchInput();
@@ -2543,24 +2574,37 @@ function initCartReviewSwipe(){
     const card = row.querySelector(".cart-review-card");
     const del = row.querySelector(".cart-review-delete");
     let sx = 0, sy = 0, dx = 0, dy = 0, moved = false;
+    let isVerticalScroll = false;
+    let directionLocked = "";
+
     row.addEventListener("touchstart", e => {
       const t = e.touches && e.touches[0];
       if(!t) return;
       sx = t.clientX; sy = t.clientY; dx = 0; dy = 0; moved = false;
+      isVerticalScroll = false;
+      directionLocked = "";
     }, {passive:true});
+
     row.addEventListener("touchmove", e => {
       const t = e.touches && e.touches[0];
       if(!t) return;
       dx = t.clientX - sx; dy = t.clientY - sy;
-      if(Math.abs(dx) > 24 && Math.abs(dx) > Math.abs(dy) * 1.2) moved = true;
+      if(!directionLocked && (Math.abs(dx) > 10 || Math.abs(dy) > 10)){
+        directionLocked = Math.abs(dy) > Math.abs(dx) ? "vertical" : "horizontal";
+        isVerticalScroll = directionLocked === "vertical";
+      }
+      if(isVerticalScroll) return;
+      if(directionLocked === "horizontal" && Math.abs(dx) > 24 && Math.abs(dx) > Math.abs(dy) * 1.25) moved = true;
     }, {passive:true});
+
     row.addEventListener("touchend", () => {
-      if(!moved) return;
+      if(isVerticalScroll || !moved) return;
       rows.forEach(r => { if(r !== row) r.classList.remove("swiped"); });
       if(dx < -38) row.classList.add("swiped");
       if(dx > 28) row.classList.remove("swiped");
       row.dataset.justSwiped = String(Date.now());
     }, {passive:true});
+
     if(card){
       card.onclick = e => {
         const just = Date.now() - n(row.dataset.justSwiped);
@@ -2986,11 +3030,13 @@ function renderProductAnalysis(){
 
 function syncPaTotalScroll(force){
   const grid = $("paGrid");
-  const data = $("paTotalData");
-  if(!grid || !data) return;
-  const apply = () => { data.style.transform = "translate3d(" + (-grid.scrollLeft) + "px,0,0)"; };
-  apply();
-  if(grid.dataset.syncTotal === "1" && !force) return;
+  if(!grid) return;
+  const apply = () => {
+    const g = $("paGrid");
+    const d = $("paTotalData");
+    if(g && d) d.style.transform = "translate3d(" + (-g.scrollLeft) + "px,0,0)";
+  };
+  if(force) apply();
   if(grid.dataset.syncTotal !== "1"){
     let ticking = false;
     let lastLeft = -1;
@@ -3001,13 +3047,13 @@ function syncPaTotalScroll(force){
       if(ticking) return;
       ticking = true;
       requestAnimationFrame(() => {
-        const d = $("paTotalData");
-        if(d) d.style.transform = "translate3d(" + (-grid.scrollLeft) + "px,0,0)";
+        apply();
         ticking = false;
       });
     }, {passive:true});
     grid.dataset.syncTotal = "1";
   }
+  if(!force) requestAnimationFrame(apply);
 }
 
 function togglePaFilter(){ $("paKeyword").value = paState.keyword || ""; $("paFilterMask").style.display = "block"; }
@@ -3192,8 +3238,9 @@ function handleProductImageUpload(event){
   const file = event && event.target && event.target.files && event.target.files[0];
   if(!file || !productDraft) return;
   if(!/^image\//.test(file.type || "")){ alert("请选择图片文件"); return; }
+  const previousImage = productDraft.image || placeholderImg(productDraft.code || "商品", productDraft.name || "商品");
 
-  // V2.37：上传图片自动压缩版
+  // V2.63：上传图片自动压缩优化版
   // 关键点：绝不再直接保存原图 Base64，避免 localStorage 空间爆掉，导致商品保存失败或商品消失。
   const objectUrl = URL.createObjectURL(file);
   const img = new Image();
@@ -3243,18 +3290,17 @@ function handleProductImageUpload(event){
     }catch(e){
       URL.revokeObjectURL(objectUrl);
       console.error("图片压缩失败", e);
-      // 压缩失败也不保存原图，避免再次引发本地空间不足
-      productDraft.image = placeholderImg(productDraft.code || "商品", productDraft.name || "商品");
+      productDraft.image = previousImage;
       renderProductEdit();
-      alert("图片压缩失败，已使用占位图，商品资料可以正常保存。");
+      alert("图片压缩失败，已保留原图片。可以重新上传更小或更清晰的图片。");
     }
   };
 
   img.onerror = function(){
     URL.revokeObjectURL(objectUrl);
-    productDraft.image = placeholderImg(productDraft.code || "商品", productDraft.name || "商品");
+    productDraft.image = previousImage;
     renderProductEdit();
-    alert("图片读取失败，已使用占位图。");
+    alert("图片读取失败，已保留原图片。请重新选择图片。");
   };
 
   img.src = objectUrl;
